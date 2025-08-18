@@ -1,0 +1,21 @@
+{
+  "meta": {
+    "version": 1,
+    "updatedAt": "2025-08-18T18:07:06.828Z"
+  },
+  "rows": [
+    {
+      "id": "efec186a-e36d-4b16-8a25-ca1a8e6e1b48",
+      "name": "Indian Portfolio Amit",
+      "viewSummary": {
+        "totalInvestedValue": "2601244.51",
+        "totalCurrentValue": "2921435.5867",
+        "totalQuantity": "11760",
+        "totalPnl": "320191.0767",
+        "totalPnlPercent": "12.309149542424214477"
+      },
+      "createdAt": "2025-08-18T18:07:06.825Z",
+      "updatedAt": "2025-08-18T18:07:06.825Z"
+    }
+  ]
+}

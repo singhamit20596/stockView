@@ -1,0 +1,38 @@
+{
+  "meta": {
+    "version": 1,
+    "updatedAt": "2025-08-18T18:05:55.598Z"
+  },
+  "rows": [
+    {
+      "id": "1eaf61ea-ce69-4015-accb-6582ac080204",
+      "name": "Amit",
+      "investedValue": "742555.92",
+      "currentValue": "901561.0093",
+      "pnl": "159005.0893",
+      "pnlPercent": "21.413214145542062341",
+      "createdAt": "2025-08-18T17:23:02.616Z",
+      "updatedAt": "2025-08-18T17:58:42.584Z"
+    },
+    {
+      "id": "5318aee8-a008-4299-99ee-8f8862f03e34",
+      "name": "Preeti Grow",
+      "investedValue": "687799.28",
+      "currentValue": "795234.2066",
+      "pnl": "107434.9266",
+      "pnlPercent": "15.620098729966684466",
+      "createdAt": "2025-08-18T18:02:43.758Z",
+      "updatedAt": "2025-08-18T18:02:43.758Z"
+    },
+    {
+      "id": "82fe42d7-b9ad-41ef-8b8e-f2720b2b6771",
+      "name": "Sheela Grow",
+      "investedValue": "1170889.31",
+      "currentValue": "1224640.3708",
+      "pnl": "53751.0608",
+      "pnlPercent": "4.5906184590582691373",
+      "createdAt": "2025-08-18T18:05:55.596Z",
+      "updatedAt": "2025-08-18T18:05:55.596Z"
+    }
+  ]
+}

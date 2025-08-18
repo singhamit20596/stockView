@@ -1,0 +1,23 @@
+{
+  "meta": {
+    "version": 1,
+    "updatedAt": "2025-08-18T18:07:06.829Z"
+  },
+  "rows": [
+    {
+      "id": "1ac0fdf7-5cb1-4aa7-aa62-98eebafb048d",
+      "viewId": "efec186a-e36d-4b16-8a25-ca1a8e6e1b48",
+      "accountId": "1eaf61ea-ce69-4015-accb-6582ac080204"
+    },
+    {
+      "id": "17238ac9-8e0e-49f0-a5e3-d855ba6a16ab",
+      "viewId": "efec186a-e36d-4b16-8a25-ca1a8e6e1b48",
+      "accountId": "5318aee8-a008-4299-99ee-8f8862f03e34"
+    },
+    {
+      "id": "32b54567-6730-4ff3-8f55-4f3c08f4df54",
+      "viewId": "efec186a-e36d-4b16-8a25-ca1a8e6e1b48",
+      "accountId": "82fe42d7-b9ad-41ef-8b8e-f2720b2b6771"
+    }
+  ]
+}
