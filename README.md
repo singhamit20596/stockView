@@ -1,36 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+stockView – Local portfolio viewer with live scraping
 
-## Getting Started
+## Setup
 
-First, run the development server:
+Prereqs: Node 20+, npm, Chromium (Playwright installs browsers automatically on first run).
 
+1) Install
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2) Run (live scraping)
+```bash
+export SCRAPE_MODE=live
+npm run dev
+# open http://localhost:3000
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3) Add Account wizard
+- Enter account name → Check availability
+- Select broker (Groww) → Create & Scrape
+- A Chromium window opens; log in to Groww
+- The app extracts → scrolls → extracts until complete, then auto‑closes
+- Preview appears; Confirm & Save writes JSON to `data/`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Logs
+- Server logs: `tail -F logs/stockview.log`
+- Client logs: browser DevTools console (React Query Devtools enabled)
 
-## Learn More
+## Backup
+Create a timestamped backup of all tables under `backups/<ts>/data`:
+```bash
+TS=$(date +%Y%m%d-%H%M%S)
+mkdir -p backups/$TS/data
+cp -a data/*.json backups/$TS/data/
+echo "backup at backups/$TS/data"
+```
 
-To learn more about Next.js, take a look at the following resources:
+Optionally commit and tag the backup:
+```bash
+git add backups/$TS/data
+git commit -m "chore(backup): add data backup $TS"
+git tag -a backup-$TS -m "backup $TS"
+git push origin main --tags
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Restore
+From backup folder:
+```bash
+cp -a backups/<ts>/data/*.json data/
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+From git tag:
+```bash
+git fetch --tags
+git checkout tags/backup-<ts> -b restore-<ts>
+```
