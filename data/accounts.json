@@ -1,28 +1,28 @@
 {
   "meta": {
     "version": 1,
-    "updatedAt": "2025-08-18T18:05:55.598Z"
+    "updatedAt": "2025-08-19T16:14:02.930Z"
   },
   "rows": [
     {
       "id": "1eaf61ea-ce69-4015-accb-6582ac080204",
       "name": "Amit",
       "investedValue": "742555.92",
-      "currentValue": "901561.0093",
-      "pnl": "159005.0893",
-      "pnlPercent": "21.413214145542062341",
+      "currentValue": "905706.3249",
+      "pnl": "163150.4049",
+      "pnlPercent": "21.97146376531480619",
       "createdAt": "2025-08-18T17:23:02.616Z",
-      "updatedAt": "2025-08-18T17:58:42.584Z"
+      "updatedAt": "2025-08-19T16:09:37.267Z"
     },
     {
       "id": "5318aee8-a008-4299-99ee-8f8862f03e34",
       "name": "Preeti Grow",
       "investedValue": "687799.28",
-      "currentValue": "795234.2066",
-      "pnl": "107434.9266",
-      "pnlPercent": "15.620098729966684466",
+      "currentValue": "797396.9539",
+      "pnl": "109597.6739",
+      "pnlPercent": "15.934543272566380122",
       "createdAt": "2025-08-18T18:02:43.758Z",
-      "updatedAt": "2025-08-18T18:02:43.758Z"
+      "updatedAt": "2025-08-19T16:14:02.927Z"
     },
     {
       "id": "82fe42d7-b9ad-41ef-8b8e-f2720b2b6771",

@@ -1,58 +1,117 @@
 export default function Home() {
   return (
     <div className="min-h-screen">
-      <section className="bg-gradient-to-br from-indigo-600 to-purple-600 text-white py-20">
-        <div className="max-w-5xl mx-auto px-6">
-          <h1 className="text-4xl md:text-5xl font-bold">stockView</h1>
-          <p className="mt-4 text-lg md:text-xl opacity-90">All your investment accounts and analytics in one privacy‑first dashboard.</p>
-          <div className="mt-6 flex gap-3">
-            <a href="/add-account" className="px-4 py-2 bg-white text-indigo-700 rounded font-medium">Add Account</a>
-            <a href="/stock-view" className="px-4 py-2 bg-black/20 rounded font-medium">Open Analytics</a>
+      <section className="bg-gradient-to-br from-indigo-600 via-purple-600 to-indigo-700 text-white py-24">
+        <div className="max-w-6xl mx-auto px-6 text-center">
+          <h1 className="text-5xl md:text-6xl font-bold tracking-tight">stockView</h1>
+          <p className="mt-6 text-xl md:text-2xl opacity-95 max-w-3xl mx-auto leading-relaxed">
+            All your investment accounts and analytics in one privacy‑first dashboard.
+          </p>
+          <div className="mt-8 flex gap-4 justify-center">
+            <a 
+              href="/add-account" 
+              className="px-6 py-3 bg-white text-indigo-700 rounded-lg font-semibold hover:bg-zinc-50 transition-colors shadow-lg"
+            >
+              Add Account
+            </a>
+            <a 
+              href="/stock-view" 
+              className="px-6 py-3 bg-white/10 backdrop-blur-sm rounded-lg font-semibold hover:bg-white/20 transition-colors border border-white/20"
+            >
+              Open Analytics
+            </a>
           </div>
         </div>
       </section>
 
-      <section className="max-w-5xl mx-auto px-6 py-12 grid md:grid-cols-3 gap-6">
-        <Feature title="Unified Portfolio" desc="Aggregate multiple broker accounts, views, and holdings with live scraping and accurate P&L." />
-        <Feature title="Deep Analytics" desc="Sector, subsector, and market‑cap allocations; warnings and recommendations to rebalance risk." />
-        <Feature title="Local & Private" desc="Data stays on your machine in JSON files; no external server required." />
+      <section className="max-w-6xl mx-auto px-6 py-16">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl font-bold text-zinc-900 mb-4">Key Features</h2>
+          <p className="text-lg text-zinc-600 max-w-2xl mx-auto">
+            Everything you need to manage your investment portfolio effectively
+          </p>
+        </div>
+        <div className="grid md:grid-cols-3 gap-8">
+          <Feature title="Unified Portfolio" desc="Aggregate multiple broker accounts, views, and holdings with live scraping and accurate P&L." />
+          <Feature title="Deep Analytics" desc="Sector, subsector, and market‑cap allocations; warnings and recommendations to rebalance risk." />
+          <Feature title="Local & Private" desc="Data stays on your machine in JSON files; no external server required." />
+        </div>
       </section>
 
-      <section className="bg-gray-50 py-12">
-        <div className="max-w-5xl mx-auto px-6 grid md:grid-cols-2 gap-8 items-center">
-          <div>
-            <h2 className="text-2xl font-semibold">What problem does stockView solve?</h2>
-            <p className="mt-3 text-gray-700">Managing multiple investment accounts is messy: scattered statements, inconsistent summaries, and manual tracking. stockView centralizes accounts, computes accurate metrics, and surfaces insights to help you make better allocation decisions.</p>
-            <ul className="mt-4 list-disc pl-5 text-gray-700 text-sm space-y-1">
-              <li>Combine holdings from multiple brokers into unified views</li>
-              <li>See real‑time allocations by sector, subsector, and market cap</li>
-              <li>Get warnings when concentration risk exceeds thresholds</li>
-              <li>Scan latest news for your holdings</li>
-            </ul>
+      <section className="bg-zinc-50 py-16">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-zinc-900 mb-4">What problem does stockView solve?</h2>
+            <p className="text-lg text-zinc-600 max-w-3xl mx-auto">
+              Managing multiple investment accounts is messy: scattered statements, inconsistent summaries, and manual tracking. stockView centralizes accounts, computes accurate metrics, and surfaces insights to help you make better allocation decisions.
+            </p>
           </div>
-          <div className="border rounded p-6 bg-white shadow-sm">
-            <h3 className="font-medium">Capabilities</h3>
-            <ul className="mt-3 text-sm text-gray-700 space-y-1">
-              <li>• Add Account wizard with live scraping (Groww)</li>
-              <li>• Create Views across accounts; correct weighted averages</li>
-              <li>• Analytics dashboard with distribution charts</li>
-              <li>• Logging, backups, and JSON DB</li>
-            </ul>
+          <div className="grid md:grid-cols-2 gap-12 items-start">
+            <div className="space-y-4">
+              <h3 className="text-xl font-semibold text-zinc-900">Key Benefits</h3>
+              <div className="space-y-3">
+                <div className="flex items-start gap-3">
+                  <div className="w-2 h-2 bg-indigo-600 rounded-full mt-2 flex-shrink-0"></div>
+                  <span className="text-zinc-700">Combine holdings from multiple brokers into unified views</span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-2 h-2 bg-indigo-600 rounded-full mt-2 flex-shrink-0"></div>
+                  <span className="text-zinc-700">See real‑time allocations by sector, subsector, and market cap</span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-2 h-2 bg-indigo-600 rounded-full mt-2 flex-shrink-0"></div>
+                  <span className="text-zinc-700">Get warnings when concentration risk exceeds thresholds</span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-2 h-2 bg-indigo-600 rounded-full mt-2 flex-shrink-0"></div>
+                  <span className="text-zinc-700">Scan latest news for your holdings</span>
+                </div>
+              </div>
+            </div>
+            <div className="bg-white border border-zinc-200 rounded-2xl p-6 shadow-sm">
+              <h3 className="text-lg font-semibold text-zinc-900 mb-4">Capabilities</h3>
+              <div className="space-y-3">
+                <div className="flex items-start gap-3">
+                  <div className="w-2 h-2 bg-indigo-600 rounded-full mt-2 flex-shrink-0"></div>
+                  <span className="text-zinc-700">Add Account wizard with live scraping (Groww)</span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-2 h-2 bg-indigo-600 rounded-full mt-2 flex-shrink-0"></div>
+                  <span className="text-zinc-700">Create Views across accounts; correct weighted averages</span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-2 h-2 bg-indigo-600 rounded-full mt-2 flex-shrink-0"></div>
+                  <span className="text-zinc-700">Analytics dashboard with distribution charts</span>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-2 h-2 bg-indigo-600 rounded-full mt-2 flex-shrink-0"></div>
+                  <span className="text-zinc-700">Logging, backups, and JSON DB</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      <section className="max-w-5xl mx-auto px-6 py-12 grid md:grid-cols-2 gap-8">
-        <div>
-          <h2 className="text-2xl font-semibold">About Us</h2>
-          <p className="mt-3 text-gray-700">We are builders focused on pragmatic, privacy‑first finance tools. stockView is crafted to be robust, simple, and transparent—so you can trust your numbers and focus on decisions.</p>
+      <section className="max-w-6xl mx-auto px-6 py-16 grid md:grid-cols-2 gap-12">
+        <div className="space-y-4">
+          <h2 className="text-2xl font-bold text-zinc-900">About Us</h2>
+          <p className="text-zinc-700 leading-relaxed">
+            We are builders focused on pragmatic, privacy‑first finance tools. stockView is crafted to be robust, simple, and transparent—so you can trust your numbers and focus on decisions.
+          </p>
         </div>
-        <div>
-          <h2 className="text-2xl font-semibold">Contact</h2>
-          <p className="mt-3 text-gray-700 text-sm">Have feedback, feature ideas, or want to collaborate?</p>
-          <div className="mt-3 space-y-1 text-sm text-gray-700">
-            <div>Email: <a className="underline" href="mailto:hello@example.com">hello@example.com</a></div>
-            <div>GitHub: <a className="underline" href="https://github.com/singhamit20596/stockView" target="_blank" rel="noreferrer">/stockView</a></div>
+        <div className="space-y-4">
+          <h2 className="text-2xl font-bold text-zinc-900">Contact</h2>
+          <p className="text-zinc-700">Have feedback, feature ideas, or want to collaborate?</p>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <span className="text-zinc-600">Email:</span>
+              <a className="text-indigo-600 hover:text-indigo-700 underline font-medium" href="mailto:hello@example.com">hello@example.com</a>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-zinc-600">GitHub:</span>
+              <a className="text-indigo-600 hover:text-indigo-700 underline font-medium" href="https://github.com/singhamit20596/stockView" target="_blank" rel="noreferrer">/stockView</a>
+            </div>
           </div>
         </div>
       </section>
@@ -62,9 +121,9 @@ export default function Home() {
 
 function Feature({ title, desc }: { title: string; desc: string }) {
   return (
-    <div className="border rounded p-5 bg-white">
-      <div className="font-medium">{title}</div>
-      <div className="mt-2 text-sm text-gray-700">{desc}</div>
+    <div className="bg-white border border-zinc-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
+      <h3 className="text-lg font-semibold text-zinc-900 mb-3">{title}</h3>
+      <p className="text-zinc-700 leading-relaxed">{desc}</p>
     </div>
   );
 }

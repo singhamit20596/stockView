@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Providers } from './providers';
+import { Providers, useTheme } from './providers';
 import Link from 'next/link';
 
 const geistSans = Geist({
@@ -19,6 +19,8 @@ export const metadata: Metadata = {
   description: "Local portfolio viewer",
 };
 
+import AppContent from './AppContent';
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -28,15 +30,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <Providers>
-          <div className="p-4 border-b flex gap-4 text-sm">
-            <Link href="/" className="font-medium">Home</Link>
-            <Link href="/accounts">Accounts</Link>
-            <Link href="/add-account">Add Account</Link>
-            <Link href="/add-view">Add View</Link>
-            <Link href="/views">Views</Link>
-            <Link href="/stock-view">StockView</Link>
-          </div>
-          {children}
+          <AppContent>{children}</AppContent>
         </Providers>
       </body>
     </html>

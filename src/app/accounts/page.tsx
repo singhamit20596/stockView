@@ -2,6 +2,9 @@
 import Link from 'next/link';
 import { trpc } from '@/app/providers';
 import { useMemo } from 'react';
+import { Card, CardBody } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
+import { formatCurrency, formatPercentage } from '@/lib/utils';
 
 export default function AccountsPage() {
   const { data: accounts, isLoading } = trpc.accounts.list.useQuery();
@@ -9,46 +12,90 @@ export default function AccountsPage() {
   const holdingsCount = counts ?? {} as Record<string, number>;
   const del = trpc.accounts.delete.useMutation();
   return (
-    <div className="p-8 space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Accounts</h1>
-        <Link href="/add-account" className="px-3 py-2 bg-black text-white rounded">Add Account</Link>
+    <div className="max-w-6xl mx-auto p-6 space-y-6">
+      <div>
+        <h1 className="text-2xl font-semibold text-zinc-900">My Accounts</h1>
+        <p className="text-sm text-zinc-600 mt-1">Manage your broker accounts and portfolio data</p>
       </div>
       {isLoading ? (
         <p className="text-sm text-gray-500">Loading...</p>
       ) : !accounts || accounts.length === 0 ? (
         <p className="text-sm text-gray-500">No accounts yet.</p>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {accounts.map((a) => (
-            <div key={a.id} className="border rounded p-4 space-y-2">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="font-medium">{a.name}</div>
-                  <div className="text-xs text-gray-500">Updated: {new Date(a.updatedAt).toLocaleDateString('en-GB')}</div>
+            <Card key={a.id}>
+              <CardBody className="p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <div>
+                    <h3 className="text-lg font-semibold text-zinc-900">{a.name}</h3>
+                    <p className="text-sm text-zinc-500">Primary trading account</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button 
+                      className="w-8 h-8 rounded-lg bg-zinc-100 hover:bg-zinc-200 grid place-items-center transition-colors relative group"
+                      onClick={() => window.location.href = `/add-account?name=${encodeURIComponent(a.name)}`}
+                      title="Update account data"
+                    >
+                      <svg className="w-4 h-4 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                      </svg>
+                      <div className="absolute bottom-full right-0 mb-2 px-2 py-1 text-xs text-white bg-gray-800 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                        Update account data
+                      </div>
+                    </button>
+                    <button 
+                      className="w-8 h-8 rounded-lg bg-red-100 hover:bg-red-200 grid place-items-center transition-colors relative group"
+                      onClick={async () => {
+                        if (!confirm(`Delete account ${a.name}?`)) return;
+                        await del.mutateAsync({ accountId: a.id });
+                        location.reload();
+                      }}
+                      title="Delete account"
+                    >
+                      <svg className="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                      <div className="absolute bottom-full right-0 mb-2 px-2 py-1 text-xs text-white bg-gray-800 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                        Delete account
+                      </div>
+                    </button>
+                  </div>
                 </div>
-                <div className="text-right text-sm">
-                  <div>Invested: ₹{a.investedValue}</div>
-                  <div>Current: ₹{a.currentValue}</div>
-                  <div>PnL: ₹{a.pnl} ({a.pnlPercent}%)</div>
-                  <div className="text-xs text-gray-500">Holdings: {holdingsCount[a.id] ?? 0}</div>
+                
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                  <div className="bg-zinc-50 rounded-lg p-3">
+                    <div className="text-xs text-zinc-500 mb-1">INVESTED</div>
+                    <div className="text-lg font-semibold text-zinc-900">{formatCurrency(a.investedValue)}</div>
+                  </div>
+                  <div className="bg-zinc-50 rounded-lg p-3">
+                    <div className="text-xs text-zinc-500 mb-1">CURRENT</div>
+                    <div className="text-lg font-semibold text-zinc-900">{formatCurrency(a.currentValue)}</div>
+                  </div>
+                  <div className="bg-zinc-50 rounded-lg p-3">
+                    <div className="text-xs text-zinc-500 mb-1">P&L</div>
+                    <div className={`text-lg font-semibold ${a.pnl >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {formatCurrency(a.pnl)}
+                    </div>
+                  </div>
+                  <div className="bg-zinc-50 rounded-lg p-3">
+                    <div className="text-xs text-zinc-500 mb-1">P&L %</div>
+                    <div className={`text-lg font-semibold ${a.pnlPercent >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {formatPercentage(a.pnlPercent)}
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div className="flex gap-2">
-                <Link href={`/accounts/${a.id}`} className="px-3 py-1 bg-gray-100 rounded">Open</Link>
-                <Link href={`/add-account?name=${encodeURIComponent(a.name)}`} className="px-3 py-1 bg-gray-100 rounded">Update</Link>
-                <button
-                  className="px-3 py-1 bg-red-600 text-white rounded"
-                  onClick={async () => {
-                    if (!confirm(`Delete account ${a.name}?`)) return;
-                    await del.mutateAsync({ accountId: a.id });
-                    location.reload();
-                  }}
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
+                
+                <div className="flex items-center justify-between">
+                  <div className="text-xs text-zinc-500">
+                    Last updated: {new Date(a.updatedAt).toLocaleDateString('en-GB')} • {holdingsCount[a.id] ?? 0} stocks
+                  </div>
+                  <Link href={`/accounts/${a.id}`}>
+                    <Button variant="primary" size="sm">View Details</Button>
+                  </Link>
+                </div>
+              </CardBody>
+            </Card>
           ))}
         </div>
       )}

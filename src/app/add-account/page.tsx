@@ -1,6 +1,7 @@
 "use client";
 import { trpc } from '@/app/providers';
 import { useMemo, useState, useEffect } from 'react';
+import { Button } from '@/components/ui/Button';
 
 export default function AddAccountPage() {
 	const [name, setName] = useState('');
@@ -42,39 +43,67 @@ export default function AddAccountPage() {
 	}, [preview]);
 
 	return (
-		<div className="p-6 space-y-4 max-w-3xl mx-auto">
-			<h1 className="text-2xl font-semibold">Add Account (Wizard Draft)</h1>
-			<div className="space-y-2">
-				<label className="block text-sm">Account Name</label>
-				<input className="border p-2 w-full" value={name} onChange={(e) => setName(e.target.value)} placeholder="My Groww" />
-				<div className="flex items-center gap-2 text-xs">
-					<button
-						className="px-2 py-1 border rounded disabled:opacity-50"
-						disabled={!name || isChecking}
-						onClick={async () => {
-							if (!name) return;
-							const res = await check.refetch();
-							setChecked(res.data?.valid === true);
-						}}
-					>
-						Check availability
-					</button>
-					{checked !== null && (
-						<span className={isNameAvailable ? 'text-green-600' : 'text-red-600'}>
-							{isNameAvailable ? 'Name is available' : 'Name already exists'}
-						</span>
-					)}
+		<div className="max-w-6xl mx-auto p-6 space-y-6">
+			<h1 className="text-2xl font-semibold">Add Account</h1>
+			
+			{/* Stepper */}
+			<div className="relative">
+				<div className="absolute top-4 left-0 right-0 h-0.5 bg-zinc-200" />
+				<div className="relative grid grid-cols-4 gap-4">
+					{['Account Name', 'Select Broker', 'Scrape Holdings', 'Verify & Confirm'].map((label, idx) => (
+						<div key={label} className="flex flex-col items-center">
+							<div className="w-8 h-8 rounded-full grid place-items-center text-sm font-medium bg-indigo-600 text-white relative z-10">
+								{idx + 1}
+							</div>
+							<div className="mt-2 text-xs text-zinc-600 text-center font-medium">{label}</div>
+						</div>
+					))}
 				</div>
 			</div>
-			<div className="space-y-2">
-				<label className="block text-sm">Select Broker</label>
-				<select className="border p-2" value={brokerId} onChange={(e) => setBrokerId(e.target.value as 'groww')}>
-					<option value="groww">Groww</option>
-				</select>
+			<div className="space-y-4">
+				<div className="space-y-2">
+					<label className="block text-sm font-medium text-zinc-700">Account Name</label>
+					<input 
+						className="w-full px-3 py-2 border border-zinc-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-black" 
+						value={name} 
+						onChange={(e) => setName(e.target.value)} 
+						placeholder="My Groww" 
+					/>
+					<div className="flex items-center gap-3 text-xs">
+						<Button
+							size="sm"
+							variant="secondary"
+							disabled={!name || isChecking}
+							onClick={async () => {
+								if (!name) return;
+								const res = await check.refetch();
+								setChecked(res.data?.valid === true);
+							}}
+						>
+							Check availability
+						</Button>
+						{checked !== null && (
+							<span className={`font-medium ${isNameAvailable ? 'text-green-600' : 'text-red-600'}`}>
+								{isNameAvailable ? '✓ Name is available' : '✗ Name already exists'}
+							</span>
+						)}
+					</div>
+				</div>
+				
+				<div className="space-y-2">
+					<label className="block text-sm font-medium text-zinc-700">Select Broker</label>
+					<select 
+						className="w-full px-3 py-2 border border-zinc-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-black" 
+						value={brokerId} 
+						onChange={(e) => setBrokerId(e.target.value as 'groww')}
+					>
+						<option value="groww">Groww</option>
+					</select>
+				</div>
 			</div>
-			<div className="flex gap-2">
-				<button
-					className="px-4 py-2 bg-black text-white rounded disabled:opacity-50"
+			<div className="flex gap-3">
+				<Button
+					variant="primary"
 					disabled={!name || start.isPending || isChecking || !isNameAvailable}
 					onClick={async () => {
 						const res = await start.mutateAsync({ name, brokerId });
@@ -82,9 +111,9 @@ export default function AddAccountPage() {
 					}}
 				>
 					Create & Scrape
-				</button>
-				<button
-					className="px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-50"
+				</Button>
+				<Button
+					variant="secondary"
 					disabled={!name || start.isPending || isChecking || !isNameExists}
 					onClick={async () => {
 						const res = await start.mutateAsync({ name, brokerId });
@@ -92,23 +121,29 @@ export default function AddAccountPage() {
 					}}
 				>
 					Update & Re-scrape
-				</button>
+				</Button>
 			</div>
+			
 			{progress && (
-				<div>
-					<div className="h-2 bg-gray-200 rounded">
-						<div className="h-2 bg-green-600 rounded" style={{ width: `${progress.percent}%` }} />
+				<div className="space-y-2">
+					<div className="h-2 bg-zinc-200 rounded-full overflow-hidden">
+						<div 
+							className="h-full bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full transition-all duration-300" 
+							style={{ width: `${progress.percent}%` }} 
+						/>
 					</div>
-					<p className="text-sm text-gray-600 mt-1">{progress.stage}</p>
+					<p className="text-sm text-zinc-600 font-medium">{progress.stage}</p>
 				</div>
 			)}
 			{preview && (
-				<div className="mt-4">
-					<h2 className="font-medium">Preview (mapped)</h2>
-					<pre className="text-xs bg-black text-green-200 p-2 rounded overflow-auto max-h-64">{JSON.stringify(preview.mapped, null, 2)}</pre>
+				<div className="space-y-4">
+					<h2 className="text-lg font-semibold text-zinc-900">Preview (mapped)</h2>
+					<div className="bg-zinc-50 border border-zinc-200 rounded-lg p-4">
+						<pre className="text-xs text-zinc-700 overflow-auto max-h-64 font-mono">{JSON.stringify(preview.mapped, null, 2)}</pre>
+					</div>
 					{jobId && (
-						<button
-							className={`mt-2 px-4 py-2 rounded ${confirm.isPending ? 'bg-blue-400' : 'bg-blue-600'} text-white`}
+						<Button
+							variant={confirm.isPending ? 'secondary' : 'primary'}
 							onClick={async () => {
 								if (!jobId) return;
 								await confirm.mutateAsync({ jobId });
@@ -118,7 +153,7 @@ export default function AddAccountPage() {
 							}}
 						>
 							{confirm.isPending ? 'Saving…' : 'Confirm & Save'}
-						</button>
+						</Button>
 					)}
 				</div>
 			)}

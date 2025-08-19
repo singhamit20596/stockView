@@ -148,3 +148,71 @@
 [2025-08-18T18:05:48.862Z] [seq13][groww] total extracted 29
 [2025-08-18T18:05:48.866Z] [seq08][groww] scroll pass
 [2025-08-18T18:05:49.046Z] [seq14][groww] browser closed
+[2025-08-19T16:07:17.064Z] [seq01][groww] launching chromium (headed)
+[2025-08-19T16:07:18.965Z] [seq02][groww] goto login
+[2025-08-19T16:07:19.521Z] [seq03][groww] waiting for user login
+[2025-08-19T16:08:03.569Z] [seq04][groww] login detected; url= https://groww.in/stocks/user/explore
+[2025-08-19T16:08:03.588Z] [seq05][groww] navigate to holdings loop start
+[2025-08-19T16:08:04.153Z] [seq06][groww] navigated to holdings
+[2025-08-19T16:08:04.509Z] [seq07][groww] clicking holdings/stocks tab
+[2025-08-19T16:08:04.919Z] [seq09][groww] attach network listeners
+[2025-08-19T16:08:08.348Z] [seq10][groww] network capture yielded 0
+[2025-08-19T16:08:08.351Z] [seq11][groww] extract pass 1
+[2025-08-19T16:08:08.361Z] [seq13][groww] total extracted 0
+[2025-08-19T16:08:08.367Z] [seq08][groww] scroll pass
+[2025-08-19T16:08:08.872Z] [seq11][groww] extract pass 2
+[2025-08-19T16:08:08.876Z] [seq13][groww] total extracted 0
+[2025-08-19T16:08:08.880Z] [seq08][groww] scroll pass
+[2025-08-19T16:08:09.598Z] [seq14][groww] browser closed
+[2025-08-19T16:08:36.322Z] [seq01][groww] launching chromium (headed)
+[2025-08-19T16:08:37.663Z] [seq02][groww] goto login
+[2025-08-19T16:08:38.149Z] [seq03][groww] waiting for user login
+[2025-08-19T16:09:14.192Z] [seq04][groww] login detected; url= https://groww.in/stocks/user/explore
+[2025-08-19T16:09:14.198Z] [seq05][groww] navigate to holdings loop start
+[2025-08-19T16:09:14.669Z] [seq06][groww] navigated to holdings
+[2025-08-19T16:09:14.916Z] [seq09][groww] attach network listeners
+[2025-08-19T16:09:18.386Z] [seq10][groww] network capture yielded 0
+[2025-08-19T16:09:18.388Z] [seq11][groww] extract pass 1
+[2025-08-19T16:09:18.402Z] [seq13][groww] total extracted 15
+[2025-08-19T16:09:18.408Z] [seq08][groww] scroll pass
+[2025-08-19T16:09:18.911Z] [seq11][groww] extract pass 2
+[2025-08-19T16:09:18.917Z] [seq13][groww] total extracted 17
+[2025-08-19T16:09:18.922Z] [seq08][groww] scroll pass
+[2025-08-19T16:09:19.426Z] [seq11][groww] extract pass 3
+[2025-08-19T16:09:19.435Z] [seq13][groww] total extracted 17
+[2025-08-19T16:09:19.440Z] [seq08][groww] scroll pass
+[2025-08-19T16:09:19.642Z] [seq14][groww] browser closed
+[2025-08-19T16:11:17.322Z] [seq01][groww] launching chromium (headed)
+[2025-08-19T16:11:18.216Z] [seq02][groww] goto login
+[2025-08-19T16:11:18.734Z] [seq03][groww] waiting for user login
+[2025-08-19T16:12:39.827Z] [seq04][groww] login detected; url= https://groww.in/stocks/user/explore
+[2025-08-19T16:12:39.842Z] [seq05][groww] navigate to holdings loop start
+[2025-08-19T16:12:40.376Z] [seq06][groww] navigated to holdings
+[2025-08-19T16:12:40.797Z] [seq07][groww] clicking holdings/stocks tab
+[2025-08-19T16:12:41.274Z] [seq09][groww] attach network listeners
+[2025-08-19T16:12:44.642Z] [seq10][groww] network capture yielded 0
+[2025-08-19T16:12:44.652Z] [seq11][groww] extract pass 1
+[2025-08-19T16:12:44.661Z] [seq13][groww] total extracted 0
+[2025-08-19T16:12:44.675Z] [seq08][groww] scroll pass
+[2025-08-19T16:12:45.179Z] [seq11][groww] extract pass 2
+[2025-08-19T16:12:45.188Z] [seq13][groww] total extracted 0
+[2025-08-19T16:12:45.200Z] [seq08][groww] scroll pass
+[2025-08-19T16:12:46.465Z] [seq14][groww] browser closed
+[2025-08-19T16:12:49.261Z] [seq01][groww] launching chromium (headed)
+[2025-08-19T16:12:50.589Z] [seq02][groww] goto login
+[2025-08-19T16:12:51.136Z] [seq03][groww] waiting for user login
+[2025-08-19T16:13:51.195Z] [seq04][groww] login detected; url= https://groww.in/stocks/user/explore
+[2025-08-19T16:13:51.211Z] [seq05][groww] navigate to holdings loop start
+[2025-08-19T16:13:51.682Z] [seq06][groww] navigated to holdings
+[2025-08-19T16:13:51.934Z] [seq09][groww] attach network listeners
+[2025-08-19T16:13:55.397Z] [seq10][groww] network capture yielded 0
+[2025-08-19T16:13:55.401Z] [seq11][groww] extract pass 1
+[2025-08-19T16:13:55.413Z] [seq13][groww] total extracted 15
+[2025-08-19T16:13:55.419Z] [seq08][groww] scroll pass
+[2025-08-19T16:13:55.925Z] [seq11][groww] extract pass 2
+[2025-08-19T16:13:55.931Z] [seq13][groww] total extracted 16
+[2025-08-19T16:13:55.935Z] [seq08][groww] scroll pass
+[2025-08-19T16:13:56.439Z] [seq11][groww] extract pass 3
+[2025-08-19T16:13:56.442Z] [seq13][groww] total extracted 16
+[2025-08-19T16:13:56.444Z] [seq08][groww] scroll pass
+[2025-08-19T16:13:56.680Z] [seq14][groww] browser closed

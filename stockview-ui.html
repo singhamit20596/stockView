@@ -1,0 +1,2131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StockView - Portfolio Management Dashboard</title>
+    
+    <!-- Google Fonts - Lexend -->
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- ApexCharts -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    
+    <style>
+        :root {
+            /* Lexend Theme Colors */
+            --primary-blue: #2563eb;
+            --primary-purple: #7c3aed;
+            --secondary-blue: #1e40af;
+            --accent-blue: #3b82f6;
+            --success-green: #10b981;
+            --danger-red: #ef4444;
+            --warning-orange: #f59e0b;
+            
+            /* Neutral Colors */
+            --white: #ffffff;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            
+            /* Typography */
+            --font-family: 'Lexend', sans-serif;
+            --font-size-xs: 0.75rem;
+            --font-size-sm: 0.875rem;
+            --font-size-base: 1rem;
+            --font-size-lg: 1.125rem;
+            --font-size-xl: 1.25rem;
+            --font-size-2xl: 1.5rem;
+            --font-size-3xl: 1.875rem;
+            --font-size-4xl: 2.25rem;
+            
+            /* Spacing */
+            --spacing-1: 0.25rem;
+            --spacing-2: 0.5rem;
+            --spacing-3: 0.75rem;
+            --spacing-4: 1rem;
+            --spacing-5: 1.25rem;
+            --spacing-6: 1.5rem;
+            --spacing-8: 2rem;
+            --spacing-10: 2.5rem;
+            --spacing-12: 3rem;
+            
+            /* Shadows */
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            
+            /* Border Radius */
+            --border-radius-sm: 0.25rem;
+            --border-radius-md: 0.375rem;
+            --border-radius-lg: 0.5rem;
+            --border-radius-xl: 0.75rem;
+            --border-radius-2xl: 1rem;
+            
+            /* Transitions */
+            --transition-fast: 150ms ease-in-out;
+            --transition-normal: 300ms ease-in-out;
+            --transition-slow: 500ms ease-in-out;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: var(--font-family);
+            font-size: var(--font-size-base);
+            line-height: 1.5;
+            color: var(--gray-700);
+            background-color: var(--gray-50);
+            overflow-x: hidden;
+        }
+        
+        /* Layout Structure */
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar Styles */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-purple) 100%);
+            color: var(--white);
+            padding: var(--spacing-6) 0;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 1000;
+            transition: transform var(--transition-normal);
+        }
+        
+        .sidebar-header {
+            padding: 0 var(--spacing-6) var(--spacing-8);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-3);
+            font-size: var(--font-size-2xl);
+            font-weight: 700;
+            color: var(--white);
+        }
+        
+        .logo i {
+            font-size: var(--font-size-3xl);
+            background: var(--white);
+            color: var(--primary-blue);
+            padding: var(--spacing-2);
+            border-radius: var(--border-radius-lg);
+        }
+        
+        .sidebar-nav {
+            padding: var(--spacing-6);
+        }
+        
+        .nav-item {
+            margin-bottom: var(--spacing-2);
+        }
+        
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-3);
+            padding: var(--spacing-3) var(--spacing-4);
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            border-radius: var(--border-radius-lg);
+            transition: all var(--transition-fast);
+            font-weight: 500;
+        }
+        
+        .nav-link:hover,
+        .nav-link.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--white);
+            transform: translateX(4px);
+        }
+        
+        .nav-link i {
+            font-size: var(--font-size-lg);
+            width: 20px;
+            text-align: center;
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            min-height: 100vh;
+            background: var(--gray-50);
+        }
+        
+        /* Top Bar */
+        .top-bar {
+            background: var(--white);
+            padding: var(--spacing-4) var(--spacing-6);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .top-bar-left {
+            flex: 1;
+        }
+        
+        .breadcrumb {
+            font-size: var(--font-size-lg);
+            font-weight: 600;
+            color: var(--gray-800);
+        }
+        
+        .top-bar-right {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-4);
+        }
+        
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--spacing-2);
+            padding: var(--spacing-3) var(--spacing-5);
+            font-family: inherit;
+            font-size: var(--font-size-sm);
+            font-weight: 500;
+            text-decoration: none;
+            border: none;
+            border-radius: var(--border-radius-lg);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--accent-blue) 100%);
+            color: var(--white);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .btn-secondary {
+            background: var(--white);
+            color: var(--gray-700);
+            border: 1px solid var(--gray-300);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--gray-50);
+            border-color: var(--gray-400);
+        }
+        
+        .btn-success {
+            background: var(--success-green);
+            color: var(--white);
+        }
+        
+        .btn-danger {
+            background: var(--danger-red);
+            color: var(--white);
+        }
+        
+        .btn-sm {
+            padding: var(--spacing-2) var(--spacing-3);
+            font-size: var(--font-size-xs);
+        }
+        
+        /* User Profile Dropdown */
+        .user-profile {
+            position: relative;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-purple) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: var(--spacing-2);
+            background: var(--white);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-xl);
+            padding: var(--spacing-2);
+            min-width: 200px;
+            display: none;
+            z-index: 1000;
+        }
+        
+        .dropdown-menu.show {
+            display: block;
+        }
+        
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-3);
+            padding: var(--spacing-3) var(--spacing-4);
+            color: var(--gray-700);
+            text-decoration: none;
+            border-radius: var(--border-radius-md);
+            transition: background var(--transition-fast);
+        }
+        
+        .dropdown-item:hover {
+            background: var(--gray-100);
+        }
+        
+        /* Content Area */
+        .content {
+            padding: var(--spacing-6);
+        }
+        
+        .page-header {
+            margin-bottom: var(--spacing-8);
+        }
+        
+        .page-title {
+            font-size: var(--font-size-3xl);
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: var(--spacing-2);
+        }
+        
+        .page-description {
+            color: var(--gray-600);
+            font-size: var(--font-size-lg);
+        }
+        
+        /* Card Layout */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: var(--spacing-6);
+            margin-bottom: var(--spacing-8);
+        }
+        
+        .card {
+            background: var(--white);
+            border-radius: var(--border-radius-xl);
+            box-shadow: var(--shadow-md);
+            padding: var(--spacing-6);
+            transition: all var(--transition-normal);
+            border: 1px solid var(--gray-200);
+        }
+        
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: var(--spacing-5);
+        }
+        
+        .card-title {
+            font-size: var(--font-size-xl);
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: var(--spacing-1);
+        }
+        
+        .card-subtitle {
+            color: var(--gray-500);
+            font-size: var(--font-size-sm);
+        }
+        
+        .card-actions {
+            display: flex;
+            gap: var(--spacing-2);
+        }
+        
+        .card-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--spacing-4);
+            margin-bottom: var(--spacing-5);
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: var(--spacing-3);
+            border-radius: var(--border-radius-lg);
+            background: var(--gray-50);
+        }
+        
+        .stat-label {
+            font-size: var(--font-size-xs);
+            color: var(--gray-500);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: var(--spacing-1);
+        }
+        
+        .stat-value {
+            font-size: var(--font-size-lg);
+            font-weight: 600;
+            color: var(--gray-900);
+        }
+        
+        .stat-value.positive {
+            color: var(--success-green);
+        }
+        
+        .stat-value.negative {
+            color: var(--danger-red);
+        }
+        
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: var(--spacing-4);
+            border-top: 1px solid var(--gray-200);
+        }
+        
+        .last-updated {
+            font-size: var(--font-size-xs);
+            color: var(--gray-500);
+        }
+        
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all var(--transition-normal);
+        }
+        
+        .modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal-content {
+            background: var(--white);
+            border-radius: var(--border-radius-2xl);
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-xl);
+            transform: scale(0.9);
+            transition: transform var(--transition-normal);
+        }
+        
+        .modal.show .modal-content {
+            transform: scale(1);
+        }
+        
+        .modal-header {
+            padding: var(--spacing-6);
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-size: var(--font-size-2xl);
+            font-weight: 700;
+            color: var(--gray-900);
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: var(--font-size-2xl);
+            color: var(--gray-400);
+            cursor: pointer;
+            padding: var(--spacing-2);
+            border-radius: var(--border-radius-md);
+            transition: all var(--transition-fast);
+        }
+        
+        .modal-close:hover {
+            background: var(--gray-100);
+            color: var(--gray-600);
+        }
+        
+        .modal-body {
+            padding: var(--spacing-6);
+        }
+        
+        .modal-footer {
+            padding: var(--spacing-6);
+            border-top: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: flex-end;
+            gap: var(--spacing-3);
+        }
+        
+        /* Form Styles */
+        .form-group {
+            margin-bottom: var(--spacing-5);
+        }
+        
+        .form-label {
+            display: block;
+            font-size: var(--font-size-sm);
+            font-weight: 500;
+            color: var(--gray-700);
+            margin-bottom: var(--spacing-2);
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: var(--spacing-3) var(--spacing-4);
+            border: 1px solid var(--gray-300);
+            border-radius: var(--border-radius-lg);
+            font-family: inherit;
+            font-size: var(--font-size-base);
+            transition: all var(--transition-fast);
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        
+        .form-input.error {
+            border-color: var(--danger-red);
+        }
+        
+        .form-error {
+            color: var(--danger-red);
+            font-size: var(--font-size-xs);
+            margin-top: var(--spacing-1);
+        }
+        
+        .form-success {
+            color: var(--success-green);
+            font-size: var(--font-size-xs);
+            margin-top: var(--spacing-1);
+        }
+        
+        /* Broker Selection Grid */
+        .broker-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: var(--spacing-4);
+            margin-bottom: var(--spacing-6);
+        }
+        
+        .broker-card {
+            padding: var(--spacing-4);
+            border: 2px solid var(--gray-200);
+            border-radius: var(--border-radius-xl);
+            text-align: center;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            background: var(--white);
+        }
+        
+        .broker-card:hover {
+            border-color: var(--primary-blue);
+            transform: translateY(-2px);
+        }
+        
+        .broker-card.selected {
+            border-color: var(--primary-blue);
+            background: rgba(37, 99, 235, 0.05);
+        }
+        
+        .broker-logo {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto var(--spacing-3);
+            border-radius: var(--border-radius-lg);
+            background: var(--gray-100);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: var(--font-size-2xl);
+            color: var(--gray-500);
+        }
+        
+        .broker-name {
+            font-size: var(--font-size-sm);
+            font-weight: 500;
+            color: var(--gray-700);
+        }
+        
+        /* Progress Steps */
+        .progress-steps {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: var(--spacing-8);
+            position: relative;
+        }
+        
+        .progress-steps::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            height: 2px;
+            background: var(--gray-200);
+            z-index: 1;
+        }
+        
+        .progress-line {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            height: 2px;
+            background: var(--primary-blue);
+            z-index: 2;
+            transition: width var(--transition-normal);
+        }
+        
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 3;
+        }
+        
+        .step-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--gray-200);
+            color: var(--gray-500);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            margin-bottom: var(--spacing-2);
+            transition: all var(--transition-fast);
+        }
+        
+        .step.active .step-number,
+        .step.completed .step-number {
+            background: var(--primary-blue);
+            color: var(--white);
+        }
+        
+        .step.completed .step-number {
+            background: var(--success-green);
+        }
+        
+        .step-title {
+            font-size: var(--font-size-sm);
+            font-weight: 500;
+            color: var(--gray-500);
+            text-align: center;
+        }
+        
+        .step.active .step-title,
+        .step.completed .step-title {
+            color: var(--gray-700);
+        }
+        
+        /* Table Styles */
+        .table-container {
+            background: var(--white);
+            border-radius: var(--border-radius-xl);
+            box-shadow: var(--shadow-md);
+            overflow: hidden;
+        }
+        
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .table th,
+        .table td {
+            padding: var(--spacing-4);
+            text-align: left;
+            border-bottom: 1px solid var(--gray-200);
+        }
+        
+        .table th {
+            background: var(--gray-50);
+            font-weight: 600;
+            color: var(--gray-700);
+            font-size: var(--font-size-sm);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .table td {
+            color: var(--gray-600);
+        }
+        
+        .table tbody tr:hover {
+            background: var(--gray-50);
+        }
+        
+        /* Loading Spinner */
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--gray-300);
+            border-top: 2px solid var(--primary-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Alert Messages */
+        .alert {
+            padding: var(--spacing-4);
+            border-radius: var(--border-radius-lg);
+            margin-bottom: var(--spacing-4);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-3);
+        }
+        
+        .alert-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: #065f46;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+        
+        .alert-error {
+            background: rgba(239, 68, 68, 0.1);
+            color: #991b1b;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+        
+        .alert-warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: #92400e;
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+        
+        .alert-info {
+            background: rgba(37, 99, 235, 0.1);
+            color: #1e3a8a;
+            border: 1px solid rgba(37, 99, 235, 0.2);
+        }
+        
+        /* Dashboard Specific */
+        .dashboard-selector {
+            margin-bottom: var(--spacing-8);
+        }
+        
+        .dashboard-widgets {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: var(--spacing-6);
+        }
+        
+        .widget {
+            background: var(--white);
+            border-radius: var(--border-radius-xl);
+            box-shadow: var(--shadow-md);
+            padding: var(--spacing-6);
+        }
+        
+        .widget-header {
+            margin-bottom: var(--spacing-5);
+        }
+        
+        .widget-title {
+            font-size: var(--font-size-xl);
+            font-weight: 600;
+            color: var(--gray-900);
+        }
+        
+        .chart-container {
+            height: 300px;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .top-bar {
+                padding-left: var(--spacing-4);
+            }
+            
+            .mobile-menu-btn {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 40px;
+                height: 40px;
+                border: none;
+                background: none;
+                color: var(--gray-600);
+                border-radius: var(--border-radius-md);
+                transition: all var(--transition-fast);
+                margin-right: var(--spacing-4);
+            }
+            
+            .mobile-menu-btn:hover {
+                background: var(--gray-100);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .dashboard-widgets {
+                grid-template-columns: 1fr;
+            }
+            
+            .broker-grid {
+                grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            }
+            
+            .card-stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .modal-content {
+                width: 95%;
+                margin: var(--spacing-4);
+            }
+            
+            .progress-steps {
+                flex-direction: column;
+                gap: var(--spacing-4);
+            }
+            
+            .progress-steps::before,
+            .progress-line {
+                display: none;
+            }
+        }
+        
+        /* Utility Classes */
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .font-semibold { font-weight: 600; }
+        .font-bold { font-weight: 700; }
+        .text-sm { font-size: var(--font-size-sm); }
+        .text-lg { font-size: var(--font-size-lg); }
+        .text-xl { font-size: var(--font-size-xl); }
+        .text-2xl { font-size: var(--font-size-2xl); }
+        .text-success { color: var(--success-green); }
+        .text-danger { color: var(--danger-red); }
+        .text-warning { color: var(--warning-orange); }
+        .text-gray-500 { color: var(--gray-500); }
+        .text-gray-600 { color: var(--gray-600); }
+        .text-gray-700 { color: var(--gray-700); }
+        .text-gray-900 { color: var(--gray-900); }
+        .mb-4 { margin-bottom: var(--spacing-4); }
+        .mb-6 { margin-bottom: var(--spacing-6); }
+        .mt-4 { margin-top: var(--spacing-4); }
+        .mt-6 { margin-top: var(--spacing-6); }
+        .hidden { display: none; }
+        .flex { display: flex; }
+        .items-center { align-items: center; }
+        .justify-between { justify-content: space-between; }
+        .gap-4 { gap: var(--spacing-4); }
+    </style>
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-chart-line"></i>
+                    <span>stockView</span>
+                </div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <div class="nav-item">
+                    <a href="#dashboard" class="nav-link active" data-page="dashboard">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="#accounts" class="nav-link" data-page="accounts">
+                        <i class="fas fa-building"></i>
+                        <span>Accounts</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="#views" class="nav-link" data-page="views">
+                        <i class="fas fa-eye"></i>
+                        <span>Views</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="#settings" class="nav-link" data-page="settings">
+                        <i class="fas fa-cog"></i>
+                        <span>Settings</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Bar -->
+            <header class="top-bar">
+                <button class="mobile-menu-btn" id="mobileMenuBtn" style="display: none;">
+                    <i class="fas fa-bars"></i>
+                </button>
+                
+                <div class="top-bar-left">
+                    <div class="breadcrumb" id="breadcrumb">Dashboard</div>
+                </div>
+                
+                <div class="top-bar-right">
+                    <button class="btn btn-primary" id="addAccountBtn">
+                        <i class="fas fa-plus"></i>
+                        Add Account
+                    </button>
+                    <button class="btn btn-secondary" id="addViewBtn">
+                        <i class="fas fa-plus"></i>
+                        Add View
+                    </button>
+                    
+                    <div class="user-profile">
+                        <div class="user-avatar" id="userAvatar">JD</div>
+                        <div class="dropdown-menu" id="userDropdown">
+                            <a href="#" class="dropdown-item">
+                                <i class="fas fa-user"></i>
+                                My Profile
+                            </a>
+                            <a href="#" class="dropdown-item">
+                                <i class="fas fa-sign-out-alt"></i>
+                                Logout
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            
+            <!-- Content Area -->
+            <div class="content">
+                <!-- Dashboard Page -->
+                <div id="dashboardPage" class="page">
+                    <div class="page-header">
+                        <h1 class="page-title">Portfolio Dashboard</h1>
+                        <p class="page-description">Get insights into your investment portfolio performance</p>
+                    </div>
+                    
+                    <div class="dashboard-selector">
+                        <div class="form-group">
+                            <label class="form-label">Select Account or View</label>
+                            <select class="form-input" id="dashboardSelector" style="width: 300px;">
+                                <option value="">Select an account or view</option>
+                                <option value="account-1">Zerodha Account</option>
+                                <option value="account-2">Groww Account</option>
+                                <option value="view-1">Combined Portfolio</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="dashboard-widgets" id="dashboardWidgets" style="display: none;">
+                        <div class="widget">
+                            <div class="widget-header">
+                                <h3 class="widget-title">Sector Allocation</h3>
+                            </div>
+                            <div class="chart-container" id="sectorChart"></div>
+                        </div>
+                        
+                        <div class="widget">
+                            <div class="widget-header">
+                                <h3 class="widget-title">Market Cap Allocation</h3>
+                            </div>
+                            <div class="chart-container" id="marketCapChart"></div>
+                        </div>
+                        
+                        <div class="widget">
+                            <div class="widget-header">
+                                <h3 class="widget-title">Top Holdings</h3>
+                            </div>
+                            <div class="chart-container" id="holdingsChart"></div>
+                        </div>
+                        
+                        <div class="widget">
+                            <div class="widget-header">
+                                <h3 class="widget-title">Portfolio Performance</h3>
+                            </div>
+                            <div class="chart-container" id="performanceChart"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Accounts Page -->
+                <div id="accountsPage" class="page hidden">
+                    <div class="page-header">
+                        <h1 class="page-title">My Accounts</h1>
+                        <p class="page-description">Manage your broker accounts and portfolio data</p>
+                    </div>
+                    
+                    <div class="cards-grid" id="accountsGrid">
+                        <!-- Sample Account Cards -->
+                        <div class="card">
+                            <div class="card-header">
+                                <div>
+                                    <h3 class="card-title">Zerodha Account</h3>
+                                    <p class="card-subtitle">Primary trading account</p>
+                                </div>
+                                <div class="card-actions">
+                                    <button class="btn btn-sm btn-secondary">
+                                        <i class="fas fa-sync"></i>
+                                        Update
+                                    </button>
+                                    <button class="btn btn-sm btn-danger">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="card-stats">
+                                <div class="stat-item">
+                                    <div class="stat-label">Invested</div>
+                                    <div class="stat-value">₹2,50,000</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-label">Current</div>
+                                    <div class="stat-value">₹2,85,000</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-label">P&L</div>
+                                    <div class="stat-value positive">+₹35,000</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-label">P&L %</div>
+                                    <div class="stat-value positive">+14.0%</div>
+                                </div>
+                            </div>
+                            
+                            <div class="card-footer">
+                                <span class="last-updated">Last updated: 2 hours ago</span>
+                                <button class="btn btn-sm btn-primary">View Details</button>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="card-header">
+                                <div>
+                                    <h3 class="card-title">Groww Account</h3>
+                                    <p class="card-subtitle">Secondary portfolio</p>
+                                </div>
+                                <div class="card-actions">
+                                    <button class="btn btn-sm btn-secondary">
+                                        <i class="fas fa-sync"></i>
+                                        Update
+                                    </button>
+                                    <button class="btn btn-sm btn-danger">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="card-stats">
+                                <div class="stat-item">
+                                    <div class="stat-label">Invested</div>
+                                    <div class="stat-value">₹1,50,000</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-label">Current</div>
+                                    <div class="stat-value">₹1,42,000</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-label">P&L</div>
+                                    <div class="stat-value negative">-₹8,000</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-label">P&L %</div>
+                                    <div class="stat-value negative">-5.3%</div>
+                                </div>
+                            </div>
+                            
+                            <div class="card-footer">
+                                <span class="last-updated">Last updated: 4 hours ago</span>
+                                <button class="btn btn-sm btn-primary">View Details</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Views Page -->
+                <div id="viewsPage" class="page hidden">
+                    <div class="page-header">
+                        <h1 class="page-title">Portfolio Views</h1>
+                        <p class="page-description">Combined views of multiple accounts</p>
+                    </div>
+                    
+                    <div class="cards-grid" id="viewsGrid">
+                        <!-- Sample View Cards -->
+                        <div class="card">
+                            <div class="card-header">
+                                <div>
+                                    <h3 class="card-title">Combined Portfolio</h3>
+                                    <p class="card-subtitle">All accounts combined</p>
+                                </div>
+                                <div class="card-actions">
+                                    <button class="btn btn-sm btn-danger">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="card-stats">
+                                <div class="stat-item">
+                                    <div class="stat-label">Total Invested</div>
+                                    <div class="stat-value">₹4,00,000</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-label">Total Current</div>
+                                    <div class="stat-value">₹4,27,000</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-label">Total P&L</div>
+                                    <div class="stat-value positive">+₹27,000</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-label">Total P&L %</div>
+                                    <div class="stat-value positive">+6.75%</div>
+                                </div>
+                            </div>
+                            
+                            <div class="card-footer">
+                                <div class="flex items-center gap-4">
+                                    <span class="text-sm text-gray-500">
+                                        <i class="fas fa-building"></i>
+                                        Zerodha, Groww
+                                    </span>
+                                </div>
+                                <button class="btn btn-sm btn-primary">View Details</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Settings Page -->
+                <div id="settingsPage" class="page hidden">
+                    <div class="page-header">
+                        <h1 class="page-title">Settings</h1>
+                        <p class="page-description">Manage your profile and application preferences</p>
+                    </div>
+                    
+                    <div class="card" style="max-width: 600px;">
+                        <div class="card-header">
+                            <h3 class="card-title">User Profile</h3>
+                        </div>
+                        
+                        <form>
+                            <div class="form-group">
+                                <label class="form-label">Full Name</label>
+                                <input type="text" class="form-input" value="John Doe">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Email</label>
+                                <input type="email" class="form-input" value="john.doe@example.com">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Preferred Currency</label>
+                                <select class="form-input">
+                                    <option value="INR" selected>Indian Rupee (₹)</option>
+                                    <option value="USD">US Dollar ($)</option>
+                                    <option value="EUR">Euro (€)</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-primary">Save Changes</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Add Account Modal -->
+    <div class="modal" id="addAccountModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Add New Account</h2>
+                <button class="modal-close" id="closeAddAccountModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="modal-body">
+                <!-- Progress Steps -->
+                <div class="progress-steps">
+                    <div class="progress-line" id="progressLine" style="width: 0%;"></div>
+                    <div class="step active" data-step="1">
+                        <div class="step-number">1</div>
+                        <div class="step-title">Account Name</div>
+                    </div>
+                    <div class="step" data-step="2">
+                        <div class="step-number">2</div>
+                        <div class="step-title">Select Broker</div>
+                    </div>
+                    <div class="step" data-step="3">
+                        <div class="step-number">3</div>
+                        <div class="step-title">Scrape Holdings</div>
+                    </div>
+                    <div class="step" data-step="4">
+                        <div class="step-number">4</div>
+                        <div class="step-title">Verify & Confirm</div>
+                    </div>
+                </div>
+                
+                <!-- Step 1: Account Name -->
+                <div class="step-content" id="step1">
+                    <div class="form-group">
+                        <label class="form-label">Account Name</label>
+                        <input type="text" class="form-input" id="accountName" placeholder="Enter a unique name for your account">
+                        <div class="form-error hidden" id="accountNameError">Account name is required</div>
+                        <div class="form-success hidden" id="accountNameSuccess">Account name is available</div>
+                    </div>
+                </div>
+                
+                <!-- Step 2: Select Broker -->
+                <div class="step-content hidden" id="step2">
+                    <h4 class="mb-4">Select Your Broker</h4>
+                    <div class="broker-grid">
+                        <div class="broker-card" data-broker="zerodha">
+                            <div class="broker-logo">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div class="broker-name">Zerodha</div>
+                        </div>
+                        <div class="broker-card" data-broker="groww">
+                            <div class="broker-logo">
+                                <i class="fas fa-seedling"></i>
+                            </div>
+                            <div class="broker-name">Groww</div>
+                        </div>
+                        <div class="broker-card" data-broker="upstox">
+                            <div class="broker-logo">
+                                <i class="fas fa-arrow-trend-up"></i>
+                            </div>
+                            <div class="broker-name">Upstox</div>
+                        </div>
+                        <div class="broker-card" data-broker="angelone">
+                            <div class="broker-logo">
+                                <i class="fas fa-angel"></i>
+                            </div>
+                            <div class="broker-name">Angel One</div>
+                        </div>
+                        <div class="broker-card" data-broker="icicidirect">
+                            <div class="broker-logo">
+                                <i class="fas fa-university"></i>
+                            </div>
+                            <div class="broker-name">ICICI Direct</div>
+                        </div>
+                        <div class="broker-card" data-broker="hdfc">
+                            <div class="broker-logo">
+                                <i class="fas fa-building-columns"></i>
+                            </div>
+                            <div class="broker-name">HDFC Securities</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Step 3: Scrape Holdings -->
+                <div class="step-content hidden" id="step3">
+                    <div class="text-center">
+                        <h4 class="mb-4">Scrape Your Holdings</h4>
+                        <div class="alert alert-info mb-6">
+                            <i class="fas fa-info-circle"></i>
+                            Please log in to your broker account and navigate to the holdings page. Scroll to the end to ensure all holdings are loaded.
+                        </div>
+                        
+                        <div id="scrapeInstructions">
+                            <p class="mb-6">When you're ready, click the button below to start scraping your holdings data.</p>
+                            <button class="btn btn-primary" id="startScrapeBtn">
+                                <i class="fas fa-download"></i>
+                                Start Scraping
+                            </button>
+                        </div>
+                        
+                        <div id="scrapingProgress" class="hidden">
+                            <div class="loading-spinner"></div>
+                            <p class="mt-4">Scraping your holdings...</p>
+                            <p class="text-sm text-gray-500">This may take a few moments</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Step 4: Verify and Confirm -->
+                <div class="step-content hidden" id="step4">
+                    <h4 class="mb-4">Verify Your Holdings</h4>
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Stock Name</th>
+                                    <th>Quantity</th>
+                                    <th>Avg Price</th>
+                                    <th>Market Price</th>
+                                    <th>P&L</th>
+                                </tr>
+                            </thead>
+                            <tbody id="holdingsTableBody">
+                                <tr>
+                                    <td>Reliance Industries</td>
+                                    <td>50</td>
+                                    <td>₹2,400</td>
+                                    <td>₹2,650</td>
+                                    <td class="text-success">+₹12,500</td>
+                                </tr>
+                                <tr>
+                                    <td>Infosys</td>
+                                    <td>25</td>
+                                    <td>₹1,200</td>
+                                    <td>₹1,350</td>
+                                    <td class="text-success">+₹3,750</td>
+                                </tr>
+                                <tr>
+                                    <td>HDFC Bank</td>
+                                    <td>30</td>
+                                    <td>₹1,500</td>
+                                    <td>₹1,420</td>
+                                    <td class="text-danger">-₹2,400</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="alert alert-success mt-6">
+                        <i class="fas fa-check-circle"></i>
+                        Found 3 holdings in your portfolio. Please verify the data above.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="prevStepBtn" style="display: none;">
+                    <i class="fas fa-arrow-left"></i>
+                    Back
+                </button>
+                <button class="btn btn-primary" id="nextStepBtn">
+                    Next
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+                <button class="btn btn-success hidden" id="finishAccountBtn">
+                    <i class="fas fa-check"></i>
+                    Add Account
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Add View Modal -->
+    <div class="modal" id="addViewModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Create New View</h2>
+                <button class="modal-close" id="closeAddViewModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="modal-body">
+                <!-- Progress Steps -->
+                <div class="progress-steps">
+                    <div class="progress-line" id="viewProgressLine" style="width: 0%;"></div>
+                    <div class="step active" data-step="1">
+                        <div class="step-number">1</div>
+                        <div class="step-title">View Name</div>
+                    </div>
+                    <div class="step" data-step="2">
+                        <div class="step-number">2</div>
+                        <div class="step-title">Select Accounts</div>
+                    </div>
+                    <div class="step" data-step="3">
+                        <div class="step-number">3</div>
+                        <div class="step-title">Review</div>
+                    </div>
+                </div>
+                
+                <!-- Step 1: View Name -->
+                <div class="step-content" id="viewStep1">
+                    <div class="form-group">
+                        <label class="form-label">View Name</label>
+                        <input type="text" class="form-input" id="viewName" placeholder="Enter a name for your view">
+                        <div class="form-error hidden" id="viewNameError">View name is required</div>
+                    </div>
+                </div>
+                
+                <!-- Step 2: Select Accounts -->
+                <div class="step-content hidden" id="viewStep2">
+                    <h4 class="mb-4">Select Accounts to Include</h4>
+                    <div class="form-group">
+                        <label class="form-label">
+                            <input type="checkbox" id="selectAllAccounts" style="margin-right: 8px;">
+                            Select All
+                        </label>
+                    </div>
+                    <div class="space-y-3">
+                        <label class="form-label flex items-center">
+                            <input type="checkbox" class="account-checkbox" data-account="zerodha" style="margin-right: 8px;">
+                            Zerodha Account - ₹2,85,000
+                        </label>
+                        <label class="form-label flex items-center">
+                            <input type="checkbox" class="account-checkbox" data-account="groww" style="margin-right: 8px;">
+                            Groww Account - ₹1,42,000
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- Step 3: Review -->
+                <div class="step-content hidden" id="viewStep3">
+                    <h4 class="mb-4">Review Combined View</h4>
+                    <div class="card">
+                        <div class="card-stats">
+                            <div class="stat-item">
+                                <div class="stat-label">Total Invested</div>
+                                <div class="stat-value">₹4,00,000</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Total Current</div>
+                                <div class="stat-value">₹4,27,000</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Total P&L</div>
+                                <div class="stat-value positive">+₹27,000</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-label">Total P&L %</div>
+                                <div class="stat-value positive">+6.75%</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="viewPrevStepBtn" style="display: none;">
+                    <i class="fas fa-arrow-left"></i>
+                    Back
+                </button>
+                <button class="btn btn-primary" id="viewNextStepBtn">
+                    Next
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+                <button class="btn btn-success hidden" id="finishViewBtn">
+                    <i class="fas fa-check"></i>
+                    Create View
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let currentStep = 1;
+        let currentViewStep = 1;
+        let selectedBroker = null;
+        let selectedAccounts = [];
+        
+        // DOM elements
+        const sidebar = document.getElementById('sidebar');
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const navLinks = document.querySelectorAll('.nav-link');
+        const pages = document.querySelectorAll('.page');
+        const breadcrumb = document.getElementById('breadcrumb');
+        
+        // Modal elements
+        const addAccountModal = document.getElementById('addAccountModal');
+        const addViewModal = document.getElementById('addViewModal');
+        const addAccountBtn = document.getElementById('addAccountBtn');
+        const addViewBtn = document.getElementById('addViewBtn');
+        const closeAddAccountModal = document.getElementById('closeAddAccountModal');
+        const closeAddViewModal = document.getElementById('closeAddViewModal');
+        
+        // User dropdown
+        const userAvatar = document.getElementById('userAvatar');
+        const userDropdown = document.getElementById('userDropdown');
+        
+        // Dashboard elements
+        const dashboardSelector = document.getElementById('dashboardSelector');
+        const dashboardWidgets = document.getElementById('dashboardWidgets');
+        
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeNavigation();
+            initializeModals();
+            initializeUserDropdown();
+            initializeDashboard();
+            initializeResponsive();
+            
+            // Show dashboard by default
+            showPage('dashboard');
+        });
+        
+        // Navigation functionality
+        function initializeNavigation() {
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const page = this.getAttribute('data-page');
+                    showPage(page);
+                    
+                    // Update active nav link
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Close sidebar on mobile
+                    if (window.innerWidth <= 1024) {
+                        sidebar.classList.remove('open');
+                    }
+                });
+            });
+        }
+        
+        function showPage(pageName) {
+            // Hide all pages
+            pages.forEach(page => page.classList.add('hidden'));
+            
+            // Show selected page
+            const targetPage = document.getElementById(pageName + 'Page');
+            if (targetPage) {
+                targetPage.classList.remove('hidden');
+                
+                // Update breadcrumb
+                const pageTitle = targetPage.querySelector('.page-title').textContent;
+                breadcrumb.textContent = pageTitle;
+            }
+        }
+        
+        // Modal functionality
+        function initializeModals() {
+            // Add Account Modal
+            addAccountBtn.addEventListener('click', () => openModal(addAccountModal));
+            closeAddAccountModal.addEventListener('click', () => closeModal(addAccountModal));
+            
+            // Add View Modal
+            addViewBtn.addEventListener('click', () => openModal(addViewModal));
+            closeAddViewModal.addEventListener('click', () => closeModal(addViewModal));
+            
+            // Close modal when clicking outside
+            window.addEventListener('click', function(e) {
+                if (e.target.classList.contains('modal')) {
+                    closeModal(e.target);
+                }
+            });
+            
+            initializeAddAccountFlow();
+            initializeAddViewFlow();
+        }
+        
+        function openModal(modal) {
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeModal(modal) {
+            modal.classList.remove('show');
+            document.body.style.overflow = '';
+            
+            // Reset modal state
+            if (modal === addAccountModal) {
+                resetAddAccountModal();
+            } else if (modal === addViewModal) {
+                resetAddViewModal();
+            }
+        }
+        
+        // Add Account Flow
+        function initializeAddAccountFlow() {
+            const accountNameInput = document.getElementById('accountName');
+            const nextStepBtn = document.getElementById('nextStepBtn');
+            const prevStepBtn = document.getElementById('prevStepBtn');
+            const finishAccountBtn = document.getElementById('finishAccountBtn');
+            const brokerCards = document.querySelectorAll('.broker-card');
+            const startScrapeBtn = document.getElementById('startScrapeBtn');
+            
+            // Account name validation
+            accountNameInput.addEventListener('input', validateAccountName);
+            
+            // Broker selection
+            brokerCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    brokerCards.forEach(c => c.classList.remove('selected'));
+                    this.classList.add('selected');
+                    selectedBroker = this.getAttribute('data-broker');
+                    updateNextButton();
+                });
+            });
+            
+            // Navigation buttons
+            nextStepBtn.addEventListener('click', nextStep);
+            prevStepBtn.addEventListener('click', prevStep);
+            finishAccountBtn.addEventListener('click', finishAddAccount);
+            startScrapeBtn.addEventListener('click', startScraping);
+        }
+        
+        function validateAccountName() {
+            const input = document.getElementById('accountName');
+            const error = document.getElementById('accountNameError');
+            const success = document.getElementById('accountNameSuccess');
+            
+            if (input.value.trim() === '') {
+                error.classList.remove('hidden');
+                success.classList.add('hidden');
+                input.classList.add('error');
+            } else {
+                error.classList.add('hidden');
+                success.classList.remove('hidden');
+                input.classList.remove('error');
+            }
+            
+            updateNextButton();
+        }
+        
+        function updateNextButton() {
+            const nextBtn = document.getElementById('nextStepBtn');
+            const accountName = document.getElementById('accountName').value.trim();
+            
+            if (currentStep === 1) {
+                nextBtn.disabled = accountName === '';
+            } else if (currentStep === 2) {
+                nextBtn.disabled = !selectedBroker;
+            } else {
+                nextBtn.disabled = false;
+            }
+        }
+        
+        function nextStep() {
+            if (currentStep < 4) {
+                currentStep++;
+                updateStepDisplay();
+                updateProgressLine();
+                updateButtons();
+            }
+        }
+        
+        function prevStep() {
+            if (currentStep > 1) {
+                currentStep--;
+                updateStepDisplay();
+                updateProgressLine();
+                updateButtons();
+            }
+        }
+        
+        function updateStepDisplay() {
+            // Hide all step content
+            document.querySelectorAll('.step-content').forEach(step => {
+                step.classList.add('hidden');
+            });
+            
+            // Show current step
+            document.getElementById('step' + currentStep).classList.remove('hidden');
+            
+            // Update step indicators
+            document.querySelectorAll('.step').forEach(step => {
+                step.classList.remove('active', 'completed');
+                const stepNumber = parseInt(step.getAttribute('data-step'));
+                
+                if (stepNumber < currentStep) {
+                    step.classList.add('completed');
+                } else if (stepNumber === currentStep) {
+                    step.classList.add('active');
+                }
+            });
+        }
+        
+        function updateProgressLine() {
+            const progressLine = document.getElementById('progressLine');
+            const progress = ((currentStep - 1) / 3) * 100;
+            progressLine.style.width = progress + '%';
+        }
+        
+        function updateButtons() {
+            const nextBtn = document.getElementById('nextStepBtn');
+            const prevBtn = document.getElementById('prevStepBtn');
+            const finishBtn = document.getElementById('finishAccountBtn');
+            
+            prevBtn.style.display = currentStep > 1 ? 'inline-flex' : 'none';
+            
+            if (currentStep === 4) {
+                nextBtn.classList.add('hidden');
+                finishBtn.classList.remove('hidden');
+            } else {
+                nextBtn.classList.remove('hidden');
+                finishBtn.classList.add('hidden');
+            }
+        }
+        
+        function startScraping() {
+            const instructions = document.getElementById('scrapeInstructions');
+            const progress = document.getElementById('scrapingProgress');
+            
+            instructions.classList.add('hidden');
+            progress.classList.remove('hidden');
+            
+            // Simulate scraping process
+            setTimeout(() => {
+                progress.classList.add('hidden');
+                nextStep();
+            }, 3000);
+        }
+        
+        function finishAddAccount() {
+            // Show success message
+            alert('Account added successfully!');
+            closeModal(addAccountModal);
+            
+            // Refresh accounts page if currently viewing
+            if (!document.getElementById('accountsPage').classList.contains('hidden')) {
+                // Add new account card to the grid
+                addAccountCard();
+            }
+        }
+        
+        function addAccountCard() {
+            const accountsGrid = document.getElementById('accountsGrid');
+            const accountName = document.getElementById('accountName').value;
+            const brokerName = selectedBroker.charAt(0).toUpperCase() + selectedBroker.slice(1);
+            
+            const cardHTML = `
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <h3 class="card-title">${accountName}</h3>
+                            <p class="card-subtitle">${brokerName} account</p>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn btn-sm btn-secondary">
+                                <i class="fas fa-sync"></i>
+                                Update
+                            </button>
+                            <button class="btn btn-sm btn-danger">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="card-stats">
+                        <div class="stat-item">
+                            <div class="stat-label">Invested</div>
+                            <div class="stat-value">₹1,00,000</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Current</div>
+                            <div class="stat-value">₹1,05,000</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">P&L</div>
+                            <div class="stat-value positive">+₹5,000</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">P&L %</div>
+                            <div class="stat-value positive">+5.0%</div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-footer">
+                        <span class="last-updated">Last updated: Just now</span>
+                        <button class="btn btn-sm btn-primary">View Details</button>
+                    </div>
+                </div>
+            `;
+            
+            accountsGrid.insertAdjacentHTML('beforeend', cardHTML);
+        }
+        
+        function resetAddAccountModal() {
+            currentStep = 1;
+            selectedBroker = null;
+            
+            document.getElementById('accountName').value = '';
+            document.getElementById('accountNameError').classList.add('hidden');
+            document.getElementById('accountNameSuccess').classList.add('hidden');
+            
+            document.querySelectorAll('.broker-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            document.getElementById('scrapeInstructions').classList.remove('hidden');
+            document.getElementById('scrapingProgress').classList.add('hidden');
+            
+            updateStepDisplay();
+            updateProgressLine();
+            updateButtons();
+        }
+        
+        // Add View Flow
+        function initializeAddViewFlow() {
+            const viewNameInput = document.getElementById('viewName');
+            const viewNextStepBtn = document.getElementById('viewNextStepBtn');
+            const viewPrevStepBtn = document.getElementById('viewPrevStepBtn');
+            const finishViewBtn = document.getElementById('finishViewBtn');
+            const selectAllAccounts = document.getElementById('selectAllAccounts');
+            const accountCheckboxes = document.querySelectorAll('.account-checkbox');
+            
+            viewNameInput.addEventListener('input', validateViewName);
+            viewNextStepBtn.addEventListener('click', nextViewStep);
+            viewPrevStepBtn.addEventListener('click', prevViewStep);
+            finishViewBtn.addEventListener('click', finishAddView);
+            
+            // Select all functionality
+            selectAllAccounts.addEventListener('change', function() {
+                accountCheckboxes.forEach(checkbox => {
+                    checkbox.checked = this.checked;
+                });
+                updateSelectedAccounts();
+            });
+            
+            accountCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', updateSelectedAccounts);
+            });
+        }
+        
+        function validateViewName() {
+            const input = document.getElementById('viewName');
+            const error = document.getElementById('viewNameError');
+            
+            if (input.value.trim() === '') {
+                error.classList.remove('hidden');
+                input.classList.add('error');
+            } else {
+                error.classList.add('hidden');
+                input.classList.remove('error');
+            }
+            
+            updateViewNextButton();
+        }
+        
+        function updateSelectedAccounts() {
+            const checkboxes = document.querySelectorAll('.account-checkbox');
+            selectedAccounts = Array.from(checkboxes)
+                .filter(cb => cb.checked)
+                .map(cb => cb.getAttribute('data-account'));
+            
+            updateViewNextButton();
+        }
+        
+        function updateViewNextButton() {
+            const nextBtn = document.getElementById('viewNextStepBtn');
+            const viewName = document.getElementById('viewName').value.trim();
+            
+            if (currentViewStep === 1) {
+                nextBtn.disabled = viewName === '';
+            } else if (currentViewStep === 2) {
+                nextBtn.disabled = selectedAccounts.length === 0;
+            } else {
+                nextBtn.disabled = false;
+            }
+        }
+        
+        function nextViewStep() {
+            if (currentViewStep < 3) {
+                currentViewStep++;
+                updateViewStepDisplay();
+                updateViewProgressLine();
+                updateViewButtons();
+            }
+        }
+        
+        function prevViewStep() {
+            if (currentViewStep > 1) {
+                currentViewStep--;
+                updateViewStepDisplay();
+                updateViewProgressLine();
+                updateViewButtons();
+            }
+        }
+        
+        function updateViewStepDisplay() {
+            // Hide all step content
+            document.querySelectorAll('#addViewModal .step-content').forEach(step => {
+                step.classList.add('hidden');
+            });
+            
+            // Show current step
+            document.getElementById('viewStep' + currentViewStep).classList.remove('hidden');
+            
+            // Update step indicators
+            document.querySelectorAll('#addViewModal .step').forEach(step => {
+                step.classList.remove('active', 'completed');
+                const stepNumber = parseInt(step.getAttribute('data-step'));
+                
+                if (stepNumber < currentViewStep) {
+                    step.classList.add('completed');
+                } else if (stepNumber === currentViewStep) {
+                    step.classList.add('active');
+                }
+            });
+        }
+        
+        function updateViewProgressLine() {
+            const progressLine = document.getElementById('viewProgressLine');
+            const progress = ((currentViewStep - 1) / 2) * 100;
+            progressLine.style.width = progress + '%';
+        }
+        
+        function updateViewButtons() {
+            const nextBtn = document.getElementById('viewNextStepBtn');
+            const prevBtn = document.getElementById('viewPrevStepBtn');
+            const finishBtn = document.getElementById('finishViewBtn');
+            
+            prevBtn.style.display = currentViewStep > 1 ? 'inline-flex' : 'none';
+            
+            if (currentViewStep === 3) {
+                nextBtn.classList.add('hidden');
+                finishBtn.classList.remove('hidden');
+            } else {
+                nextBtn.classList.remove('hidden');
+                finishBtn.classList.add('hidden');
+            }
+        }
+        
+        function finishAddView() {
+            alert('View created successfully!');
+            closeModal(addViewModal);
+        }
+        
+        function resetAddViewModal() {
+            currentViewStep = 1;
+            selectedAccounts = [];
+            
+            document.getElementById('viewName').value = '';
+            document.getElementById('viewNameError').classList.add('hidden');
+            document.getElementById('selectAllAccounts').checked = false;
+            
+            document.querySelectorAll('.account-checkbox').forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            
+            updateViewStepDisplay();
+            updateViewProgressLine();
+            updateViewButtons();
+        }
+        
+        // User dropdown functionality
+        function initializeUserDropdown() {
+            userAvatar.addEventListener('click', function() {
+                userDropdown.classList.toggle('show');
+            });
+            
+            document.addEventListener('click', function(e) {
+                if (!userAvatar.contains(e.target) && !userDropdown.contains(e.target)) {
+                    userDropdown.classList.remove('show');
+                }
+            });
+        }
+        
+        // Dashboard functionality
+        function initializeDashboard() {
+            dashboardSelector.addEventListener('change', function() {
+                if (this.value) {
+                    dashboardWidgets.style.display = 'grid';
+                    loadDashboardCharts();
+                } else {
+                    dashboardWidgets.style.display = 'none';
+                }
+            });
+        }
+        
+        function loadDashboardCharts() {
+            // Sector Allocation Chart
+            const sectorOptions = {
+                chart: {
+                    type: 'donut',
+                    height: 280
+                },
+                series: [30, 25, 20, 15, 10],
+                labels: ['Technology', 'Finance', 'Healthcare', 'Consumer', 'Energy'],
+                colors: ['#2563eb', '#7c3aed', '#10b981', '#f59e0b', '#ef4444'],
+                legend: {
+                    position: 'bottom'
+                },
+                responsive: [{
+                    breakpoint: 480,
+                    options: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }]
+            };
+            
+            const sectorChart = new ApexCharts(document.querySelector("#sectorChart"), sectorOptions);
+            sectorChart.render();
+            
+            // Market Cap Chart
+            const marketCapOptions = {
+                chart: {
+                    type: 'bar',
+                    height: 280
+                },
+                series: [{
+                    name: 'Allocation',
+                    data: [45, 35, 20]
+                }],
+                xaxis: {
+                    categories: ['Large Cap', 'Mid Cap', 'Small Cap']
+                },
+                colors: ['#2563eb'],
+                plotOptions: {
+                    bar: {
+                        borderRadius: 4,
+                        horizontal: false,
+                    }
+                }
+            };
+            
+            const marketCapChart = new ApexCharts(document.querySelector("#marketCapChart"), marketCapOptions);
+            marketCapChart.render();
+            
+            // Holdings Chart
+            const holdingsOptions = {
+                chart: {
+                    type: 'treemap',
+                    height: 280
+                },
+                series: [{
+                    data: [
+                        { x: 'Reliance', y: 25 },
+                        { x: 'Infosys', y: 20 },
+                        { x: 'HDFC Bank', y: 15 },
+                        { x: 'TCS', y: 12 },
+                        { x: 'ICICI Bank', y: 10 },
+                        { x: 'Others', y: 18 }
+                    ]
+                }],
+                colors: ['#2563eb', '#7c3aed', '#10b981', '#f59e0b', '#ef4444', '#6b7280']
+            };
+            
+            const holdingsChart = new ApexCharts(document.querySelector("#holdingsChart"), holdingsOptions);
+            holdingsChart.render();
+            
+            // Performance Chart
+            const performanceOptions = {
+                chart: {
+                    type: 'area',
+                    height: 280,
+                    zoom: {
+                        enabled: false
+                    }
+                },
+                series: [{
+                    name: 'Portfolio Value',
+                    data: [400000, 410000, 395000, 420000, 435000, 427000]
+                }],
+                xaxis: {
+                    categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun']
+                },
+                colors: ['#10b981'],
+                fill: {
+                    type: 'gradient',
+                    gradient: {
+                        shadeIntensity: 1,
+                        opacityFrom: 0.7,
+                        opacityTo: 0.9,
+                        stops: [0, 90, 100]
+                    }
+                }
+            };
+            
+            const performanceChart = new ApexCharts(document.querySelector("#performanceChart"), performanceOptions);
+            performanceChart.render();
+        }
+        
+        // Responsive functionality
+        function initializeResponsive() {
+            // Mobile menu button
+            if (mobileMenuBtn) {
+                mobileMenuBtn.addEventListener('click', function() {
+                    sidebar.classList.toggle('open');
+                });
+            }
+            
+            // Check screen size on load and resize
+            function checkScreenSize() {
+                if (window.innerWidth <= 1024) {
+                    mobileMenuBtn.style.display = 'flex';
+                } else {
+                    mobileMenuBtn.style.display = 'none';
+                    sidebar.classList.remove('open');
+                }
+            }
+            
+            checkScreenSize();
+            window.addEventListener('resize', checkScreenSize);
+            
+            // Close sidebar when clicking outside on mobile
+            document.addEventListener('click', function(e) {
+                if (window.innerWidth <= 1024) {
+                    if (!sidebar.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
+                        sidebar.classList.remove('open');
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>

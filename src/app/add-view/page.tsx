@@ -15,16 +15,16 @@ export default function AddViewPage() {
 
     return (
         <div className="p-8 space-y-4 max-w-2xl mx-auto">
-            <h1 className="text-2xl font-semibold">Add View</h1>
+            <h1 className="text-2xl font-semibold text-black font-bold">Add View</h1>
             <div className="space-y-2">
-                <label className="block text-sm">View Name</label>
-                <input className="border p-2 w-full" value={name} onChange={(e) => setName(e.target.value)} placeholder="My Combined Portfolio" />
+                <label className="block text-sm font-bold text-black">View Name</label>
+                <input className="border p-2 w-full text-black" value={name} onChange={(e) => setName(e.target.value)} placeholder="My Combined Portfolio" />
                 {name && check.data && (
                     <p className={`text-xs ${check.data.valid ? 'text-green-600' : 'text-red-600'}`}>{check.data.valid ? 'Name is available' : 'Name already exists'}</p>
                 )}
             </div>
             <div className="space-y-2">
-                <div className="text-sm font-medium">Select Accounts</div>
+                <div className="text-sm font-medium text-black font-bold">Select Accounts</div>
                 <div className="border rounded">
                     <div className="divide-y">
                         {(accountsQuery.data ?? []).map((a) => (
