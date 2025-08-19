@@ -39,3 +39,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+# Ignore Next.js build and dev logs
+.next
+.next-*.log
+.next-dev-*.log
+.next-dev.pid
+logs/*.log
+
