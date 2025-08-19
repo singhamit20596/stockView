@@ -29,7 +29,7 @@ export default function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <Providers>
           <div className="p-4 border-b flex gap-4 text-sm">
-            <Link href="/" className="font-medium">stockView</Link>
+            <Link href="/" className="font-medium">Home</Link>
             <Link href="/accounts">Accounts</Link>
             <Link href="/add-account">Add Account</Link>
             <Link href="/add-view">Add View</Link>

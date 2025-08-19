@@ -1,7 +1,7 @@
 {
   "meta": {
     "version": 1,
-    "updatedAt": "2025-08-19T08:20:55.101Z"
+    "updatedAt": "2025-08-19T08:53:19.552Z"
   },
   "rows": [
     {
@@ -18,7 +18,7 @@
       "quantity": "649",
       "sector": "Financials",
       "subsector": "Mutual Fund - Index",
-      "capCategory": null,
+      "capCategory": "SMALL",
       "createdAt": "2025-08-18T17:21:16.669Z",
       "updatedAt": "2025-08-18T17:58:42.584Z"
     },
@@ -36,7 +36,7 @@
       "quantity": "2060",
       "sector": "Financials",
       "subsector": "Bank - Private",
-      "capCategory": null,
+      "capCategory": "SMALL",
       "createdAt": "2025-08-18T17:21:16.669Z",
       "updatedAt": "2025-08-18T17:58:42.584Z"
     },
@@ -54,7 +54,7 @@
       "quantity": "248",
       "sector": "Financials",
       "subsector": "NBFC - Diversified",
-      "capCategory": null,
+      "capCategory": "MID",
       "createdAt": "2025-08-18T17:21:16.669Z",
       "updatedAt": "2025-08-18T17:58:42.584Z"
     },
@@ -72,7 +72,7 @@
       "quantity": "10",
       "sector": "Healthcare",
       "subsector": "Hospitals",
-      "capCategory": null,
+      "capCategory": "MEGA",
       "createdAt": "2025-08-18T17:21:16.669Z",
       "updatedAt": "2025-08-18T17:58:42.584Z"
     },
@@ -90,7 +90,7 @@
       "quantity": "35",
       "sector": "Financials",
       "subsector": "Housing Finance",
-      "capCategory": null,
+      "capCategory": "LARGE",
       "createdAt": "2025-08-18T17:21:16.669Z",
       "updatedAt": "2025-08-18T17:58:42.584Z"
     },
@@ -108,7 +108,7 @@
       "quantity": "140",
       "sector": "Industrials",
       "subsector": "Engineering - Industrial",
-      "capCategory": null,
+      "capCategory": "MID",
       "createdAt": "2025-08-18T17:21:16.669Z",
       "updatedAt": "2025-08-18T17:58:42.584Z"
     },
@@ -126,7 +126,7 @@
       "quantity": "60",
       "sector": "Financials",
       "subsector": "NBFC - Consumer",
-      "capCategory": null,
+      "capCategory": "MID",
       "createdAt": "2025-08-18T17:21:16.669Z",
       "updatedAt": "2025-08-18T17:58:42.584Z"
     },
@@ -144,7 +144,7 @@
       "quantity": "34",
       "sector": "Healthcare",
       "subsector": "Pharmaceuticals",
-      "capCategory": null,
+      "capCategory": "LARGE",
       "createdAt": "2025-08-18T17:21:16.669Z",
       "updatedAt": "2025-08-18T17:58:42.584Z"
     },
@@ -162,7 +162,7 @@
       "quantity": "40",
       "sector": "Healthcare",
       "subsector": "Hospitals",
-      "capCategory": null,
+      "capCategory": "LARGE",
       "createdAt": "2025-08-18T17:21:16.669Z",
       "updatedAt": "2025-08-18T17:58:42.584Z"
     },
@@ -180,7 +180,7 @@
       "quantity": "20",
       "sector": "Financials",
       "subsector": "Capital Markets",
-      "capCategory": null,
+      "capCategory": "LARGE",
       "createdAt": "2025-08-18T17:21:16.669Z",
       "updatedAt": "2025-08-18T17:58:42.584Z"
     },
@@ -198,7 +198,7 @@
       "quantity": "25",
       "sector": "Financials",
       "subsector": "Housing Finance",
-      "capCategory": null,
+      "capCategory": "LARGE",
       "createdAt": "2025-08-18T17:21:16.669Z",
       "updatedAt": "2025-08-18T17:58:42.584Z"
     },
@@ -216,7 +216,7 @@
       "quantity": "12",
       "sector": "Healthcare",
       "subsector": "Hospitals",
-      "capCategory": null,
+      "capCategory": "LARGE",
       "createdAt": "2025-08-18T17:21:16.669Z",
       "updatedAt": "2025-08-18T17:58:42.584Z"
     },
@@ -234,7 +234,7 @@
       "quantity": "19",
       "sector": "Financials",
       "subsector": "Bank - Private",
-      "capCategory": null,
+      "capCategory": "LARGE",
       "createdAt": "2025-08-18T17:21:16.669Z",
       "updatedAt": "2025-08-18T17:58:42.584Z"
     },
@@ -252,7 +252,7 @@
       "quantity": "20",
       "sector": "Financials",
       "subsector": "Consumer Finance - Credit Cards",
-      "capCategory": null,
+      "capCategory": "MID",
       "createdAt": "2025-08-18T17:21:16.669Z",
       "updatedAt": "2025-08-18T17:58:42.584Z"
     },
@@ -270,7 +270,7 @@
       "quantity": "65",
       "sector": "Financials",
       "subsector": "Bank - Private",
-      "capCategory": null,
+      "capCategory": "SMALL",
       "createdAt": "2025-08-18T17:21:16.669Z",
       "updatedAt": "2025-08-18T17:58:42.584Z"
     },
@@ -288,7 +288,7 @@
       "quantity": "6",
       "sector": "Financials",
       "subsector": "Bank - Private",
-      "capCategory": null,
+      "capCategory": "MEGA",
       "createdAt": "2025-08-18T17:21:16.669Z",
       "updatedAt": "2025-08-18T17:58:42.584Z"
     },
@@ -306,7 +306,7 @@
       "quantity": "14",
       "sector": "Financials",
       "subsector": "Bank - PSU",
-      "capCategory": null,
+      "capCategory": "MID",
       "createdAt": "2025-08-18T17:21:16.670Z",
       "updatedAt": "2025-08-18T17:58:42.584Z"
     },
@@ -324,7 +324,7 @@
       "quantity": "19",
       "sector": "Financials",
       "subsector": "Capital Markets",
-      "capCategory": null,
+      "capCategory": "MEGA",
       "createdAt": "2025-08-18T18:02:25.210Z",
       "updatedAt": "2025-08-18T18:02:43.758Z"
     },
@@ -342,7 +342,7 @@
       "quantity": "323",
       "sector": "Financials",
       "subsector": "Mutual Fund - Index",
-      "capCategory": null,
+      "capCategory": "SMALL",
       "createdAt": "2025-08-18T18:02:25.210Z",
       "updatedAt": "2025-08-18T18:02:43.758Z"
     },
@@ -360,7 +360,7 @@
       "quantity": "37",
       "sector": "Financials",
       "subsector": "Bank - Private",
-      "capCategory": null,
+      "capCategory": "MEGA",
       "createdAt": "2025-08-18T18:02:25.210Z",
       "updatedAt": "2025-08-18T18:02:43.758Z"
     },
@@ -378,7 +378,7 @@
       "quantity": "59",
       "sector": "Materials",
       "subsector": "Paints & Coatings",
-      "capCategory": null,
+      "capCategory": "LARGE",
       "createdAt": "2025-08-18T18:02:25.210Z",
       "updatedAt": "2025-08-18T18:02:43.758Z"
     },
@@ -396,7 +396,7 @@
       "quantity": "946",
       "sector": "Financials",
       "subsector": "Bank - Private",
-      "capCategory": null,
+      "capCategory": "SMALL",
       "createdAt": "2025-08-18T18:02:25.210Z",
       "updatedAt": "2025-08-18T18:02:43.758Z"
     },
@@ -414,7 +414,7 @@
       "quantity": "48",
       "sector": "Financials",
       "subsector": "Microfinance",
-      "capCategory": null,
+      "capCategory": "LARGE",
       "createdAt": "2025-08-18T18:02:25.210Z",
       "updatedAt": "2025-08-18T18:02:43.758Z"
     },
@@ -432,7 +432,7 @@
       "quantity": "70",
       "sector": "Financials",
       "subsector": "NBFC - Consumer",
-      "capCategory": null,
+      "capCategory": "MID",
       "createdAt": "2025-08-18T18:02:25.210Z",
       "updatedAt": "2025-08-18T18:02:43.758Z"
     },
@@ -450,7 +450,7 @@
       "quantity": "19",
       "sector": "Information Technology",
       "subsector": "IT Services",
-      "capCategory": null,
+      "capCategory": "MEGA",
       "createdAt": "2025-08-18T18:02:25.210Z",
       "updatedAt": "2025-08-18T18:02:43.758Z"
     },
@@ -468,7 +468,7 @@
       "quantity": "1238",
       "sector": "Financials",
       "subsector": "Small Finance Bank",
-      "capCategory": null,
+      "capCategory": "SMALL",
       "createdAt": "2025-08-18T18:02:25.210Z",
       "updatedAt": "2025-08-18T18:02:43.758Z"
     },
@@ -486,7 +486,7 @@
       "quantity": "47",
       "sector": "Financials",
       "subsector": "Bank - Private",
-      "capCategory": null,
+      "capCategory": "LARGE",
       "createdAt": "2025-08-18T18:02:25.210Z",
       "updatedAt": "2025-08-18T18:02:43.758Z"
     },
@@ -504,7 +504,7 @@
       "quantity": "30",
       "sector": "Financials",
       "subsector": "Consumer Finance - Credit Cards",
-      "capCategory": null,
+      "capCategory": "MID",
       "createdAt": "2025-08-18T18:02:25.210Z",
       "updatedAt": "2025-08-18T18:02:43.758Z"
     },
@@ -522,7 +522,7 @@
       "quantity": "81",
       "sector": "Financials",
       "subsector": "NBFC - Gold Loans",
-      "capCategory": null,
+      "capCategory": "SMALL",
       "createdAt": "2025-08-18T18:02:25.210Z",
       "updatedAt": "2025-08-18T18:02:43.758Z"
     },
@@ -540,7 +540,7 @@
       "quantity": "47",
       "sector": "Consumer Discretionary",
       "subsector": "Hotels & Leisure",
-      "capCategory": null,
+      "capCategory": "SMALL",
       "createdAt": "2025-08-18T18:02:25.210Z",
       "updatedAt": "2025-08-18T18:02:43.758Z"
     },
@@ -558,7 +558,7 @@
       "quantity": "6",
       "sector": "Financials",
       "subsector": "Microfinance",
-      "capCategory": null,
+      "capCategory": "LARGE",
       "createdAt": "2025-08-18T18:02:25.210Z",
       "updatedAt": "2025-08-18T18:02:43.758Z"
     },
@@ -576,7 +576,7 @@
       "quantity": "10",
       "sector": "Consumer Discretionary",
       "subsector": "Apparel & Accessories",
-      "capCategory": null,
+      "capCategory": "MID",
       "createdAt": "2025-08-18T18:02:25.210Z",
       "updatedAt": "2025-08-18T18:02:43.758Z"
     },
@@ -594,7 +594,7 @@
       "quantity": "24",
       "sector": "Consumer Staples",
       "subsector": "Beverages - Alcoholic",
-      "capCategory": null,
+      "capCategory": "SMALL",
       "createdAt": "2025-08-18T18:02:25.210Z",
       "updatedAt": "2025-08-18T18:02:43.758Z"
     },
@@ -612,7 +612,7 @@
       "quantity": "43",
       "sector": "Consumer Staples",
       "subsector": "FMCG - Personal & Home Care",
-      "capCategory": null,
+      "capCategory": "MEGA",
       "createdAt": "2025-08-18T18:05:49.048Z",
       "updatedAt": "2025-08-18T18:05:55.596Z"
     },
@@ -630,7 +630,7 @@
       "quantity": "2359",
       "sector": "Financials",
       "subsector": "Small Finance Bank",
-      "capCategory": null,
+      "capCategory": "SMALL",
       "createdAt": "2025-08-18T18:05:49.048Z",
       "updatedAt": "2025-08-18T18:05:55.596Z"
     },
@@ -648,7 +648,7 @@
       "quantity": "36",
       "sector": "Materials",
       "subsector": "Paints & Coatings",
-      "capCategory": null,
+      "capCategory": "MEGA",
       "createdAt": "2025-08-18T18:05:49.048Z",
       "updatedAt": "2025-08-18T18:05:55.596Z"
     },
@@ -666,7 +666,7 @@
       "quantity": "225",
       "sector": "Financials",
       "subsector": "NBFC - Diversified",
-      "capCategory": null,
+      "capCategory": "MID",
       "createdAt": "2025-08-18T18:05:49.048Z",
       "updatedAt": "2025-08-18T18:05:55.596Z"
     },
@@ -684,7 +684,7 @@
       "quantity": "512",
       "sector": "Utilities",
       "subsector": "Power Exchange",
-      "capCategory": null,
+      "capCategory": "SMALL",
       "createdAt": "2025-08-18T18:05:49.048Z",
       "updatedAt": "2025-08-18T18:05:55.596Z"
     },
@@ -702,7 +702,7 @@
       "quantity": "973",
       "sector": "Financials",
       "subsector": "Bank - Private",
-      "capCategory": null,
+      "capCategory": "SMALL",
       "createdAt": "2025-08-18T18:05:49.048Z",
       "updatedAt": "2025-08-18T18:05:55.596Z"
     },
@@ -720,7 +720,7 @@
       "quantity": "113",
       "sector": "Healthcare",
       "subsector": "Healthcare Services",
-      "capCategory": null,
+      "capCategory": "MID",
       "createdAt": "2025-08-18T18:05:49.048Z",
       "updatedAt": "2025-08-18T18:05:55.596Z"
     },
@@ -738,7 +738,7 @@
       "quantity": "12",
       "sector": "Consumer Discretionary",
       "subsector": "Automobiles - 2 Wheelers",
-      "capCategory": null,
+      "capCategory": "MEGA",
       "createdAt": "2025-08-18T18:05:49.048Z",
       "updatedAt": "2025-08-18T18:05:55.596Z"
     },
@@ -756,7 +756,7 @@
       "quantity": "157",
       "sector": "Consumer Discretionary",
       "subsector": "Jewellery",
-      "capCategory": null,
+      "capCategory": "MID",
       "createdAt": "2025-08-18T18:05:49.048Z",
       "updatedAt": "2025-08-18T18:05:55.596Z"
     },
@@ -774,7 +774,7 @@
       "quantity": "95",
       "sector": "Real Estate",
       "subsector": "Real Estate Development",
-      "capCategory": null,
+      "capCategory": "MID",
       "createdAt": "2025-08-18T18:05:49.048Z",
       "updatedAt": "2025-08-18T18:05:55.596Z"
     },
@@ -792,7 +792,7 @@
       "quantity": "27",
       "sector": "Communication Services",
       "subsector": "Telecom Services",
-      "capCategory": null,
+      "capCategory": "LARGE",
       "createdAt": "2025-08-18T18:05:49.048Z",
       "updatedAt": "2025-08-18T18:05:55.596Z"
     },
@@ -810,7 +810,7 @@
       "quantity": "35",
       "sector": "Industrials",
       "subsector": "Power Equipment & Services",
-      "capCategory": null,
+      "capCategory": "LARGE",
       "createdAt": "2025-08-18T18:05:49.049Z",
       "updatedAt": "2025-08-18T18:05:55.596Z"
     },
@@ -828,7 +828,7 @@
       "quantity": "27",
       "sector": "Materials",
       "subsector": "Metals & Recycling",
-      "capCategory": null,
+      "capCategory": "LARGE",
       "createdAt": "2025-08-18T18:05:49.049Z",
       "updatedAt": "2025-08-18T18:05:55.596Z"
     },
@@ -846,7 +846,7 @@
       "quantity": "50",
       "sector": "Financials",
       "subsector": "Bank - PSU",
-      "capCategory": null,
+      "capCategory": "MID",
       "createdAt": "2025-08-18T18:05:49.049Z",
       "updatedAt": "2025-08-18T18:05:55.596Z"
     },
@@ -864,7 +864,7 @@
       "quantity": "24",
       "sector": "Financials",
       "subsector": "Housing Finance",
-      "capCategory": null,
+      "capCategory": "LARGE",
       "createdAt": "2025-08-18T18:05:49.049Z",
       "updatedAt": "2025-08-18T18:05:55.596Z"
     },
@@ -882,7 +882,7 @@
       "quantity": "30",
       "sector": "Materials",
       "subsector": "Plastics & Recycling",
-      "capCategory": null,
+      "capCategory": "LARGE",
       "createdAt": "2025-08-18T18:05:49.049Z",
       "updatedAt": "2025-08-18T18:05:55.596Z"
     },
@@ -900,7 +900,7 @@
       "quantity": "47",
       "sector": "Financials",
       "subsector": "Consumer Finance - Credit Cards",
-      "capCategory": null,
+      "capCategory": "MID",
       "createdAt": "2025-08-18T18:05:49.049Z",
       "updatedAt": "2025-08-18T18:05:55.596Z"
     },
@@ -918,7 +918,7 @@
       "quantity": "32",
       "sector": "Consumer Discretionary",
       "subsector": "Apparel & Accessories",
-      "capCategory": null,
+      "capCategory": "MID",
       "createdAt": "2025-08-18T18:05:49.049Z",
       "updatedAt": "2025-08-18T18:05:55.596Z"
     },
@@ -936,7 +936,7 @@
       "quantity": "93",
       "sector": "Consumer Staples",
       "subsector": "Beverages - Alcoholic",
-      "capCategory": null,
+      "capCategory": "SMALL",
       "createdAt": "2025-08-18T18:05:49.049Z",
       "updatedAt": "2025-08-18T18:05:55.596Z"
     },
@@ -954,7 +954,7 @@
       "quantity": "10",
       "sector": "Financials",
       "subsector": "Bank - Private",
-      "capCategory": null,
+      "capCategory": "MEGA",
       "createdAt": "2025-08-18T18:05:49.049Z",
       "updatedAt": "2025-08-18T18:05:55.596Z"
     },
@@ -972,7 +972,7 @@
       "quantity": "80",
       "sector": "Financials",
       "subsector": "Bank - Private",
-      "capCategory": null,
+      "capCategory": "SMALL",
       "createdAt": "2025-08-18T18:05:49.049Z",
       "updatedAt": "2025-08-18T18:05:55.596Z"
     },
@@ -990,7 +990,7 @@
       "quantity": "70",
       "sector": "Financials",
       "subsector": "Bank - Private",
-      "capCategory": null,
+      "capCategory": "SMALL",
       "createdAt": "2025-08-18T18:05:49.049Z",
       "updatedAt": "2025-08-18T18:05:55.596Z"
     },
@@ -1008,7 +1008,7 @@
       "quantity": "6",
       "sector": "Financials",
       "subsector": "Financial Services - Diversified",
-      "capCategory": null,
+      "capCategory": "LARGE",
       "createdAt": "2025-08-18T18:05:49.049Z",
       "updatedAt": "2025-08-18T18:05:55.596Z"
     },
@@ -1026,7 +1026,7 @@
       "quantity": "54",
       "sector": "Consumer Discretionary",
       "subsector": "Hotels & Leisure",
-      "capCategory": null,
+      "capCategory": "SMALL",
       "createdAt": "2025-08-18T18:05:49.049Z",
       "updatedAt": "2025-08-18T18:05:55.596Z"
     },
@@ -1044,7 +1044,7 @@
       "quantity": "8",
       "sector": "Financials",
       "subsector": "Microfinance",
-      "capCategory": null,
+      "capCategory": "LARGE",
       "createdAt": "2025-08-18T18:05:49.049Z",
       "updatedAt": "2025-08-18T18:05:55.596Z"
     },
@@ -1062,7 +1062,7 @@
       "quantity": "70",
       "sector": "Consumer Discretionary",
       "subsector": "Hotels & Leisure",
-      "capCategory": null,
+      "capCategory": "SMALL",
       "createdAt": "2025-08-18T18:05:49.049Z",
       "updatedAt": "2025-08-18T18:05:55.596Z"
     },
@@ -1080,7 +1080,7 @@
       "quantity": "60",
       "sector": "Financials",
       "subsector": "Bank - Private",
-      "capCategory": null,
+      "capCategory": "SMALL",
       "createdAt": "2025-08-18T18:05:49.049Z",
       "updatedAt": "2025-08-18T18:05:55.596Z"
     },
@@ -1098,7 +1098,7 @@
       "quantity": "5",
       "sector": "Financials",
       "subsector": "Microfinance",
-      "capCategory": null,
+      "capCategory": "LARGE",
       "createdAt": "2025-08-18T18:05:49.049Z",
       "updatedAt": "2025-08-18T18:05:55.596Z"
     },
@@ -1116,7 +1116,7 @@
       "quantity": "46",
       "sector": "Financials",
       "subsector": "Microfinance",
-      "capCategory": null,
+      "capCategory": "SMALL",
       "createdAt": "2025-08-18T18:05:49.049Z",
       "updatedAt": "2025-08-18T18:05:55.596Z"
     }

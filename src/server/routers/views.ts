@@ -34,13 +34,12 @@ export const viewsRouter = router({
             const accNames = accounts.filter((a) => accIds.has(a.id)).map((a) => a.name);
             const vsRows = byViewStocks.get(v.id) ?? [];
             const stockNames = new Set(vsRows.map((r) => r.stockName.toLowerCase()));
+            // Compute per-account share from underlying stocks (currentValue sum per account / total current in view)
             const totalCurrent = vsRows.reduce((acc, r) => acc + Number(r.currentValue || '0'), 0);
             const perAccount = Array.from(accIds).map((aid) => {
-                const cur = vsRows
-                    .filter((r) => r.accountName && accounts.find((a) => a.id === aid)?.name === r.accountName)
-                    .reduce((acc, r) => acc + Number(r.currentValue || '0'), 0);
-                const pct = totalCurrent ? (cur / totalCurrent) * 100 : 0;
                 const accountName = accounts.find((a) => a.id === aid)?.name ?? '';
+                const cur = vsRows.filter((r) => r.accountName === accountName).reduce((acc, r) => acc + Number(r.currentValue || '0'), 0);
+                const pct = totalCurrent ? (cur / totalCurrent) * 100 : 0;
                 return { accountId: aid, accountName, currentValue: cur, sharePercent: Number(pct.toFixed(2)) };
             });
             return {
@@ -86,20 +85,33 @@ export const viewsRouter = router({
         const inView = viewStocks.filter((r) => r.viewId === input.viewId);
         const names = Array.from(new Set(inView.map((r) => r.stockName))).slice(0, 5);
         const apiKey = process.env.NEWS_API_KEY;
-        if (!apiKey) {
-            return { disabled: true, items: [] as { title: string; url: string; source?: string }[] } as const;
-        }
         const items: { title: string; url: string; source?: string }[] = [];
-        for (const name of names) {
-            try {
-                const url = `https://newsapi.org/v2/everything?q=${encodeURIComponent(name)}&apiKey=${apiKey}&pageSize=3&sortBy=publishedAt`;
-                const res = await fetch(url);
-                if (!res.ok) continue;
-                const data = await res.json();
-                for (const a of data.articles ?? []) {
-                    items.push({ title: a.title, url: a.url, source: a.source?.name });
-                }
-            } catch {}
+        if (apiKey) {
+            for (const name of names) {
+                try {
+                    const url = `https://newsapi.org/v2/everything?q=${encodeURIComponent(name)}&apiKey=${apiKey}&pageSize=3&sortBy=publishedAt`;
+                    const res = await fetch(url);
+                    if (!res.ok) continue;
+                    const data = await res.json();
+                    for (const a of data.articles ?? []) {
+                        items.push({ title: a.title, url: a.url, source: a.source?.name });
+                    }
+                } catch {}
+            }
+        } else {
+            // Fallback: Google News RSS (no key). Parse minimal fields.
+            for (const name of names) {
+                try {
+                    const url = `https://news.google.com/rss/search?q=${encodeURIComponent(name)}&hl=en-IN&gl=IN&ceid=IN:en`;
+                    const res = await fetch(url);
+                    if (!res.ok) continue;
+                    const xml = await res.text();
+                    const matches = Array.from(xml.matchAll(/<item>[\s\S]*?<title><!\[CDATA\[(.*?)\]\]><\/title>[\s\S]*?<link>(.*?)<\/link>/g));
+                    for (const m of matches.slice(0, 3)) {
+                        items.push({ title: m[1], url: m[2] });
+                    }
+                } catch {}
+            }
         }
         return { disabled: false, items } as const;
     }),

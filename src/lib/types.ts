@@ -2,7 +2,7 @@ export type Uuid = string;
 
 export type DecimalString = string; // Always serialize decimals as strings in JSON
 
-export type MarketCapCategory = 'SMALL' | 'MID' | 'LARGE';
+export type MarketCapCategory = 'SMALL' | 'MID' | 'LARGE' | 'MEGA';
 
 export interface Account {
 	id: Uuid;
