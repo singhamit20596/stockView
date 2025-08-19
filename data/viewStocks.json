@@ -1,7 +1,7 @@
 {
   "meta": {
     "version": 1,
-    "updatedAt": "2025-08-18T18:07:06.829Z"
+    "updatedAt": "2025-08-19T07:57:57.430Z"
   },
   "rows": [
     {
@@ -16,8 +16,8 @@
       "pnl": "27052.534",
       "pnlPercent": "11.046559151723324354",
       "quantity": "972",
-      "sector": null,
-      "subsector": null,
+      "sector": "Financials",
+      "subsector": "Mutual Fund - Index",
       "updatedAt": "2025-08-18T18:07:06.825Z"
     },
     {
@@ -32,8 +32,8 @@
       "pnl": "5921.979",
       "pnlPercent": "2.1754857665345035397",
       "quantity": "3979",
-      "sector": null,
-      "subsector": null,
+      "sector": "Financials",
+      "subsector": "Bank - Private",
       "updatedAt": "2025-08-18T18:07:06.825Z"
     },
     {
@@ -48,8 +48,8 @@
       "pnl": "55908.833",
       "pnlPercent": "55.979260507644667757",
       "quantity": "473",
-      "sector": null,
-      "subsector": null,
+      "sector": "Financials",
+      "subsector": "NBFC - Diversified",
       "updatedAt": "2025-08-18T18:07:06.825Z"
     },
     {
@@ -64,8 +64,8 @@
       "pnl": "15343.016",
       "pnlPercent": "30.971277465456857659",
       "quantity": "10",
-      "sector": null,
-      "subsector": null,
+      "sector": "Healthcare",
+      "subsector": "Hospitals",
       "updatedAt": "2025-08-18T18:07:06.825Z"
     },
     {
@@ -80,8 +80,8 @@
       "pnl": "12419.426700000000002",
       "pnlPercent": "14.405857608575244795",
       "quantity": "59",
-      "sector": null,
-      "subsector": null,
+      "sector": "Financials",
+      "subsector": "Housing Finance",
       "updatedAt": "2025-08-18T18:07:06.825Z"
     },
     {
@@ -96,8 +96,8 @@
       "pnl": "-9333.8",
       "pnlPercent": "-14.100503362801911933",
       "quantity": "140",
-      "sector": null,
-      "subsector": null,
+      "sector": "Industrials",
+      "subsector": "Engineering - Industrial",
       "updatedAt": "2025-08-18T18:07:06.825Z"
     },
     {
@@ -112,8 +112,8 @@
       "pnl": "18090.359",
       "pnlPercent": "18.165527954676451155",
       "quantity": "130",
-      "sector": null,
-      "subsector": null,
+      "sector": "Financials",
+      "subsector": "NBFC - Consumer",
       "updatedAt": "2025-08-18T18:07:06.825Z"
     },
     {
@@ -128,8 +128,8 @@
       "pnl": "2740.434",
       "pnlPercent": "5.429139162063855584",
       "quantity": "34",
-      "sector": null,
-      "subsector": null,
+      "sector": "Healthcare",
+      "subsector": "Pharmaceuticals",
       "updatedAt": "2025-08-18T18:07:06.825Z"
     },
     {
@@ -144,8 +144,8 @@
       "pnl": "26628.8",
       "pnlPercent": "121.95354290320216897",
       "quantity": "40",
-      "sector": null,
-      "subsector": null,
+      "sector": "Healthcare",
+      "subsector": "Hospitals",
       "updatedAt": "2025-08-18T18:07:06.825Z"
     },
     {
@@ -160,8 +160,8 @@
       "pnl": "31502.03",
       "pnlPercent": "0",
       "quantity": "20",
-      "sector": null,
-      "subsector": null,
+      "sector": "Financials",
+      "subsector": "Capital Markets",
       "updatedAt": "2025-08-18T18:07:06.825Z"
     },
     {
@@ -176,8 +176,8 @@
       "pnl": "10382.875",
       "pnlPercent": "49.348851578559631174",
       "quantity": "25",
-      "sector": null,
-      "subsector": null,
+      "sector": "Financials",
+      "subsector": "Housing Finance",
       "updatedAt": "2025-08-18T18:07:06.825Z"
     },
     {
@@ -192,8 +192,8 @@
       "pnl": "7345.8264",
       "pnlPercent": "50.096337820696427841",
       "quantity": "12",
-      "sector": null,
-      "subsector": null,
+      "sector": "Healthcare",
+      "subsector": "Hospitals",
       "updatedAt": "2025-08-18T18:07:06.825Z"
     },
     {
@@ -208,8 +208,8 @@
       "pnl": "38.932400000000001",
       "pnlPercent": "0.054517427977857179866",
       "quantity": "66",
-      "sector": null,
-      "subsector": null,
+      "sector": "Financials",
+      "subsector": "Bank - Private",
       "updatedAt": "2025-08-18T18:07:06.825Z"
     },
     {
@@ -224,8 +224,8 @@
       "pnl": "7040.1334",
       "pnlPercent": "9.8182341794147885466",
       "quantity": "97",
-      "sector": null,
-      "subsector": null,
+      "sector": "Financials",
+      "subsector": "Consumer Finance - Credit Cards",
       "updatedAt": "2025-08-18T18:07:06.825Z"
     },
     {
@@ -240,8 +240,8 @@
       "pnl": "5903.65",
       "pnlPercent": "28.759012081060015588",
       "quantity": "135",
-      "sector": null,
-      "subsector": null,
+      "sector": "Financials",
+      "subsector": "Bank - Private",
       "updatedAt": "2025-08-18T18:07:06.825Z"
     },
     {
@@ -256,8 +256,8 @@
       "pnl": "1069.8138",
       "pnlPercent": "9.7801711370742142505",
       "quantity": "6",
-      "sector": null,
-      "subsector": null,
+      "sector": "Financials",
+      "subsector": "Bank - Private",
       "updatedAt": "2025-08-18T18:07:06.825Z"
     },
     {
@@ -272,8 +272,8 @@
       "pnl": "13341.664",
       "pnlPercent": "33.667265569799131927",
       "quantity": "64",
-      "sector": null,
-      "subsector": null,
+      "sector": "Financials",
+      "subsector": "Bank - PSU",
       "updatedAt": "2025-08-18T18:07:06.825Z"
     },
     {
@@ -288,8 +288,8 @@
       "pnl": "32529.9",
       "pnlPercent": "33.123101627038634913",
       "quantity": "19",
-      "sector": null,
-      "subsector": null,
+      "sector": "Financials",
+      "subsector": "Capital Markets",
       "updatedAt": "2025-08-18T18:07:06.825Z"
     },
     {
@@ -304,8 +304,8 @@
       "pnl": "19029.006400000000002",
       "pnlPercent": "25.324651435149603578",
       "quantity": "47",
-      "sector": null,
-      "subsector": null,
+      "sector": "Financials",
+      "subsector": "Bank - Private",
       "updatedAt": "2025-08-18T18:07:06.825Z"
     },
     {
@@ -320,8 +320,8 @@
       "pnl": "7355.7188",
       "pnlPercent": "12.277872428429335355",
       "quantity": "59",
-      "sector": null,
-      "subsector": null,
+      "sector": "Materials",
+      "subsector": "Paints & Coatings",
       "updatedAt": "2025-08-18T18:07:06.825Z"
     },
     {
@@ -336,8 +336,8 @@
       "pnl": "22358.4672",
       "pnlPercent": "42.14952267483071169",
       "quantity": "56",
-      "sector": null,
-      "subsector": null,
+      "sector": "Financials",
+      "subsector": "Microfinance",
       "updatedAt": "2025-08-18T18:07:06.825Z"
     },
     {
@@ -352,8 +352,8 @@
       "pnl": "-7863.72",
       "pnlPercent": "-12.083805341773038878",
       "quantity": "19",
-      "sector": null,
-      "subsector": null,
+      "sector": "Information Technology",
+      "subsector": "IT Services",
       "updatedAt": "2025-08-18T18:07:06.825Z"
     },
     {
@@ -368,8 +368,8 @@
       "pnl": "22704.287",
       "pnlPercent": "17.152660373911786095",
       "quantity": "3597",
-      "sector": null,
-      "subsector": null,
+      "sector": "Financials",
+      "subsector": "Small Finance Bank",
       "updatedAt": "2025-08-18T18:07:06.825Z"
     },
     {
@@ -384,8 +384,8 @@
       "pnl": "9491.661",
       "pnlPercent": "78.214524095581364304",
       "quantity": "81",
-      "sector": null,
-      "subsector": null,
+      "sector": "Financials",
+      "subsector": "NBFC - Gold Loans",
       "updatedAt": "2025-08-18T18:07:06.825Z"
     },
     {
@@ -400,8 +400,8 @@
       "pnl": "-62.76",
       "pnlPercent": "-0.31005530702935298927",
       "quantity": "101",
-      "sector": null,
-      "subsector": null,
+      "sector": "Consumer Discretionary",
+      "subsector": "Hotels & Leisure",
       "updatedAt": "2025-08-18T18:07:06.825Z"
     },
     {
@@ -416,8 +416,8 @@
       "pnl": "-5687.55",
       "pnlPercent": "-27.680077089857865575",
       "quantity": "11",
-      "sector": null,
-      "subsector": null,
+      "sector": "Financials",
+      "subsector": "Microfinance",
       "updatedAt": "2025-08-18T18:07:06.825Z"
     },
     {
@@ -432,8 +432,8 @@
       "pnl": "-10466.4676",
       "pnlPercent": "-24.537285818241834086",
       "quantity": "42",
-      "sector": null,
-      "subsector": null,
+      "sector": "Consumer Discretionary",
+      "subsector": "Apparel & Accessories",
       "updatedAt": "2025-08-18T18:07:06.825Z"
     },
     {
@@ -448,8 +448,8 @@
       "pnl": "-22424.49",
       "pnlPercent": "-43.41041106964524031",
       "quantity": "117",
-      "sector": null,
-      "subsector": null,
+      "sector": "Consumer Staples",
+      "subsector": "Beverages - Alcoholic",
       "updatedAt": "2025-08-18T18:07:06.825Z"
     },
     {
@@ -464,8 +464,8 @@
       "pnl": "11812.4741",
       "pnlPercent": "11.978228830557251243",
       "quantity": "43",
-      "sector": null,
-      "subsector": null,
+      "sector": "Consumer Staples",
+      "subsector": "FMCG - Personal & Home Care",
       "updatedAt": "2025-08-18T18:07:06.825Z"
     },
     {
@@ -480,8 +480,8 @@
       "pnl": "4923.2088",
       "pnlPercent": "5.580388876420541489",
       "quantity": "36",
-      "sector": null,
-      "subsector": null,
+      "sector": "Materials",
+      "subsector": "Paints & Coatings",
       "updatedAt": "2025-08-18T18:07:06.825Z"
     },
     {
@@ -496,8 +496,8 @@
       "pnl": "-14182.4",
       "pnlPercent": "-16.4187066563926264",
       "quantity": "512",
-      "sector": null,
-      "subsector": null,
+      "sector": "Utilities",
+      "subsector": "Power Exchange",
       "updatedAt": "2025-08-18T18:07:06.825Z"
     },
     {
@@ -512,8 +512,8 @@
       "pnl": "9958.69",
       "pnlPercent": "19.841502127563770628",
       "quantity": "113",
-      "sector": null,
-      "subsector": null,
+      "sector": "Healthcare",
+      "subsector": "Healthcare Services",
       "updatedAt": "2025-08-18T18:07:06.825Z"
     },
     {
@@ -528,8 +528,8 @@
       "pnl": "6882.033",
       "pnlPercent": "13.003123228658882213",
       "quantity": "12",
-      "sector": null,
-      "subsector": null,
+      "sector": "Consumer Discretionary",
+      "subsector": "Automobiles - 2 Wheelers",
       "updatedAt": "2025-08-18T18:07:06.825Z"
     },
     {
@@ -544,8 +544,8 @@
       "pnl": "9465.7969",
       "pnlPercent": "18.935240727364090324",
       "quantity": "157",
-      "sector": null,
-      "subsector": null,
+      "sector": "Consumer Discretionary",
+      "subsector": "Jewellery",
       "updatedAt": "2025-08-18T18:07:06.825Z"
     },
     {
@@ -560,8 +560,8 @@
       "pnl": "1311.665",
       "pnlPercent": "2.6070619335347432024",
       "quantity": "95",
-      "sector": null,
-      "subsector": null,
+      "sector": "Real Estate",
+      "subsector": "Real Estate Development",
       "updatedAt": "2025-08-18T18:07:06.825Z"
     },
     {
@@ -576,8 +576,8 @@
       "pnl": "932.0886",
       "pnlPercent": "1.8582286384824898535",
       "quantity": "27",
-      "sector": null,
-      "subsector": null,
+      "sector": "Communication Services",
+      "subsector": "Telecom Services",
       "updatedAt": "2025-08-18T18:07:06.825Z"
     },
     {
@@ -592,8 +592,8 @@
       "pnl": "-2048.2",
       "pnlPercent": "-3.9041443172417473915",
       "quantity": "35",
-      "sector": null,
-      "subsector": null,
+      "sector": "Industrials",
+      "subsector": "Power Equipment & Services",
       "updatedAt": "2025-08-18T18:07:06.825Z"
     },
     {
@@ -608,8 +608,8 @@
       "pnl": "-2870.37",
       "pnlPercent": "-5.755477475624083027",
       "quantity": "27",
-      "sector": null,
-      "subsector": null,
+      "sector": "Materials",
+      "subsector": "Metals & Recycling",
       "updatedAt": "2025-08-18T18:07:06.825Z"
     },
     {
@@ -624,8 +624,8 @@
       "pnl": "-6228",
       "pnlPercent": "-13.535893590663102302",
       "quantity": "30",
-      "sector": null,
-      "subsector": null,
+      "sector": "Materials",
+      "subsector": "Plastics & Recycling",
       "updatedAt": "2025-08-18T18:07:06.825Z"
     },
     {
@@ -640,8 +640,8 @@
       "pnl": "6388.16",
       "pnlPercent": "59.591044776119402985",
       "quantity": "80",
-      "sector": null,
-      "subsector": null,
+      "sector": "Financials",
+      "subsector": "Bank - Private",
       "updatedAt": "2025-08-18T18:07:06.825Z"
     },
     {
@@ -656,8 +656,8 @@
       "pnl": "1885.2408",
       "pnlPercent": "18.710581790031560769",
       "quantity": "6",
-      "sector": null,
-      "subsector": null,
+      "sector": "Financials",
+      "subsector": "Financial Services - Diversified",
       "updatedAt": "2025-08-18T18:07:06.825Z"
     },
     {
@@ -672,8 +672,8 @@
       "pnl": "202.09",
       "pnlPercent": "1.9233844103930712858",
       "quantity": "70",
-      "sector": null,
-      "subsector": null,
+      "sector": "Consumer Discretionary",
+      "subsector": "Hotels & Leisure",
       "updatedAt": "2025-08-18T18:07:06.825Z"
     },
     {
@@ -688,8 +688,8 @@
       "pnl": "-2894.82",
       "pnlPercent": "-22.398792943361188487",
       "quantity": "60",
-      "sector": null,
-      "subsector": null,
+      "sector": "Financials",
+      "subsector": "Bank - Private",
       "updatedAt": "2025-08-18T18:07:06.825Z"
     },
     {

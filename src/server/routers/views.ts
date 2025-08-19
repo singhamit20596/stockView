@@ -9,6 +9,35 @@ export const viewsRouter = router({
     list: publicProcedure.query(async () => {
         return listRows<View>(tables.views);
     }),
+    stockBreakdown: publicProcedure.input(z.object({ viewId: z.string().uuid(), stockName: z.string().min(1) })).query(async ({ input }) => {
+        const [viewAccounts, accounts, stocks] = await Promise.all([
+            listRows<ViewAccount>(tables.viewAccounts),
+            listRows<Account>(tables.accounts),
+            listRows<Stock>(tables.stocks),
+        ]);
+        const linked = viewAccounts.filter((va) => va.viewId === input.viewId).map((va) => va.accountId);
+        const linkedSet = new Set(linked);
+        const accountList = accounts.filter((a) => linkedSet.has(a.id));
+        const nameLc = input.stockName.toLowerCase();
+        const stockRows = stocks.filter((s) => linkedSet.has(s.accountId) && s.stockName.toLowerCase() === nameLc);
+        const totalCurrent = stockRows.reduce((acc, s) => acc + Number(s.currentValue || '0'), 0);
+        const result = accountList.map((a) => {
+            const row = stockRows.find((s) => s.accountId === a.id);
+            const quantity = row?.quantity ?? '0';
+            const investedValue = row?.investedValue ?? '0';
+            const currentValue = row?.currentValue ?? '0';
+            const sharePct = totalCurrent ? (Number(currentValue) / totalCurrent) * 100 : 0;
+            return {
+                accountId: a.id,
+                accountName: a.name,
+                quantity,
+                investedValue,
+                currentValue,
+                sharePercent: sharePct.toFixed(2),
+            };
+        });
+        return result;
+    }),
     uniqueStockCount: publicProcedure.query(async () => {
         const rows = await listRows<ViewStock>(tables.viewStocks);
         const byView = new Map<string, Set<string>>();

@@ -67,8 +67,7 @@ export default function ViewDetailPage() {
 }
 
 function StockSplitModal({ viewId, stockName, onClose }: { viewId: string; stockName: string; onClose: () => void }) {
-  const rows = trpc.views.listStocks.useQuery({ viewId }).data ?? [];
-  const parts = rows.filter((r) => r.stockName.toLowerCase() === stockName.toLowerCase());
+  const parts = trpc.views.stockBreakdown.useQuery({ viewId, stockName }).data ?? [];
   return (
     <div className="fixed inset-0 bg-black/30 flex items-center justify-center">
       <div className="bg-white rounded shadow p-4 w-full max-w-lg">
@@ -80,26 +79,22 @@ function StockSplitModal({ viewId, stockName, onClose }: { viewId: string; stock
           <thead>
             <tr className="text-left text-gray-600">
               <th className="py-1 pr-2">Account</th>
-              <th className="py-1 pr-2">Qty</th>
-              <th className="py-1 pr-2">Avg</th>
-              <th className="py-1 pr-2">Mkt</th>
-              <th className="py-1 pr-2">Current %</th>
+              <th className="py-1 pr-2">Quantity</th>
+              <th className="py-1 pr-2">Share %</th>
+              <th className="py-1 pr-2">Invested Value</th>
+              <th className="py-1 pr-2">Current Value</th>
             </tr>
           </thead>
           <tbody>
-            {parts.map((p) => {
-              const totalCurrent = parts.reduce((acc, x) => acc + Number(x.currentValue || '0'), 0);
-              const share = totalCurrent ? (Number(p.currentValue || '0') / totalCurrent) * 100 : 0;
-              return (
-                <tr key={p.id} className="border-t">
-                  <td className="py-2 pr-2">{p.accountName}</td>
-                  <td className="py-2 pr-2">{p.quantity}</td>
-                  <td className="py-2 pr-2">₹{p.avgPrice}</td>
-                  <td className="py-2 pr-2">₹{p.marketPrice}</td>
-                  <td className="py-2 pr-2">{share.toFixed(2)}%</td>
-                </tr>
-              );
-            })}
+            {parts.map((p) => (
+              <tr key={p.accountId} className="border-t">
+                <td className="py-2 pr-2">{p.accountName}</td>
+                <td className="py-2 pr-2">{p.quantity}</td>
+                <td className="py-2 pr-2">{p.sharePercent}%</td>
+                <td className="py-2 pr-2">₹{p.investedValue}</td>
+                <td className="py-2 pr-2">₹{p.currentValue}</td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>

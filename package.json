@@ -6,7 +6,9 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "backfill:sectors": "node scripts/backfillSectors.mjs",
+    "backfill:view-sectors": "node scripts/backfillViewSectors.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",
