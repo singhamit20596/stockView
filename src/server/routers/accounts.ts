@@ -9,6 +9,14 @@ export const accountsRouter = router({
 	list: publicProcedure.query(async () => {
 		return listRows<Account>(tables.accounts);
 	}),
+	stocksCountByAccount: publicProcedure.query(async () => {
+		const rows = await listRows<Stock>(tables.stocks);
+		const map = new Map<string, number>();
+		for (const s of rows) {
+			map.set(s.accountId, (map.get(s.accountId) ?? 0) + 1);
+		}
+		return Object.fromEntries(map);
+	}),
 	getById: publicProcedure.input(z.object({ accountId: z.string().uuid() })).query(async ({ input }) => {
 		const rows = await listRows<Account>(tables.accounts);
 		return rows.find((a) => a.id === input.accountId) ?? null;

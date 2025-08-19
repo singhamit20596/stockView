@@ -5,6 +5,7 @@ import { listRows, replaceRows, tables } from '@/lib/filedb';
 import type { Account, ScrapeSession, Stock, View, ViewAccount, ViewStock } from '@/lib/types';
 import { generateId, nowIso } from '@/lib/ids';
 import { aggregateStocksForView, summarizeStocks } from '@/lib/compute';
+import { inferSectorSubsector } from '@/lib/sectorMap';
 
 // Ensure handler is registered at import time
 registerScrapeHandler();
@@ -55,6 +56,7 @@ export const scrapeRouter = router({
 		const upsertedForAccount: Stock[] = session.preview.mapped.map((m) => {
 			const prior = byName.get(m.stockName.toLowerCase());
 			const createdAt = prior?.createdAt ?? m.createdAt ?? now;
+			const inferred = inferSectorSubsector(m.stockName);
 			return {
 				id: prior?.id ?? generateId(),
 				accountId,
@@ -67,8 +69,8 @@ export const scrapeRouter = router({
 				pnl: m.pnl,
 				pnlPercent: m.pnlPercent,
 				quantity: m.quantity,
-				sector: m.sector ?? null,
-				subsector: m.subsector ?? null,
+				sector: m.sector ?? inferred?.sector ?? null,
+				subsector: m.subsector ?? inferred?.subsector ?? null,
 				capCategory: m.capCategory ?? null,
 				createdAt,
 				updatedAt: now,

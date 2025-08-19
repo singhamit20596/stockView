@@ -9,6 +9,15 @@ export const viewsRouter = router({
     list: publicProcedure.query(async () => {
         return listRows<View>(tables.views);
     }),
+    uniqueStockCount: publicProcedure.query(async () => {
+        const rows = await listRows<ViewStock>(tables.viewStocks);
+        const byView = new Map<string, Set<string>>();
+        for (const r of rows) {
+            if (!byView.has(r.viewId)) byView.set(r.viewId, new Set());
+            byView.get(r.viewId)!.add(r.stockName.toLowerCase());
+        }
+        return Object.fromEntries(Array.from(byView.entries()).map(([k, set]) => [k, set.size]));
+    }),
     getById: publicProcedure.input(z.object({ viewId: z.string().uuid() })).query(async ({ input }) => {
         const rows = await listRows<View>(tables.views);
         return rows.find((v) => v.id === input.viewId) ?? null;

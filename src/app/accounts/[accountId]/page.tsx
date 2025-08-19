@@ -14,7 +14,7 @@ export default function AccountDetailPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">{account.name}</h1>
         <div className="text-sm text-right">
-          <div>Updated: {account.updatedAt}</div>
+          <div>Updated: {new Date(account.updatedAt).toLocaleDateString('en-GB')}</div>
           <div>Invested: ₹{account.investedValue} | Current: ₹{account.currentValue} | PnL: ₹{account.pnl} ({account.pnlPercent}%)</div>
         </div>
       </div>

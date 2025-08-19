@@ -113,7 +113,8 @@ export default function AddAccountPage() {
 								if (!jobId) return;
 								await confirm.mutateAsync({ jobId });
 								alert('Holdings saved to Accounts and Stocks');
-								// Status query will pick up 100% on next refetch
+								window.location.href = '/accounts';
+								// navigate to accounts after confirmation
 							}}
 						>
 							{confirm.isPending ? 'Saving…' : 'Confirm & Save'}

@@ -5,6 +5,7 @@ import { useState } from 'react';
 
 export default function ViewsPage() {
     const { data: views, isLoading } = trpc.views.list.useQuery();
+    const { data: uniqueCounts } = trpc.views.uniqueStockCount.useQuery();
     const del = trpc.views.delete.useMutation();
     const [busyId, setBusyId] = useState<string | null>(null);
     return (
@@ -24,12 +25,13 @@ export default function ViewsPage() {
                             <div className="flex items-center justify-between">
                                 <div>
                                     <div className="font-medium"><Link href={`/views/${v.id}`} className="underline">{v.name}</Link></div>
-                                    <div className="text-xs text-gray-500">Updated: {v.updatedAt}</div>
+                                    <div className="text-xs text-gray-500">Updated: {new Date(v.updatedAt).toLocaleDateString('en-GB')}</div>
                                 </div>
                                 <div className="text-right text-sm">
                                     <div>Invested: ₹{v.viewSummary.totalInvestedValue}</div>
                                     <div>Current: ₹{v.viewSummary.totalCurrentValue}</div>
                                     <div>PnL: ₹{v.viewSummary.totalPnl} ({v.viewSummary.totalPnlPercent}%)</div>
+                                    <div className="text-xs text-gray-500">Unique stocks: {uniqueCounts?.[v.id] ?? 0}</div>
                                 </div>
                             </div>
                             <div className="mt-2">
