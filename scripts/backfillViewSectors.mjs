@@ -22,7 +22,7 @@ function latestSectorForName(stocksForName, allowedAccountIds) {
   if (rows.length === 0) return { sector: null, subsector: null };
   rows.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
   const latest = rows[0];
-  return { sector: latest.sector ?? null, subsector: latest.subsector ?? null };
+  return { sector: latest.sector ?? null, subsector: latest.subsector ?? null, capCategory: latest.capCategory ?? null };
 }
 
 function main() {
@@ -44,14 +44,15 @@ function main() {
     const key = String(vs.stockName || '').toLowerCase();
     const set = accountsByView.get(vs.viewId) || null;
     const arr = byName.get(key) || [];
-    const { sector, subsector } = latestSectorForName(arr, set);
+    const { sector, subsector, capCategory } = latestSectorForName(arr, set);
     const beforeSector = vs.sector ?? null;
     const beforeSub = vs.subsector ?? null;
     const nextSector = beforeSector ?? sector ?? null;
     const nextSub = beforeSub ?? subsector ?? null;
-    if (nextSector !== beforeSector || nextSub !== beforeSub) {
+    if (nextSector !== beforeSector || nextSub !== beforeSub || (vs.capCategory ?? null) !== (capCategory ?? null)) {
       vs.sector = nextSector;
       vs.subsector = nextSub;
+      vs.capCategory = capCategory ?? null;
       updated++;
     }
   }

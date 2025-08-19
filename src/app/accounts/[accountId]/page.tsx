@@ -34,6 +34,7 @@ export default function AccountDetailPage() {
                 <th className="py-1 pr-2">PnL %</th>
                 <th className="py-1 pr-2">Sector</th>
                 <th className="py-1 pr-2">Subsector</th>
+                <th className="py-1 pr-2">M.Cap</th>
               </tr>
             </thead>
             <tbody>
@@ -49,6 +50,7 @@ export default function AccountDetailPage() {
                   <td className="py-2 pr-2">{s.pnlPercent}%</td>
                   <td className="py-2 pr-2">{s.sector ?? '-'}</td>
                   <td className="py-2 pr-2">{s.subsector ?? '-'}</td>
+                  <td className="py-2 pr-2">{s.capCategory ?? '-'}</td>
                 </tr>
               ))}
             </tbody>

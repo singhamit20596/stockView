@@ -70,6 +70,7 @@ export interface ViewStock {
 	quantity: DecimalString;
 	sector?: string | null;
 	subsector?: string | null;
+	capCategory?: MarketCapCategory | null;
 	updatedAt: string;
 }
 

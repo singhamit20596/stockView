@@ -65,6 +65,7 @@ export function aggregateStocksForView(input: { stocks: Stock[]; pickLatestByUpd
             quantity: toString(totalQty),
             sector: latest.sector ?? null,
             subsector: latest.subsector ?? null,
+            capCategory: latest.capCategory ?? null,
         });
     }
     return result;
