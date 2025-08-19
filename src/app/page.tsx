@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 export default function Home() {
   return (
     <div className="min-h-screen">
@@ -8,18 +10,18 @@ export default function Home() {
             All your investment accounts and analytics in one privacy‑first dashboard.
           </p>
           <div className="mt-8 flex gap-4 justify-center">
-            <a 
+            <Link 
               href="/add-account" 
               className="px-6 py-3 bg-white text-[#003135] rounded-lg font-semibold hover:bg-zinc-50 transition-colors shadow-lg"
             >
               Add Account
-            </a>
-            <a 
+            </Link>
+            <Link 
               href="/stock-view" 
               className="px-6 py-3 bg-white/10 backdrop-blur-sm rounded-lg font-semibold hover:bg-white/20 transition-colors border border-white/20"
             >
               Open Analytics
-            </a>
+            </Link>
           </div>
         </div>
       </section>
