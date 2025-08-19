@@ -10,11 +10,12 @@ export const viewsRouter = router({
         return listRows<View>(tables.views);
     }),
     viewCardSummaries: publicProcedure.query(async () => {
-        const [views, viewAccounts, viewStocks, accounts] = await Promise.all([
+        const [views, viewAccounts, viewStocks, accounts, stocks] = await Promise.all([
             listRows<View>(tables.views),
             listRows<ViewAccount>(tables.viewAccounts),
             listRows<ViewStock>(tables.viewStocks),
             listRows<Account>(tables.accounts),
+            listRows<Stock>(tables.stocks),
         ]);
         const byViewAccounts = new Map<string, ViewAccount[]>();
         for (const va of viewAccounts) {
@@ -34,11 +35,12 @@ export const viewsRouter = router({
             const accNames = accounts.filter((a) => accIds.has(a.id)).map((a) => a.name);
             const vsRows = byViewStocks.get(v.id) ?? [];
             const stockNames = new Set(vsRows.map((r) => r.stockName.toLowerCase()));
-            // Compute per-account share from underlying stocks (currentValue sum per account / total current in view)
-            const totalCurrent = vsRows.reduce((acc, r) => acc + Number(r.currentValue || '0'), 0);
+            // Compute per-account share from underlying stocks (sum currentValue for stocks where accountId in view)
+            const stocksInView = stocks.filter((s) => accIds.has(s.accountId));
+            const totalCurrent = stocksInView.reduce((acc, s) => acc + Number(s.currentValue || '0'), 0);
             const perAccount = Array.from(accIds).map((aid) => {
                 const accountName = accounts.find((a) => a.id === aid)?.name ?? '';
-                const cur = vsRows.filter((r) => r.accountName === accountName).reduce((acc, r) => acc + Number(r.currentValue || '0'), 0);
+                const cur = stocksInView.filter((s) => s.accountId === aid).reduce((acc, s) => acc + Number(s.currentValue || '0'), 0);
                 const pct = totalCurrent ? (cur / totalCurrent) * 100 : 0;
                 return { accountId: aid, accountName, currentValue: cur, sharePercent: Number(pct.toFixed(2)) };
             });
