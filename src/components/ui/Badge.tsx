@@ -15,15 +15,15 @@ export function Badge({
   subsector?: string;
 }) {
   const tones: Record<Tone, string> = {
-    neutral: 'bg-zinc-100 text-zinc-800',
-    positive: 'bg-green-100 text-green-700',
-    negative: 'bg-red-100 text-red-700',
-    warn: 'bg-amber-100 text-amber-800',
-    accent: 'bg-indigo-100 text-indigo-700',
+    neutral: 'bg-[#F1F5F9] dark:bg-[#024950] text-[#024950] dark:text-white',
+    positive: 'bg-[#0FA4AF]/10 text-[#0FA4AF] dark:bg-[#0FA4AF]/20',
+    negative: 'bg-[#964734]/10 text-[#964734] dark:bg-[#964734]/20',
+    warn: 'bg-[#964734]/10 text-[#964734] dark:bg-[#964734]/20',
+    accent: 'bg-[#0FA4AF]/10 text-[#0FA4AF] dark:bg-[#0FA4AF]/20',
     sector: 'text-white',
     subsector: 'text-white',
-    secondary: 'bg-zinc-100 text-zinc-800',
-    outline: 'bg-transparent border border-zinc-300 text-zinc-700',
+    secondary: 'bg-[#F1F5F9] dark:bg-[#024950] text-[#024950] dark:text-white',
+    outline: 'bg-transparent border border-[#CBD5E1] dark:border-[#024950] text-[#64748B] dark:text-[#AFDDE5]',
   };
 
   let backgroundColor = '';

@@ -2,7 +2,31 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #003135;
+  
+  /* Cool and Collected Theme Colors */
+  --color-primary-dark: #003135;
+  --color-primary-medium: #024950;
+  --color-primary-bright: #0FA4AF;
+  --color-primary-light: #AFDDE5;
+  --color-accent-warm: #964734;
+  
+  /* Text Colors */
+  --color-text-primary: #003135;
+  --color-text-secondary: #024950;
+  --color-text-tertiary: #64748B;
+  --color-text-muted: #94A3B8;
+  
+  /* Background Colors */
+  --color-bg-primary: #FFFFFF;
+  --color-bg-secondary: #F8FAFC;
+  --color-bg-tertiary: #F1F5F9;
+  
+  /* Border Colors */
+  --color-border-light: #E2E8F0;
+  --color-border-medium: #CBD5E1;
+  --color-border-dark: #024950;
+  --color-border-accent: #0FA4AF;
 }
 
 @theme inline {
@@ -12,12 +36,7 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+/* Remove the automatic dark mode media query to prevent unwanted dark mode styles */
 
 body {
   background: var(--background);
@@ -27,8 +46,16 @@ body {
 
 /* Dark mode styles */
 .dark {
-  --background: #0a0a0a;
-  --foreground: #ededed;
+  --background: #003135;
+  --foreground: #ffffff;
+  
+  /* Dark mode color overrides */
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #AFDDE5;
+  --color-text-tertiary: #CBD5E1;
+  --color-bg-primary: #003135;
+  --color-bg-secondary: #024950;
+  --color-bg-tertiary: #0FA4AF;
 }
 
 /* Custom scrollbar */

@@ -14,13 +14,13 @@ export default function ViewsPage() {
     return (
         <div className="max-w-6xl mx-auto p-6 space-y-6">
             <div>
-                <h1 className="text-2xl font-semibold text-zinc-900">My Views</h1>
-                <p className="text-sm text-zinc-600 mt-1">Manage your portfolio views and analytics</p>
+                <h1 className="text-2xl font-semibold text-[#964734]">My Views</h1>
+                <p className="text-sm text-[#964734] mt-1">Manage your portfolio views and analytics</p>
             </div>
             {isLoading ? (
-                <p className="text-sm text-gray-500">Loading...</p>
+                <p className="text-sm text-[#964734]">Loading...</p>
             ) : !views || views.length === 0 ? (
-                <p className="text-sm text-gray-500">No views yet.</p>
+                <p className="text-sm text-[#964734]">No views yet.</p>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {views.map((v) => (
@@ -28,12 +28,12 @@ export default function ViewsPage() {
                             <CardBody className="p-6">
                                 <div className="flex items-start justify-between mb-4">
                                     <div>
-                                        <h3 className="text-lg font-semibold text-zinc-900">
-                                            <Link href={`/views/${v.id}`} className="hover:text-indigo-600 transition-colors">
+                                        <h3 className="text-lg font-semibold text-[#964734]">
+                                            <Link href={`/views/${v.id}`} className="hover:text-[#0FA4AF] transition-colors">
                                                 {v.name}
                                             </Link>
                                         </h3>
-                                        <p className="text-sm text-zinc-500">Portfolio view</p>
+                                        <p className="text-sm text-[#964734]">Portfolio view</p>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <button 
@@ -59,29 +59,29 @@ export default function ViewsPage() {
                                 
                                 <div className="grid grid-cols-2 gap-3 mb-4">
                                     <div className="bg-zinc-50 rounded-lg p-3">
-                                        <div className="text-xs text-zinc-500 mb-1">INVESTED</div>
-                                        <div className="text-lg font-semibold text-zinc-900">{formatCurrency(v.viewSummary.totalInvestedValue)}</div>
+                                        <div className="text-xs text-[#964734] mb-1">INVESTED</div>
+                                        <div className="text-lg font-semibold text-[#964734]">{formatCurrency(v.viewSummary.totalInvestedValue)}</div>
                                     </div>
                                     <div className="bg-zinc-50 rounded-lg p-3">
-                                        <div className="text-xs text-zinc-500 mb-1">CURRENT</div>
-                                        <div className="text-lg font-semibold text-zinc-900">{formatCurrency(v.viewSummary.totalCurrentValue)}</div>
+                                        <div className="text-xs text-[#964734] mb-1">CURRENT</div>
+                                        <div className="text-lg font-semibold text-[#964734]">{formatCurrency(v.viewSummary.totalCurrentValue)}</div>
                                     </div>
                                     <div className="bg-zinc-50 rounded-lg p-3">
-                                        <div className="text-xs text-zinc-500 mb-1">P&L</div>
-                                        <div className={`text-lg font-semibold ${v.viewSummary.totalPnl >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                        <div className="text-xs text-[#964734] mb-1">P&L</div>
+                                        <div className={`text-lg font-semibold ${v.viewSummary.totalPnl >= 0 ? 'text-[#0FA4AF]' : 'text-[#964734]'}`}>
                                             {formatCurrency(v.viewSummary.totalPnl)}
                                         </div>
                                     </div>
                                     <div className="bg-zinc-50 rounded-lg p-3">
-                                        <div className="text-xs text-zinc-500 mb-1">P&L %</div>
-                                        <div className={`text-lg font-semibold ${v.viewSummary.totalPnlPercent >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                        <div className="text-xs text-[#964734] mb-1">P&L %</div>
+                                        <div className={`text-lg font-semibold ${v.viewSummary.totalPnlPercent >= 0 ? 'text-[#0FA4AF]' : 'text-[#964734]'}`}>
                                             {formatPercentage(v.viewSummary.totalPnlPercent)}
                                         </div>
                                     </div>
                                 </div>
                                 
                                 <div className="flex items-center justify-between">
-                                    <div className="text-xs text-zinc-500">
+                                    <div className="text-xs text-[#964734]">
                                         Last updated: {new Date(v.updatedAt).toLocaleDateString('en-GB')} • {uniqueCounts?.[v.id] ?? 0} stocks
                                     </div>
                                     <Link href={`/views/${v.id}`}>

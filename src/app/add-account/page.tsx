@@ -44,27 +44,27 @@ export default function AddAccountPage() {
 
 	return (
 		<div className="max-w-6xl mx-auto p-6 space-y-6">
-			<h1 className="text-2xl font-semibold">Add Account</h1>
+			<h1 className="text-2xl font-semibold text-[#003135] dark:text-white">Add Account</h1>
 			
 			{/* Stepper */}
 			<div className="relative">
-				<div className="absolute top-4 left-0 right-0 h-0.5 bg-zinc-200" />
+				<div className="absolute top-4 left-0 right-0 h-0.5 bg-[#E2E8F0] dark:bg-[#024950]" />
 				<div className="relative grid grid-cols-4 gap-4">
 					{['Account Name', 'Select Broker', 'Scrape Holdings', 'Verify & Confirm'].map((label, idx) => (
 						<div key={label} className="flex flex-col items-center">
-							<div className="w-8 h-8 rounded-full grid place-items-center text-sm font-medium bg-indigo-600 text-white relative z-10">
+							<div className="w-8 h-8 rounded-full grid place-items-center text-sm font-medium bg-[#0FA4AF] text-white relative z-10">
 								{idx + 1}
 							</div>
-							<div className="mt-2 text-xs text-zinc-600 text-center font-medium">{label}</div>
+							<div className="mt-2 text-xs text-[#64748B] dark:text-[#AFDDE5] text-center font-medium">{label}</div>
 						</div>
 					))}
 				</div>
 			</div>
 			<div className="space-y-4">
 				<div className="space-y-2">
-					<label className="block text-sm font-medium text-zinc-700">Account Name</label>
+					<label className="block text-sm font-medium text-[#003135] dark:text-white">Account Name</label>
 					<input 
-						className="w-full px-3 py-2 border border-zinc-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-black" 
+						className="w-full px-3 py-2 border border-[#CBD5E1] dark:border-[#024950] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0FA4AF] focus:border-transparent text-[#003135] dark:text-white bg-white dark:bg-[#003135]" 
 						value={name} 
 						onChange={(e) => setName(e.target.value)} 
 						placeholder="My Groww" 
@@ -83,7 +83,7 @@ export default function AddAccountPage() {
 							Check availability
 						</Button>
 						{checked !== null && (
-							<span className={`font-medium ${isNameAvailable ? 'text-green-600' : 'text-red-600'}`}>
+							<span className={`font-medium ${isNameAvailable ? 'text-[#0FA4AF]' : 'text-[#964734]'}`}>
 								{isNameAvailable ? '✓ Name is available' : '✗ Name already exists'}
 							</span>
 						)}
@@ -91,9 +91,9 @@ export default function AddAccountPage() {
 				</div>
 				
 				<div className="space-y-2">
-					<label className="block text-sm font-medium text-zinc-700">Select Broker</label>
+					<label className="block text-sm font-medium text-[#003135] dark:text-white">Select Broker</label>
 					<select 
-						className="w-full px-3 py-2 border border-zinc-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-black" 
+						className="w-full px-3 py-2 border border-[#CBD5E1] dark:border-[#024950] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0FA4AF] focus:border-transparent text-[#003135] dark:text-white bg-white dark:bg-[#003135]" 
 						value={brokerId} 
 						onChange={(e) => setBrokerId(e.target.value as 'groww')}
 					>
@@ -126,20 +126,20 @@ export default function AddAccountPage() {
 			
 			{progress && (
 				<div className="space-y-2">
-					<div className="h-2 bg-zinc-200 rounded-full overflow-hidden">
+					<div className="h-2 bg-[#E2E8F0] dark:bg-[#024950] rounded-full overflow-hidden">
 						<div 
-							className="h-full bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full transition-all duration-300" 
+							className="h-full bg-gradient-to-r from-[#0FA4AF] to-[#024950] rounded-full transition-all duration-300" 
 							style={{ width: `${progress.percent}%` }} 
 						/>
 					</div>
-					<p className="text-sm text-zinc-600 font-medium">{progress.stage}</p>
+					<p className="text-sm text-[#64748B] dark:text-[#AFDDE5] font-medium">{progress.stage}</p>
 				</div>
 			)}
 			{preview && (
 				<div className="space-y-4">
-					<h2 className="text-lg font-semibold text-zinc-900">Preview (mapped)</h2>
-					<div className="bg-zinc-50 border border-zinc-200 rounded-lg p-4">
-						<pre className="text-xs text-zinc-700 overflow-auto max-h-64 font-mono">{JSON.stringify(preview.mapped, null, 2)}</pre>
+					<h2 className="text-lg font-semibold text-[#003135] dark:text-white">Preview (mapped)</h2>
+					<div className="bg-[#F1F5F9] dark:bg-[#024950] border border-[#E2E8F0] dark:border-[#024950] rounded-lg p-4">
+						<pre className="text-xs text-[#003135] dark:text-white overflow-auto max-h-64 font-mono">{JSON.stringify(preview.mapped, null, 2)}</pre>
 					</div>
 					{jobId && (
 						<Button
