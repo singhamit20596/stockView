@@ -7,6 +7,7 @@ import { formatCurrency, formatPercentage } from '@/lib/utils';
 import { DonutChart } from '@/components/ui/DonutChart';
 import { PieChart3D } from '@/components/ui/PieChart3D';
 import { Badge } from '@/components/ui/Badge';
+import { InteractiveChart } from '@/components/ui/InteractiveChart';
 import { useState, useMemo } from 'react';
 
 export default function StockViewPage() {
@@ -40,6 +41,9 @@ export default function StockViewPage() {
   const [selectedSubsector, setSelectedSubsector] = useState<string | null>(null);
   const [selectedMarketCap, setSelectedMarketCap] = useState<string | null>(null);
   
+  // State for expanded chart views
+  const [expandedChart, setExpandedChart] = useState<'sector' | 'subsector' | 'marketCap' | null>(null);
+  
   // Filter stocks based on selections
   const filteredStocks = useMemo(() => {
     if (!selectedSector && !selectedSubsector && !selectedMarketCap) {
@@ -59,6 +63,34 @@ export default function StockViewPage() {
     setSelectedSector(null);
     setSelectedSubsector(null);
     setSelectedMarketCap(null);
+  };
+  
+  // Handle chart section clicks
+  const handleChartSectionClick = (type: 'sector' | 'subsector' | 'marketCap', label: string) => {
+    if (label === 'expand') {
+      setExpandedChart(type);
+      return;
+    }
+    
+    // Set the selected filter based on type
+    if (type === 'sector') {
+      setSelectedSector(selectedSector === label ? null : label);
+      setSelectedSubsector(null);
+      setSelectedMarketCap(null);
+    } else if (type === 'subsector') {
+      setSelectedSubsector(selectedSubsector === label ? null : label);
+      setSelectedSector(null);
+      setSelectedMarketCap(null);
+    } else if (type === 'marketCap') {
+      setSelectedMarketCap(selectedMarketCap === label ? null : label);
+      setSelectedSector(null);
+      setSelectedSubsector(null);
+    }
+  };
+  
+  // Close expanded chart
+  const closeExpandedChart = () => {
+    setExpandedChart(null);
   };
 
   return (
@@ -143,6 +175,9 @@ export default function StockViewPage() {
                 <div>
                   <div className="text-lg font-semibold text-zinc-900">{selectedView?.linkedAccountCount || 0}</div>
                   <div className="text-sm text-zinc-600">Linked Accounts</div>
+                  <div className="text-xs text-zinc-500 mt-1 line-clamp-2">
+                    {selectedView?.linkedAccountNames?.join(', ') || 'No accounts'}
+                  </div>
                 </div>
                 <div>
                   <div className="text-lg font-semibold text-zinc-900">{selectedView?.totalUniqueStocks || 0}</div>
@@ -161,115 +196,82 @@ export default function StockViewPage() {
           {/* Analytics Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
             {/* Sector Allocation */}
-            <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer">
-              <CardBody className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-zinc-900">Sector Allocation</h3>
-                  <div className="w-8 h-8 rounded-full bg-indigo-100 group-hover:bg-indigo-200 transition-colors flex items-center justify-center">
-                    <svg className="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                    </svg>
-                  </div>
-                </div>
-                
-                {analytics ? (
-                  <div className="space-y-3">
-                    {analytics.sector.slice(0, 3).map((item, index) => (
-                      <div key={item.key} className="flex items-center justify-between p-3 rounded-lg hover:bg-zinc-50 transition-colors">
-                        <div className="flex items-center gap-3">
-                          <div className="w-3 h-3 rounded-full" style={{ backgroundColor: ['#3B82F6', '#EF4444', '#10B981'][index] }}></div>
-                          <span className="text-sm font-medium text-zinc-900">{item.key}</span>
-                        </div>
-                        <span className="text-sm font-semibold text-zinc-900">{item.value}%</span>
-                      </div>
-                    ))}
-                    {analytics.sector.length > 3 && (
-                      <div className="text-center pt-2">
-                        <span className="text-sm text-zinc-500">+{analytics.sector.length - 3} more sectors</span>
-                      </div>
-                    )}
-                  </div>
-                ) : (
+            {analytics ? (
+              <InteractiveChart
+                data={analytics.sector.map((item, index) => ({
+                  label: item.key,
+                  value: item.value,
+                  color: ['#3B82F6', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899', '#06B6D4', '#84CC16'][index % 8]
+                }))}
+                title="Sector Allocation"
+                type="sector"
+                onSectionClick={(label) => handleChartSectionClick('sector', label)}
+                onClose={closeExpandedChart}
+                isExpanded={expandedChart === 'sector'}
+                filteredStocks={selectedSector ? filteredStocks : []}
+                selectedFilter={selectedSector}
+              />
+            ) : (
+              <Card className="group hover:shadow-lg transition-all duration-300">
+                <CardBody className="p-6">
                   <div className="flex items-center justify-center h-32">
                     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600"></div>
                   </div>
-                )}
-              </CardBody>
-            </Card>
+                </CardBody>
+              </Card>
+            )}
             
             {/* Subsector Allocation */}
-            <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer">
-              <CardBody className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-zinc-900">Subsector Allocation</h3>
-                  <div className="w-8 h-8 rounded-full bg-green-100 group-hover:bg-green-200 transition-colors flex items-center justify-center">
-                    <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
-                    </svg>
-                  </div>
-                </div>
-                
-                {analytics ? (
-                  <div className="space-y-3">
-                    {analytics.subsector.slice(0, 3).map((item, index) => (
-                      <div key={item.key} className="flex items-center justify-between p-3 rounded-lg hover:bg-zinc-50 transition-colors">
-                        <div className="flex items-center gap-3">
-                          <div className="w-3 h-3 rounded-full" style={{ backgroundColor: ['#10B981', '#F59E0B', '#8B5CF6'][index] }}></div>
-                          <span className="text-sm font-medium text-zinc-900">{item.key}</span>
-                        </div>
-                        <span className="text-sm font-semibold text-zinc-900">{item.value}%</span>
-                      </div>
-                    ))}
-                    {analytics.subsector.length > 3 && (
-                      <div className="text-center pt-2">
-                        <span className="text-sm text-zinc-500">+{analytics.subsector.length - 3} more subsectors</span>
-                      </div>
-                    )}
-                  </div>
-                ) : (
+            {analytics ? (
+              <InteractiveChart
+                data={analytics.subsector.map((item, index) => ({
+                  label: item.key,
+                  value: item.value,
+                  color: ['#10B981', '#F59E0B', '#8B5CF6', '#EC4899', '#06B6D4', '#84CC16', '#F97316', '#A855F7'][index % 8]
+                }))}
+                title="Subsector Allocation"
+                type="subsector"
+                onSectionClick={(label) => handleChartSectionClick('subsector', label)}
+                onClose={closeExpandedChart}
+                isExpanded={expandedChart === 'subsector'}
+                filteredStocks={selectedSubsector ? filteredStocks : []}
+                selectedFilter={selectedSubsector}
+              />
+            ) : (
+              <Card className="group hover:shadow-lg transition-all duration-300">
+                <CardBody className="p-6">
                   <div className="flex items-center justify-center h-32">
                     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600"></div>
                   </div>
-                )}
-              </CardBody>
-            </Card>
+                </CardBody>
+              </Card>
+            )}
             
             {/* Market Cap Allocation */}
-            <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer">
-              <CardBody className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-zinc-900">Market Cap</h3>
-                  <div className="w-8 h-8 rounded-full bg-purple-100 group-hover:bg-purple-200 transition-colors flex items-center justify-center">
-                    <svg className="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                    </svg>
-                  </div>
-                </div>
-                
-                {analytics ? (
-                  <div className="space-y-3">
-                    {analytics.cap.slice(0, 3).map((item, index) => (
-                      <div key={item.key} className="flex items-center justify-between p-3 rounded-lg hover:bg-zinc-50 transition-colors">
-                        <div className="flex items-center gap-3">
-                          <div className="w-3 h-3 rounded-full" style={{ backgroundColor: ['#8B5CF6', '#EC4899', '#06B6D4'][index] }}></div>
-                          <span className="text-sm font-medium text-zinc-900">{item.key}</span>
-                        </div>
-                        <span className="text-sm font-semibold text-zinc-900">{item.value}%</span>
-                      </div>
-                    ))}
-                    {analytics.cap.length > 3 && (
-                      <div className="text-center pt-2">
-                        <span className="text-sm text-zinc-500">+{analytics.cap.length - 3} more categories</span>
-                      </div>
-                    )}
-                  </div>
-                ) : (
+            {analytics ? (
+              <InteractiveChart
+                data={analytics.cap.map((item, index) => ({
+                  label: item.key,
+                  value: item.value,
+                  color: ['#8B5CF6', '#EC4899', '#06B6D4', '#84CC16', '#F97316', '#A855F7', '#EF4444', '#10B981'][index % 8]
+                }))}
+                title="Market Cap"
+                type="marketCap"
+                onSectionClick={(label) => handleChartSectionClick('marketCap', label)}
+                onClose={closeExpandedChart}
+                isExpanded={expandedChart === 'marketCap'}
+                filteredStocks={selectedMarketCap ? filteredStocks : []}
+                selectedFilter={selectedMarketCap}
+              />
+            ) : (
+              <Card className="group hover:shadow-lg transition-all duration-300">
+                <CardBody className="p-6">
                   <div className="flex items-center justify-center h-32">
                     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600"></div>
                   </div>
-                )}
-              </CardBody>
-            </Card>
+                </CardBody>
+              </Card>
+            )}
             
             {/* Warnings */}
             <Card className="group hover:shadow-lg transition-all duration-300">
@@ -361,62 +363,7 @@ export default function StockViewPage() {
               </CardBody>
             </Card>
             
-            {/* Portfolio Holdings */}
-            <Card className="lg:col-span-2 xl:col-span-1 group hover:shadow-lg transition-all duration-300">
-              <CardBody className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-zinc-900">Holdings</h3>
-                  <div className="w-8 h-8 rounded-full bg-indigo-100 group-hover:bg-indigo-200 transition-colors flex items-center justify-center">
-                    <svg className="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                  </div>
-                </div>
-                
-                <div className="space-y-3">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-zinc-900">{stocks.length}</div>
-                    <div className="text-sm text-zinc-600">Total Holdings</div>
-                  </div>
-                  
-                  {(selectedSector || selectedSubsector || selectedMarketCap) && (
-                    <div className="space-y-2">
-                      <div className="text-sm font-medium text-zinc-900">Active Filters:</div>
-                      <div className="flex flex-wrap gap-2">
-                        {selectedSector && (
-                          <Badge tone="sector" sector={selectedSector}>
-                            {selectedSector}
-                          </Badge>
-                        )}
-                        {selectedSubsector && (
-                          <Badge tone="subsector" subsector={selectedSubsector}>
-                            {selectedSubsector}
-                          </Badge>
-                        )}
-                        {selectedMarketCap && (
-                          <Badge tone="outline">
-                            {selectedMarketCap}
-                          </Badge>
-                        )}
-                      </div>
-                      <Button 
-                        variant="secondary" 
-                        size="sm"
-                        onClick={clearFilters}
-                        className="w-full"
-                      >
-                        Clear Filters
-                      </Button>
-                    </div>
-                  )}
-                  
-                  <div className="text-center">
-                    <div className="text-lg font-semibold text-zinc-900">{filteredStocks.length}</div>
-                    <div className="text-sm text-zinc-600">Filtered Results</div>
-                  </div>
-                </div>
-              </CardBody>
-            </Card>
+
           </div>
           
           {/* Detailed Holdings Table - Only show when filters are active */}
