@@ -1,5 +1,5 @@
 [build]
-  command = "npm run build"
+  command = "if [ \"$SKIP_BUILD\" != \"true\" ]; then npm run build; else echo 'Build skipped'; fi"
   publish = ".next"
 
 [build.environment]
