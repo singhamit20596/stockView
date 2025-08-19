@@ -34,6 +34,7 @@ export default function RootLayout({
             <Link href="/add-account">Add Account</Link>
             <Link href="/add-view">Add View</Link>
             <Link href="/views">Views</Link>
+            <Link href="/stock-view">StockView</Link>
           </div>
           {children}
         </Providers>
