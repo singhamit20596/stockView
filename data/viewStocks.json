@@ -1,7 +1,7 @@
 {
   "meta": {
     "version": 1,
-    "updatedAt": "2025-08-19T07:57:57.430Z"
+    "updatedAt": "2025-08-19T08:21:00.926Z"
   },
   "rows": [
     {
@@ -704,8 +704,8 @@
       "pnl": "-3707.14",
       "pnlPercent": "-36.533841062604832495",
       "quantity": "46",
-      "sector": null,
-      "subsector": null,
+      "sector": "Financials",
+      "subsector": "Microfinance",
       "updatedAt": "2025-08-18T18:07:06.825Z"
     }
   ]

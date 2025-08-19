@@ -1,7 +1,7 @@
 {
   "meta": {
     "version": 1,
-    "updatedAt": "2025-08-19T07:52:14.815Z"
+    "updatedAt": "2025-08-19T08:20:55.101Z"
   },
   "rows": [
     {
@@ -1114,8 +1114,8 @@
       "pnl": "-3707.14",
       "pnlPercent": "-36.533841062604832495",
       "quantity": "46",
-      "sector": null,
-      "subsector": null,
+      "sector": "Financials",
+      "subsector": "Microfinance",
       "capCategory": null,
       "createdAt": "2025-08-18T18:05:49.049Z",
       "updatedAt": "2025-08-18T18:05:55.596Z"
