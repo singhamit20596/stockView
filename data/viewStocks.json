@@ -1,7 +1,7 @@
 {
   "meta": {
     "version": 1,
-    "updatedAt": "2025-08-19T09:05:43.290Z"
+    "updatedAt": "2025-08-19T09:18:31.148Z"
   },
   "rows": [
     {
@@ -70,7 +70,7 @@
       "sector": "Healthcare",
       "subsector": "Hospitals",
       "updatedAt": "2025-08-18T18:07:06.825Z",
-      "capCategory": "MEGA"
+      "capCategory": "LARGE"
     },
     {
       "id": "b06988fc-9e91-439b-9212-2b741d456b41",
@@ -274,7 +274,7 @@
       "sector": "Financials",
       "subsector": "Bank - Private",
       "updatedAt": "2025-08-18T18:07:06.825Z",
-      "capCategory": "MEGA"
+      "capCategory": "LARGE"
     },
     {
       "id": "200ac6ff-9c9a-494f-8477-7a00dd0e9070",
@@ -308,7 +308,7 @@
       "sector": "Financials",
       "subsector": "Capital Markets",
       "updatedAt": "2025-08-18T18:07:06.825Z",
-      "capCategory": "MEGA"
+      "capCategory": "LARGE"
     },
     {
       "id": "8563acfa-03c8-4778-96cf-5f12060bdebb",
@@ -325,7 +325,7 @@
       "sector": "Financials",
       "subsector": "Bank - Private",
       "updatedAt": "2025-08-18T18:07:06.825Z",
-      "capCategory": "MEGA"
+      "capCategory": "LARGE"
     },
     {
       "id": "9c1f7d71-9ff3-4de4-976c-41fb463009bd",
@@ -376,7 +376,7 @@
       "sector": "Information Technology",
       "subsector": "IT Services",
       "updatedAt": "2025-08-18T18:07:06.825Z",
-      "capCategory": "MEGA"
+      "capCategory": "LARGE"
     },
     {
       "id": "a2221106-b62b-406d-8efd-1a33e8f93ef8",
@@ -495,7 +495,7 @@
       "sector": "Consumer Staples",
       "subsector": "FMCG - Personal & Home Care",
       "updatedAt": "2025-08-18T18:07:06.825Z",
-      "capCategory": "MEGA"
+      "capCategory": "LARGE"
     },
     {
       "id": "20afff3d-b894-408a-a3d1-cbf8d4e0e04f",
@@ -512,7 +512,7 @@
       "sector": "Materials",
       "subsector": "Paints & Coatings",
       "updatedAt": "2025-08-18T18:07:06.825Z",
-      "capCategory": "MEGA"
+      "capCategory": "LARGE"
     },
     {
       "id": "e3318a36-b5ab-4d36-9299-4cd1a85a4f61",
@@ -563,7 +563,7 @@
       "sector": "Consumer Discretionary",
       "subsector": "Automobiles - 2 Wheelers",
       "updatedAt": "2025-08-18T18:07:06.825Z",
-      "capCategory": "MEGA"
+      "capCategory": "LARGE"
     },
     {
       "id": "f91e339d-b53e-4fa1-ad73-6a4095fcaead",

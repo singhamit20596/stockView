@@ -1,7 +1,7 @@
 {
   "meta": {
     "version": 1,
-    "updatedAt": "2025-08-19T08:53:19.552Z"
+    "updatedAt": "2025-08-19T09:18:30.927Z"
   },
   "rows": [
     {
@@ -72,7 +72,7 @@
       "quantity": "10",
       "sector": "Healthcare",
       "subsector": "Hospitals",
-      "capCategory": "MEGA",
+      "capCategory": "LARGE",
       "createdAt": "2025-08-18T17:21:16.669Z",
       "updatedAt": "2025-08-18T17:58:42.584Z"
     },
@@ -288,7 +288,7 @@
       "quantity": "6",
       "sector": "Financials",
       "subsector": "Bank - Private",
-      "capCategory": "MEGA",
+      "capCategory": "LARGE",
       "createdAt": "2025-08-18T17:21:16.669Z",
       "updatedAt": "2025-08-18T17:58:42.584Z"
     },
@@ -324,7 +324,7 @@
       "quantity": "19",
       "sector": "Financials",
       "subsector": "Capital Markets",
-      "capCategory": "MEGA",
+      "capCategory": "LARGE",
       "createdAt": "2025-08-18T18:02:25.210Z",
       "updatedAt": "2025-08-18T18:02:43.758Z"
     },
@@ -360,7 +360,7 @@
       "quantity": "37",
       "sector": "Financials",
       "subsector": "Bank - Private",
-      "capCategory": "MEGA",
+      "capCategory": "LARGE",
       "createdAt": "2025-08-18T18:02:25.210Z",
       "updatedAt": "2025-08-18T18:02:43.758Z"
     },
@@ -450,7 +450,7 @@
       "quantity": "19",
       "sector": "Information Technology",
       "subsector": "IT Services",
-      "capCategory": "MEGA",
+      "capCategory": "LARGE",
       "createdAt": "2025-08-18T18:02:25.210Z",
       "updatedAt": "2025-08-18T18:02:43.758Z"
     },
@@ -612,7 +612,7 @@
       "quantity": "43",
       "sector": "Consumer Staples",
       "subsector": "FMCG - Personal & Home Care",
-      "capCategory": "MEGA",
+      "capCategory": "LARGE",
       "createdAt": "2025-08-18T18:05:49.048Z",
       "updatedAt": "2025-08-18T18:05:55.596Z"
     },
@@ -648,7 +648,7 @@
       "quantity": "36",
       "sector": "Materials",
       "subsector": "Paints & Coatings",
-      "capCategory": "MEGA",
+      "capCategory": "LARGE",
       "createdAt": "2025-08-18T18:05:49.048Z",
       "updatedAt": "2025-08-18T18:05:55.596Z"
     },
@@ -738,7 +738,7 @@
       "quantity": "12",
       "sector": "Consumer Discretionary",
       "subsector": "Automobiles - 2 Wheelers",
-      "capCategory": "MEGA",
+      "capCategory": "LARGE",
       "createdAt": "2025-08-18T18:05:49.048Z",
       "updatedAt": "2025-08-18T18:05:55.596Z"
     },
@@ -954,7 +954,7 @@
       "quantity": "10",
       "sector": "Financials",
       "subsector": "Bank - Private",
-      "capCategory": "MEGA",
+      "capCategory": "LARGE",
       "createdAt": "2025-08-18T18:05:49.049Z",
       "updatedAt": "2025-08-18T18:05:55.596Z"
     },
