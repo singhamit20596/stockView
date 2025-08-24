@@ -1,69 +1,100 @@
+import { router, publicProcedure } from '../trpc';
 import { z } from 'zod';
-import { publicProcedure, router } from '../trpc';
-import { listRows, replaceRows } from '@/lib/filedb';
-import { tables } from '@/lib/filedb';
-import type { Account, Stock } from '@/lib/types';
-import { generateId, nowIso } from '@/lib/ids';
+import { db } from '@/lib/database';
 
 export const accountsRouter = router({
 	list: publicProcedure.query(async () => {
-		return listRows<Account>(tables.accounts);
-	}),
-	stocksCountByAccount: publicProcedure.query(async () => {
-		const rows = await listRows<Stock>(tables.stocks);
-		const map = new Map<string, number>();
-		for (const s of rows) {
-			map.set(s.accountId, (map.get(s.accountId) ?? 0) + 1);
+		try {
+			const accounts = await db.listAccounts();
+			return accounts;
+		} catch (error) {
+			console.error('Failed to list accounts:', error);
+			throw error;
 		}
-		return Object.fromEntries(map);
 	}),
-	getById: publicProcedure.input(z.object({ accountId: z.string().uuid() })).query(async ({ input }) => {
-		const rows = await listRows<Account>(tables.accounts);
-		return rows.find((a) => a.id === input.accountId) ?? null;
-	}),
-	checkNameUnique: publicProcedure.input(z.object({ name: z.string().min(1) })).query(async ({ input }) => {
-		const rows = await listRows<Account>(tables.accounts);
-		const exists = rows.some((a) => a.name.toLowerCase() === input.name.toLowerCase());
-		return { valid: !exists } as const;
-	}),
-	createEmpty: publicProcedure.input(z.object({ name: z.string().min(1) })).mutation(async ({ input }) => {
-		const rows = await listRows<Account>(tables.accounts);
-		if (rows.some((a) => a.name.toLowerCase() === input.name.toLowerCase())) {
-			throw new Error('Account name already exists');
-		}
-		const now = nowIso();
-		const newAccount: Account = {
-			id: generateId(),
-			name: input.name,
-			investedValue: '0',
-			currentValue: '0',
-			pnl: '0',
-			pnlPercent: '0',
-			createdAt: now,
-			updatedAt: now,
-		};
-		await replaceRows<Account>(tables.accounts, [...rows, newAccount]);
-		return newAccount;
-	}),
-	listStocks: publicProcedure.input(z.object({ accountId: z.string().uuid() })).query(async ({ input }) => {
-		const rows = await listRows<Stock>(tables.stocks);
-		return rows.filter((s) => s.accountId === input.accountId);
-	}),
-	delete: publicProcedure.input(z.object({ accountId: z.string().uuid() })).mutation(async ({ input }) => {
-		const [accounts, stocks] = await Promise.all([
-			listRows<Account>(tables.accounts),
-			listRows<Stock>(tables.stocks),
-		]);
-		const nextAccounts = accounts.filter((a) => a.id !== input.accountId);
-		const nextStocks = stocks.filter((s) => s.accountId !== input.accountId);
-		await Promise.all([
-			replaceRows<Account>(tables.accounts, nextAccounts),
-			replaceRows<Stock>(tables.stocks, nextStocks),
-		]);
-		return { ok: true } as const;
-	}),
-});
 
-export type AccountsRouter = typeof accountsRouter;
+	checkNameUnique: publicProcedure
+		.input(z.object({ name: z.string() }))
+		.query(async ({ input }) => {
+			try {
+				const account = await db.getAccountByName(input.name);
+				return { isUnique: !account };
+			} catch (error) {
+				console.error('Failed to check account name:', error);
+				throw error;
+			}
+		}),
+
+	stocksCountByAccount: publicProcedure.query(async () => {
+		try {
+			const accounts = await db.listAccounts();
+			const counts = await Promise.all(
+				accounts.map(async (account) => {
+					const stocks = await db.listStocksByAccount(account.id);
+					return {
+						accountId: account.id,
+						count: stocks.length
+					};
+				})
+			);
+			
+			// Convert array to object for easier frontend consumption
+			const countsObject: Record<string, number> = {};
+			counts.forEach(({ accountId, count }) => {
+				countsObject[accountId] = count;
+			});
+			
+			return countsObject;
+		} catch (error) {
+			console.error('Failed to get stocks count by account:', error);
+			throw error;
+		}
+	}),
+
+			listStocks: publicProcedure
+		.input(z.object({ accountId: z.string() }))
+		.query(async ({ input }) => {
+			try {
+				const stocks = await db.listStocksByAccount(input.accountId);
+				return stocks;
+			} catch (error) {
+				console.error('Failed to list stocks by account:', error);
+				throw error;
+			}
+		}),
+
+		delete: publicProcedure
+		.input(z.object({ id: z.string() }))
+		.mutation(async ({ input }) => {
+			try {
+				await db.deleteAccount(input.id);
+				return { success: true };
+			} catch (error) {
+				console.error('Failed to delete account:', error);
+				throw error;
+			}
+		}),
+
+		update: publicProcedure
+		.input(z.object({ 
+			id: z.string(), 
+			updates: z.object({
+				name: z.string().optional(),
+				invested_value: z.number().optional(),
+				current_value: z.number().optional(),
+				pnl: z.number().optional(),
+				pnl_percent: z.number().optional()
+			})
+		}))
+		.mutation(async ({ input }) => {
+			try {
+				const updatedAccount = await db.updateAccount(input.id, input.updates);
+				return updatedAccount;
+			} catch (error) {
+				console.error('Failed to update account:', error);
+				throw error;
+			}
+		})
+});
 
 

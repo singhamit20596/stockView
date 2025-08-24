@@ -6,9 +6,9 @@ import { formatCurrency, formatPercentage } from '@/lib/utils';
 
 export default function AccountDetailPage() {
   const { accountId } = useParams<{ accountId: string }>();
-  const accountQuery = trpc.accounts.getById.useQuery({ accountId });
+  const accountQuery = trpc.accounts.list.useQuery();
   const stocksQuery = trpc.accounts.listStocks.useQuery({ accountId });
-  const account = accountQuery.data;
+  const account = accountQuery.data?.find(a => a.id === accountId);
   const stocks = stocksQuery.data ?? [];
   if (!account) return <div className="p-8 text-[#003135] dark:text-white">Account not found.</div>;
   return (
@@ -19,9 +19,9 @@ export default function AccountDetailPage() {
           <p className="text-sm text-[#64748B] dark:text-[#AFDDE5] mt-1">Account Holdings</p>
         </div>
         <div className="text-right">
-          <div className="text-sm text-[#64748B] dark:text-[#AFDDE5]">Updated: {new Date(account.updatedAt).toLocaleDateString('en-GB')}</div>
+          <div className="text-sm text-[#64748B] dark:text-[#AFDDE5]">Updated: {new Date(account.updated_at).toLocaleDateString('en-GB')}</div>
           <div className="text-sm font-medium text-[#003135] dark:text-white mt-1">
-            Invested: {formatCurrency(Number(account.investedValue))} | Current: {formatCurrency(Number(account.currentValue))} | PnL: {formatCurrency(Number(account.pnl))} ({formatPercentage(Number(account.pnlPercent))})
+            Invested: {formatCurrency(Number(account.invested_value))} | Current: {formatCurrency(Number(account.current_value))} | PnL: {formatCurrency(Number(account.pnl))} ({formatPercentage(Number(account.pnl_percent))})
           </div>
         </div>
       </div>
@@ -46,17 +46,17 @@ export default function AccountDetailPage() {
             <tbody className="divide-y divide-[#E2E8F0] dark:divide-[#024950]">
               {stocks.map((s) => (
                 <tr key={s.id} className="hover:bg-[#F1F5F9] dark:hover:bg-[#024950] transition-colors">
-                  <td className="px-6 py-4 text-sm font-medium text-[#003135] dark:text-white">{s.stockName}</td>
+                  <td className="px-6 py-4 text-sm font-medium text-[#003135] dark:text-white">{s.stock_name}</td>
                   <td className="px-6 py-4 text-sm text-[#64748B] dark:text-[#AFDDE5] text-right">{Number(s.quantity).toFixed(1)}</td>
-                  <td className="px-6 py-4 text-sm text-[#64748B] dark:text-[#AFDDE5] text-right">{formatCurrency(Number(s.avgPrice))}</td>
-                  <td className="px-6 py-4 text-sm text-[#64748B] dark:text-[#AFDDE5] text-right">{formatCurrency(Number(s.marketPrice))}</td>
-                  <td className="px-6 py-4 text-sm text-[#64748B] dark:text-[#AFDDE5] text-right">{formatCurrency(Number(s.investedValue))}</td>
-                  <td className="px-6 py-4 text-sm text-[#64748B] dark:text-[#AFDDE5] text-right">{formatCurrency(Number(s.currentValue))}</td>
+                  <td className="px-6 py-4 text-sm text-[#64748B] dark:text-[#AFDDE5] text-right">{formatCurrency(Number(s.avg_price))}</td>
+                  <td className="px-6 py-4 text-sm text-[#64748B] dark:text-[#AFDDE5] text-right">{formatCurrency(Number(s.market_price))}</td>
+                  <td className="px-6 py-4 text-sm text-[#64748B] dark:text-[#AFDDE5] text-right">{formatCurrency(Number(s.invested_value))}</td>
+                  <td className="px-6 py-4 text-sm text-[#64748B] dark:text-[#AFDDE5] text-right">{formatCurrency(Number(s.current_value))}</td>
                   <td className={`px-6 py-4 text-sm font-medium text-right ${Number(s.pnl) >= 0 ? 'text-[#0FA4AF]' : 'text-[#964734]'}`}>
                     {formatCurrency(Number(s.pnl))}
                   </td>
-                  <td className={`px-6 py-4 text-sm font-medium text-right ${Number(s.pnlPercent) >= 0 ? 'text-[#0FA4AF]' : 'text-[#964734]'}`}>
-                    {formatPercentage(Number(s.pnlPercent))}
+                  <td className={`px-6 py-4 text-sm font-medium text-right ${Number(s.pnl_percent) >= 0 ? 'text-[#0FA4AF]' : 'text-[#964734]'}`}>
+                    {formatPercentage(Number(s.pnl_percent))}
                   </td>
                 </tr>
               ))}

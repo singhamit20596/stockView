@@ -48,7 +48,7 @@ export default function AccountsPage() {
                       className="w-8 h-8 rounded-lg bg-[#964734]/10 hover:bg-[#964734]/20 grid place-items-center transition-colors relative group"
                       onClick={async () => {
                         if (!confirm(`Delete account ${a.name}?`)) return;
-                        await del.mutateAsync({ accountId: a.id });
+                        await del.mutateAsync({ id: a.id });
                         location.reload();
                       }}
                       title="Delete account"
@@ -66,11 +66,11 @@ export default function AccountsPage() {
                 <div className="grid grid-cols-2 gap-3 mb-4">
                   <div className="bg-zinc-50 rounded-lg p-3">
                     <div className="text-xs text-[#964734] mb-1">INVESTED</div>
-                    <div className="text-lg font-semibold text-[#964734]">{formatCurrency(a.investedValue)}</div>
+                    <div className="text-lg font-semibold text-[#964734]">{formatCurrency(a.invested_value)}</div>
                   </div>
                   <div className="bg-zinc-50 rounded-lg p-3">
                     <div className="text-xs text-[#964734] mb-1">CURRENT</div>
-                    <div className="text-lg font-semibold text-[#964734]">{formatCurrency(a.currentValue)}</div>
+                    <div className="text-lg font-semibold text-[#964734]">{formatCurrency(a.current_value)}</div>
                   </div>
                   <div className="bg-zinc-50 rounded-lg p-3">
                     <div className="text-xs text-[#964734] mb-1">P&L</div>
@@ -80,15 +80,15 @@ export default function AccountsPage() {
                   </div>
                   <div className="bg-zinc-50 rounded-lg p-3">
                     <div className="text-xs text-[#964734] mb-1">P&L %</div>
-                    <div className={`text-lg font-semibold ${a.pnlPercent >= 0 ? 'text-[#0FA4AF]' : 'text-[#964734]'}`}>
-                      {formatPercentage(a.pnlPercent)}
+                    <div className={`text-lg font-semibold ${a.pnl_percent >= 0 ? 'text-[#0FA4AF]' : 'text-[#964734]'}`}>
+                      {formatPercentage(a.pnl_percent)}
                     </div>
                   </div>
                 </div>
                 
                 <div className="flex items-center justify-between">
                   <div className="text-xs text-[#964734]">
-                    Last updated: {new Date(a.updatedAt).toLocaleDateString('en-GB')} • {holdingsCount[a.id] ?? 0} stocks
+                    Last updated: {new Date(a.updated_at).toLocaleDateString('en-GB')} • {holdingsCount[a.id] ?? 0} stocks
                   </div>
                   <Link href={`/accounts/${a.id}`}>
                     <Button variant="primary" size="sm">View Details</Button>

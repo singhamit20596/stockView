@@ -1,7 +1,7 @@
 {
   "meta": {
     "version": 1,
-    "updatedAt": "2025-08-19T16:14:02.935Z"
+    "updatedAt": "2025-08-21T08:55:18.334Z"
   },
   "rows": [
     {
@@ -16,6 +16,19 @@
       },
       "createdAt": "2025-08-18T18:07:06.825Z",
       "updatedAt": "2025-08-19T16:14:02.927Z"
+    },
+    {
+      "id": "a0dfe56f-9772-4106-b469-ecd093b8072a",
+      "name": "Sumit's View",
+      "viewSummary": {
+        "totalInvestedValue": "331348.06",
+        "totalCurrentValue": "372698.6422",
+        "totalQuantity": "1512",
+        "totalPnl": "41350.5822",
+        "totalPnlPercent": "12.479500317581457999"
+      },
+      "createdAt": "2025-08-21T08:55:18.332Z",
+      "updatedAt": "2025-08-21T08:55:18.332Z"
     }
   ]
 }

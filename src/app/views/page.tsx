@@ -8,7 +8,7 @@ import { formatCurrency, formatPercentage } from '@/lib/utils';
 
 export default function ViewsPage() {
     const { data: views, isLoading } = trpc.views.list.useQuery();
-    const { data: uniqueCounts } = trpc.views.uniqueStockCount.useQuery();
+    const { data: accounts } = trpc.accounts.list.useQuery();
     const del = trpc.views.delete.useMutation();
     const [busyId, setBusyId] = useState<string | null>(null);
     return (
@@ -42,7 +42,7 @@ export default function ViewsPage() {
                                             onClick={async () => {
                                                 if (!confirm(`Delete view ${v.name}?`)) return;
                                                 setBusyId(v.id);
-                                                await del.mutateAsync({ viewId: v.id });
+                                                await del.mutateAsync({ id: v.id });
                                                 location.reload();
                                             }}
                                             title="Delete view"
@@ -59,30 +59,26 @@ export default function ViewsPage() {
                                 
                                 <div className="grid grid-cols-2 gap-3 mb-4">
                                     <div className="bg-zinc-50 rounded-lg p-3">
-                                        <div className="text-xs text-[#964734] mb-1">INVESTED</div>
-                                        <div className="text-lg font-semibold text-[#964734]">{formatCurrency(v.viewSummary.totalInvestedValue)}</div>
+                                        <div className="text-xs text-[#964734] mb-1">ACCOUNTS</div>
+                                        <div className="text-lg font-semibold text-[#964734]">{accounts?.length || 0}</div>
                                     </div>
                                     <div className="bg-zinc-50 rounded-lg p-3">
-                                        <div className="text-xs text-[#964734] mb-1">CURRENT</div>
-                                        <div className="text-lg font-semibold text-[#964734]">{formatCurrency(v.viewSummary.totalCurrentValue)}</div>
+                                        <div className="text-xs text-[#964734] mb-1">CREATED</div>
+                                        <div className="text-lg font-semibold text-[#964734]">{new Date(v.created_at).toLocaleDateString('en-GB')}</div>
                                     </div>
                                     <div className="bg-zinc-50 rounded-lg p-3">
-                                        <div className="text-xs text-[#964734] mb-1">P&L</div>
-                                        <div className={`text-lg font-semibold ${v.viewSummary.totalPnl >= 0 ? 'text-[#0FA4AF]' : 'text-[#964734]'}`}>
-                                            {formatCurrency(v.viewSummary.totalPnl)}
-                                        </div>
+                                        <div className="text-xs text-[#964734] mb-1">STATUS</div>
+                                        <div className="text-lg font-semibold text-[#0FA4AF]">Active</div>
                                     </div>
                                     <div className="bg-zinc-50 rounded-lg p-3">
-                                        <div className="text-xs text-[#964734] mb-1">P&L %</div>
-                                        <div className={`text-lg font-semibold ${v.viewSummary.totalPnlPercent >= 0 ? 'text-[#0FA4AF]' : 'text-[#964734]'}`}>
-                                            {formatPercentage(v.viewSummary.totalPnlPercent)}
-                                        </div>
+                                        <div className="text-xs text-[#964734] mb-1">TYPE</div>
+                                        <div className="text-lg font-semibold text-[#964734]">Portfolio</div>
                                     </div>
                                 </div>
                                 
                                 <div className="flex items-center justify-between">
                                     <div className="text-xs text-[#964734]">
-                                        Last updated: {new Date(v.updatedAt).toLocaleDateString('en-GB')} • {uniqueCounts?.[v.id] ?? 0} stocks
+                                        Created: {new Date(v.created_at).toLocaleDateString('en-GB')} • Portfolio View
                                     </div>
                                     <Link href={`/views/${v.id}`}>
                                         <Button variant="primary" size="sm">View Details</Button>

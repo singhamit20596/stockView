@@ -1,7 +1,7 @@
 {
   "meta": {
     "version": 1,
-    "updatedAt": "2025-08-18T18:07:06.829Z"
+    "updatedAt": "2025-08-21T08:55:18.334Z"
   },
   "rows": [
     {
@@ -18,6 +18,11 @@
       "id": "32b54567-6730-4ff3-8f55-4f3c08f4df54",
       "viewId": "efec186a-e36d-4b16-8a25-ca1a8e6e1b48",
       "accountId": "82fe42d7-b9ad-41ef-8b8e-f2720b2b6771"
+    },
+    {
+      "id": "3d6c98ea-9eec-4abc-a7a3-d5a633a257f8",
+      "viewId": "a0dfe56f-9772-4106-b469-ecd093b8072a",
+      "accountId": "b393f670-71f9-4675-827a-6fe7506d8a3b"
     }
   ]
 }
