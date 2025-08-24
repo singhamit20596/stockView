@@ -157,7 +157,14 @@ export async function updateAccountSummary(accountId: string): Promise<void> {
     throw stocksError;
   }
 
-  const summary = stocks?.reduce((acc, stock) => {
+  interface Summary {
+    invested_value: number;
+    current_value: number;
+    pnl: number;
+    pnl_percent: number;
+  }
+
+  const summary: Summary = stocks?.reduce((acc: Summary, stock) => {
     acc.invested_value += stock.invested_value;
     acc.current_value += stock.current_value;
     acc.pnl += stock.pnl;
