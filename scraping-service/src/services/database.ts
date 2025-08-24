@@ -162,7 +162,7 @@ export async function updateAccountSummary(accountId: string): Promise<void> {
     acc.current_value += stock.current_value;
     acc.pnl += stock.pnl;
     return acc;
-  }, { invested_value: 0, current_value: 0, pnl: 0 }) || { invested_value: 0, current_value: 0, pnl: 0 };
+  }, { invested_value: 0, current_value: 0, pnl: 0, pnl_percent: 0 }) || { invested_value: 0, current_value: 0, pnl: 0, pnl_percent: 0 };
 
   summary.pnl_percent = summary.invested_value > 0 
     ? (summary.pnl / summary.invested_value) * 100 
