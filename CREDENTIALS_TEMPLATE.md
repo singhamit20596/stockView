@@ -11,10 +11,10 @@ Service Role Key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsI
 Database Password: SIwach@007MONU
 ```
 
-## **🚂 Railway Credentials**
+## **🚂 Render Credentials**
 
 ```
-Service URL: https://stockview-production.up.railway.app
+Service URL: https://stockview-6oba.onrender.com
 Project Name: stockview
 ```
 
@@ -39,9 +39,9 @@ LOG_LEVEL=info
 
 ### **For Netlify (frontend):**
 ```env
-NEXT_PUBLIC_SUPABASE_URL=https://_________________.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9._________________
-NEXT_PUBLIC_SCRAPING_SERVICE_URL=https://_________________.up.railway.app
+NEXT_PUBLIC_SUPABASE_URL=https://iydjcmhjvpnriklgphuq.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml5ZGpjbWhqdnBucmlrbGdwaHVxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYwNTYzMTgsImV4cCI6MjA3MTYzMjMxOH0.JtpiWPzWvHjBBTQ13ZaGpQYdgwH9VV1SMGblJSmXtY8
+NEXT_PUBLIC_SCRAPING_SERVICE_URL=https://stockview-6oba.onrender.com
 NEXT_PUBLIC_USE_MOCK_DATA=false
 ```
 
@@ -52,10 +52,10 @@ NEXT_PUBLIC_USE_MOCK_DATA=false
 - [ ] **Phase 1**: Supabase project created
 - [ ] **Phase 1**: Database tables created
 - [ ] **Phase 1**: Credentials copied above
-- [ ] **Phase 2**: Railway account created
-- [ ] **Phase 2**: Scraping service deployed
-- [ ] **Phase 2**: Railway credentials copied above
-- [ ] **Phase 3**: Netlify environment variables set
+- [x] **Phase 2**: Render account created
+- [x] **Phase 2**: Scraping service deployed
+- [x] **Phase 2**: Render credentials copied above
+- [x] **Phase 3**: Netlify environment variables set
 - [ ] **Phase 4**: Database connection tested
 - [ ] **Phase 4**: Scraping service tested
 - [ ] **Phase 4**: All features working
