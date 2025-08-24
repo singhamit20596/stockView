@@ -157,16 +157,16 @@ export async function updateAccountSummary(accountId: string): Promise<void> {
     throw stocksError;
   }
 
-  const summary = stocks?.reduce((acc, stock) => {
-    acc.invested_value += stock.invested_value;
-    acc.current_value += stock.current_value;
-    acc.pnl += stock.pnl;
-    return acc;
-  }, { invested_value: 0, current_value: 0, pnl: 0 }) || { invested_value: 0, current_value: 0, pnl: 0 };
+        const summary = stocks?.reduce((acc, stock) => {
+        acc.invested_value += stock.invested_value;
+        acc.current_value += stock.current_value;
+        acc.pnl += stock.pnl;
+        return acc;
+      }, { invested_value: 0, current_value: 0, pnl: 0, pnl_percent: 0 }) || { invested_value: 0, current_value: 0, pnl: 0, pnl_percent: 0 };
 
-  summary.pnl_percent = summary.invested_value > 0 
-    ? (summary.pnl / summary.invested_value) * 100 
-    : 0;
+      summary.pnl_percent = summary.invested_value > 0
+        ? (summary.pnl / summary.invested_value) * 100
+        : 0;
 
   // Update account
   const { error: updateError } = await supabase

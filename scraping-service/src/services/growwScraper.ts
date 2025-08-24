@@ -136,14 +136,15 @@ export async function scrapeGrowwHoldings(
 
     logger.info('Scraping completed successfully', { sessionId, accountName, holdingsCount: processedHoldings.length });
 
-  } catch (error) {
-    logger.error('Scraping failed', { sessionId, accountName, error: error.message });
-    
-    await updateScrapeSession(sessionId, {
-      status: 'failed',
-      progress: { percent: 0, stage: 'Failed' },
-      error: error.message
-    });
+        } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        logger.error('Scraping failed', { sessionId, accountName, error: errorMessage });
+        
+        await updateScrapeSession(sessionId, {
+          status: 'failed',
+          progress: { percent: 0, stage: 'Failed' },
+          error: errorMessage
+        });
   } finally {
     // Cleanup
     if (page) await page.close();
