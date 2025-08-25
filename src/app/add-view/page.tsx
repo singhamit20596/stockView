@@ -10,7 +10,7 @@ export default function AddViewPage() {
     const check = trpc.views.checkNameUnique.useQuery({ name }, { enabled: !!name });
     const canSubmit = useMemo(() => {
         const ids = Object.entries(selected).filter(([, v]) => v).map(([id]) => id);
-        return !!name && (check.data?.valid ?? false) && ids.length > 0;
+        return !!name && (check.data?.isUnique ?? false) && ids.length > 0;
     }, [name, check.data, selected]);
 
     return (
@@ -20,7 +20,7 @@ export default function AddViewPage() {
                 <label className="block text-sm font-bold text-[#003135] dark:text-white">View Name</label>
                 <input className="border border-[#CBD5E1] dark:border-[#024950] p-2 w-full text-[#003135] dark:text-white bg-white dark:bg-[#003135] rounded-lg" value={name} onChange={(e) => setName(e.target.value)} placeholder="My Combined Portfolio" />
                 {name && check.data && (
-                    <p className={`text-xs ${check.data.valid ? 'text-[#0FA4AF]' : 'text-[#964734]'}`}>{check.data.valid ? 'Name is available' : 'Name already exists'}</p>
+                    <p className={`text-xs ${check.data.isUnique ? 'text-[#0FA4AF]' : 'text-[#964734]'}`}>{check.data.isUnique ? 'Name is available' : 'Name already exists'}</p>
                 )}
             </div>
             <div className="space-y-2">

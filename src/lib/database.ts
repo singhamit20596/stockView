@@ -59,7 +59,23 @@ export interface ScrapeSession {
 // Check if Supabase is configured
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-const useMockData = process.env.NEXT_PUBLIC_USE_MOCK_DATA === 'true' || !supabaseUrl || !supabaseAnonKey;
+// Force use of Supabase if environment variables are set
+let useMockData = process.env.NEXT_PUBLIC_USE_MOCK_DATA === 'true' || !supabaseUrl || !supabaseAnonKey;
+
+// Override to force Supabase usage for production
+const forceSupabase = supabaseUrl && supabaseAnonKey && process.env.NEXT_PUBLIC_USE_MOCK_DATA === 'false';
+
+// If we have Supabase credentials and explicitly want to use production data, force Supabase
+if (forceSupabase) {
+  useMockData = false;
+}
+
+console.log('[DB CONFIG] Environment check:', {
+  supabaseUrl: supabaseUrl ? 'SET' : 'NOT SET',
+  supabaseAnonKey: supabaseAnonKey ? 'SET' : 'NOT SET',
+  NEXT_PUBLIC_USE_MOCK_DATA: process.env.NEXT_PUBLIC_USE_MOCK_DATA,
+  useMockData
+});
 
 // Supabase client (only if configured)
 export const supabase = supabaseUrl && supabaseAnonKey 
@@ -70,7 +86,7 @@ export const supabase = supabaseUrl && supabaseAnonKey
 export const db = {
   // Accounts
   async listAccounts(): Promise<Account[]> {
-    if (useMockData) {
+    if (useMockData && !forceSupabase) {
       return mockDb.listAccounts();
     }
     

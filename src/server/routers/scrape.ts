@@ -17,7 +17,18 @@ export const scrapeRouter = router({
 
 				// Check if we're using mock data or have scraping service configured
 				const scrapingServiceUrl = process.env.NEXT_PUBLIC_SCRAPING_SERVICE_URL;
-				const useMockData = process.env.NEXT_PUBLIC_USE_MOCK_DATA === 'true' || !scrapingServiceUrl;
+				let useMockData = process.env.NEXT_PUBLIC_USE_MOCK_DATA === 'true' || !scrapingServiceUrl;
+				
+				// Force use of production services if explicitly set
+				if (process.env.NEXT_PUBLIC_USE_MOCK_DATA === 'false' && scrapingServiceUrl) {
+					useMockData = false;
+				}
+				
+				console.log('[SCRAPE] Environment check:', {
+					scrapingServiceUrl,
+					useMockData,
+					NEXT_PUBLIC_USE_MOCK_DATA: process.env.NEXT_PUBLIC_USE_MOCK_DATA
+				});
 
 				if (useMockData) {
 					// Simulate scraping process with mock data
@@ -39,6 +50,8 @@ export const scrapeRouter = router({
 				}
 
 				// Call Railway scraping service
+				console.log('[SCRAPE] Calling scraping service:', `${scrapingServiceUrl}/api/scrape/start`);
+				
 				const response = await fetch(`${scrapingServiceUrl}/api/scrape/start`, {
 					method: 'POST',
 					headers: {
@@ -50,12 +63,17 @@ export const scrapeRouter = router({
 					})
 				});
 
+				console.log('[SCRAPE] Response status:', response.status);
+				console.log('[SCRAPE] Response ok:', response.ok);
+
 				if (!response.ok) {
 					const error = await response.text();
+					console.log('[SCRAPE] Error response:', error);
 					throw new Error(`Scraping service error: ${error}`);
 				}
 
 				const result = await response.json();
+				console.log('[SCRAPE] Success response:', result);
 				
 				// Update session with Railway session ID
 				await db.updateScrapeSession(session.id, {
@@ -74,10 +92,40 @@ export const scrapeRouter = router({
 		.input(z.object({ jobId: z.string().uuid().or(z.string()) }))
 		.query(async ({ input }) => {
 			try {
+				console.log('[SCRAPE STATUS] Looking for session:', input.jobId);
 				const session = await db.getScrapeSession(input.jobId);
+				console.log('[SCRAPE STATUS] Session found:', session);
+				
+				// If session exists but is still in 'running' status, try to get latest from scraping service
+				if (session && session.status === 'running') {
+					const scrapingServiceUrl = process.env.NEXT_PUBLIC_SCRAPING_SERVICE_URL;
+					if (scrapingServiceUrl) {
+						try {
+							console.log('[SCRAPE STATUS] Fetching latest from scraping service');
+							const response = await fetch(`${scrapingServiceUrl}/api/scrape/status/${input.jobId}`);
+							if (response.ok) {
+								const serviceStatus = await response.json();
+								console.log('[SCRAPE STATUS] Service status:', serviceStatus);
+								
+								// Update local session with latest progress
+								await db.updateScrapeSession(input.jobId, {
+									status: serviceStatus.status,
+									progress: serviceStatus.progress
+								});
+								
+								return serviceStatus.progress;
+							}
+						} catch (error) {
+							console.log('[SCRAPE STATUS] Failed to fetch from service:', error);
+						}
+					}
+				}
+				
 				if (!session) {
+					console.log('[SCRAPE STATUS] Session not found');
 					return { percent: 0, stage: 'not-found' } as const;
 				}
+				console.log('[SCRAPE STATUS] Returning progress:', session.progress);
 				return session.progress;
 			} catch (error) {
 				console.error('Failed to get scrape status:', error);

@@ -36,6 +36,9 @@ export default function AddAccountPage() {
 
 	// simple frontend console logging for debug
 	useEffect(() => {
+		console.log('[ui] jobId:', jobId);
+	}, [jobId]);
+	useEffect(() => {
 		console.log('[ui] progress', progress);
 	}, [progress]);
 	useEffect(() => {
@@ -77,7 +80,7 @@ export default function AddAccountPage() {
 							onClick={async () => {
 								if (!name) return;
 								const res = await check.refetch();
-								setChecked(res.data?.valid === true);
+								setChecked(res.data?.isUnique === true);
 							}}
 						>
 							Check availability
@@ -106,7 +109,9 @@ export default function AddAccountPage() {
 					variant="primary"
 					disabled={!name || start.isPending || isChecking || !isNameAvailable}
 					onClick={async () => {
+						console.log('[UI] Starting scrape for:', { name, brokerId });
 						const res = await start.mutateAsync({ name, brokerId });
+						console.log('[UI] Scrape started, jobId:', res.jobId);
 						setJobId(res.jobId);
 					}}
 				>
