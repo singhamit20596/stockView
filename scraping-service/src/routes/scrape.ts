@@ -1,8 +1,14 @@
 import { Router } from 'express';
+import { chromium } from 'playwright';
 import { scrapeGrowwHoldings } from '../services/growwScraper';
 import { updateScrapeSession, createScrapeSession, getScrapeSession } from '../services/database';
 import { logger } from '../utils/logger';
 import { v4 as uuidv4 } from 'uuid';
+
+// Browserless.io configuration
+const USE_BROWSERLESS = process.env.USE_BROWSERLESS?.toLowerCase() === 'true';
+const BROWSERLESS_URL = process.env.BROWSERLESS_URL || 'wss://production-sfo.browserless.io';
+const BROWSERLESS_TOKEN = process.env.BROWSERLESS_TOKEN;
 
 const router = Router();
 
@@ -201,6 +207,56 @@ router.get('/results/:sessionId', async (req, res) => {
     logger.error('Failed to get scraping results', error);
     res.status(500).json({
       error: 'Failed to get scraping results',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+// Test Browserless.io connection
+router.get('/test-browserless', async (req, res) => {
+  try {
+    logger.info('🧪 TESTING BROWSERLESS.IO CONNECTION', { 
+      service: 'RAILWAY_API', 
+      stage: 'BROWSERLESS_TEST', 
+      flow: 'CONNECTION_TEST',
+      BROWSERLESS_URL,
+      hasToken: !!BROWSERLESS_TOKEN 
+    });
+
+    const browserWSEndpoint = `${BROWSERLESS_URL}?token=${BROWSERLESS_TOKEN}`;
+    
+    // Test connection with shorter timeout
+    const browser = await chromium.connect({ 
+      wsEndpoint: browserWSEndpoint,
+      timeout: 10000 // 10 seconds timeout for testing
+    });
+
+    await browser.close();
+    
+    logger.info('✅ BROWSERLESS.IO TEST SUCCESSFUL', { 
+      service: 'RAILWAY_API', 
+      stage: 'BROWSERLESS_TEST_SUCCESS', 
+      flow: 'CONNECTION_TEST'
+    });
+
+    res.json({ 
+      success: true, 
+      message: 'Browserless.io connection test successful',
+      endpoint: browserWSEndpoint 
+    });
+
+  } catch (error) {
+    logger.error('💥 BROWSERLESS.IO TEST FAILED', { 
+      service: 'RAILWAY_API', 
+      stage: 'BROWSERLESS_TEST_FAILED', 
+      flow: 'CONNECTION_TEST',
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined 
+    });
+
+    res.status(500).json({ 
+      success: false, 
+      error: 'Browserless.io connection test failed',
       message: error instanceof Error ? error.message : 'Unknown error'
     });
   }

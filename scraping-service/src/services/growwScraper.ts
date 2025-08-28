@@ -108,38 +108,68 @@ export async function scrapeGrowwHoldings(
         
         const browserWSEndpoint = `${BROWSERLESS_URL}?token=${BROWSERLESS_TOKEN}`;
         
-        logger.info('🔌 CONNECTING TO BROWSERLESS.IO', { 
-          service: 'BROWSER_SCRAPER', 
-          stage: 'BROWSERLESS_CONNECT', 
-          flow: 'SCRAPING_FLOW',
-          sessionId,
-          endpoint: browserWSEndpoint 
-        });
+        // Try Browserless.io with retry logic
+        let retryCount = 0;
+        const maxRetries = 3;
+        
+        while (retryCount < maxRetries) {
+          try {
+            logger.info(`🔌 CONNECTING TO BROWSERLESS.IO (Attempt ${retryCount + 1}/${maxRetries})`, { 
+              service: 'BROWSER_SCRAPER', 
+              stage: 'BROWSERLESS_CONNECT', 
+              flow: 'SCRAPING_FLOW',
+              sessionId,
+              endpoint: browserWSEndpoint,
+              attempt: retryCount + 1 
+            });
 
-        browser = await chromium.connect({ 
-          wsEndpoint: browserWSEndpoint,
-          timeout: 30000
-        });
+            browser = await chromium.connect({ 
+              wsEndpoint: browserWSEndpoint,
+              timeout: 15000 // Reduced timeout for faster retries
+            });
 
-        logger.info('✅ BROWSERLESS.IO CONNECTION SUCCESSFUL', { 
-          service: 'BROWSER_SCRAPER', 
-          stage: 'BROWSERLESS_SUCCESS', 
-          flow: 'SCRAPING_FLOW',
-          sessionId 
-        });
+            logger.info('✅ BROWSERLESS.IO CONNECTION SUCCESSFUL', { 
+              service: 'BROWSER_SCRAPER', 
+              stage: 'BROWSERLESS_SUCCESS', 
+              flow: 'SCRAPING_FLOW',
+              sessionId,
+              attempt: retryCount + 1 
+            });
 
-        const context = await browser.newContext({
-          userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-          viewport: { width: 1920, height: 1080 }
-        });
+            const context = await browser.newContext({
+              userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+              viewport: { width: 1920, height: 1080 }
+            });
 
-        page = await context.newPage();
-        logger.info('📄 BROWSERLESS.IO PAGE CREATED', { 
-          service: 'BROWSER_SCRAPER', 
-          stage: 'PAGE_CREATED', 
-          flow: 'SCRAPING_FLOW',
-          sessionId 
-        });
+            page = await context.newPage();
+            logger.info('📄 BROWSERLESS.IO PAGE CREATED', { 
+              service: 'BROWSER_SCRAPER', 
+              stage: 'PAGE_CREATED', 
+              flow: 'SCRAPING_FLOW',
+              sessionId 
+            });
+            
+            break; // Success, exit retry loop
+            
+          } catch (retryError) {
+            retryCount++;
+            logger.warn(`⚠️ BROWSERLESS.IO CONNECTION ATTEMPT ${retryCount} FAILED`, { 
+              service: 'BROWSER_SCRAPER', 
+              stage: 'BROWSERLESS_RETRY', 
+              flow: 'SCRAPING_FLOW',
+              sessionId,
+              attempt: retryCount,
+              error: retryError instanceof Error ? retryError.message : 'Unknown error'
+            });
+            
+            if (retryCount >= maxRetries) {
+              throw retryError; // Re-throw if all retries failed
+            }
+            
+            // Wait before retry
+            await new Promise(resolve => setTimeout(resolve, 2000 * retryCount));
+          }
+        }
       } else {
         logger.info('🖥️ ATTEMPTING LOCAL BROWSER LAUNCH', { 
           service: 'BROWSER_SCRAPER', 
