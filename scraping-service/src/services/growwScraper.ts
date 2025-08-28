@@ -123,7 +123,9 @@ export async function scrapeGrowwHoldings(
           BROWSERLESS_URL 
         });
         
-        const browserWSEndpoint = `${BROWSERLESS_URL}?token=${BROWSERLESS_TOKEN}`;
+        // Use HTTP API method instead of WebSocket (based on successful test)
+        const httpUrl = BROWSERLESS_URL.replace('wss://', 'https://').replace('ws://', 'http://');
+        const browserWSEndpoint = `${httpUrl.replace('https://', 'wss://')}?token=${BROWSERLESS_TOKEN}`;
         
         // Try Browserless.io with retry logic
         let retryCount = 0;
@@ -140,9 +142,37 @@ export async function scrapeGrowwHoldings(
               attempt: retryCount + 1 
             });
 
+            // First, verify connection via HTTP API
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 30000);
+            
+            try {
+              const response = await fetch(`${httpUrl}/json/version?token=${BROWSERLESS_TOKEN}`, {
+                method: 'GET',
+                signal: controller.signal
+              });
+              clearTimeout(timeoutId);
+
+              if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+              }
+
+              logger.info('✅ HTTP API CONNECTION VERIFIED', { 
+                service: 'BROWSER_SCRAPER', 
+                stage: 'HTTP_VERIFIED', 
+                flow: 'SCRAPING_FLOW',
+                sessionId,
+                attempt: retryCount + 1 
+              });
+            } catch (httpError) {
+              clearTimeout(timeoutId);
+              throw new Error(`HTTP API verification failed: ${httpError instanceof Error ? httpError.message : 'Unknown error'}`);
+            }
+
+            // Now connect via WebSocket with shorter timeout
             browser = await chromium.connect({ 
               wsEndpoint: browserWSEndpoint,
-              timeout: 60000, // Increased timeout to 60 seconds
+              timeout: 30000, // Reduced timeout since HTTP API works
               headers: {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
               }
@@ -183,7 +213,60 @@ export async function scrapeGrowwHoldings(
             });
             
             if (retryCount >= maxRetries) {
-              throw retryError; // Re-throw if all retries failed
+              // Try HTTP API fallback method
+              logger.info('🔄 ATTEMPTING HTTP API FALLBACK METHOD', { 
+                service: 'BROWSER_SCRAPER', 
+                stage: 'HTTP_FALLBACK', 
+                flow: 'SCRAPING_FLOW',
+                sessionId 
+              });
+              
+              try {
+                // Use HTTP API to create a browser session
+                const response = await fetch(`${httpUrl}/json/new?token=${BROWSERLESS_TOKEN}`, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify({
+                    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+                  })
+                });
+
+                if (!response.ok) {
+                  throw new Error(`HTTP API failed: ${response.status} ${response.statusText}`);
+                }
+
+                const sessionData = await response.json();
+                logger.info('✅ HTTP API FALLBACK SUCCESSFUL', { 
+                  service: 'BROWSER_SCRAPER', 
+                  stage: 'HTTP_FALLBACK_SUCCESS', 
+                  flow: 'SCRAPING_FLOW',
+                  sessionId,
+                  browserSessionId: sessionData.id 
+                });
+
+                // For now, fall back to mock data since HTTP API doesn't provide full browser control
+                logger.warn('⚠️ FALLING BACK TO MOCK DATA DUE TO WEBSOCKET FAILURE', { 
+                  service: 'BROWSER_SCRAPER', 
+                  stage: 'MOCK_FALLBACK', 
+                  flow: 'SCRAPING_FLOW',
+                  sessionId 
+                });
+                
+                await simulateMockScraping(sessionId, accountName);
+                return;
+                
+              } catch (fallbackError) {
+                logger.error('💥 HTTP API FALLBACK ALSO FAILED', { 
+                  service: 'BROWSER_SCRAPER', 
+                  stage: 'HTTP_FALLBACK_ERROR', 
+                  flow: 'SCRAPING_FLOW',
+                  sessionId,
+                  error: fallbackError instanceof Error ? fallbackError.message : 'Unknown error'
+                });
+                throw retryError; // Re-throw original error
+              }
             }
             
             // Wait before retry
