@@ -212,7 +212,7 @@ router.get('/results/:sessionId', async (req, res) => {
   }
 });
 
-// Test Browserless.io connection
+// Test Browserless.io connection with multiple methods
 router.get('/test-browserless', async (req, res) => {
   try {
     logger.info('🧪 TESTING BROWSERLESS.IO CONNECTION', { 
@@ -223,32 +223,155 @@ router.get('/test-browserless', async (req, res) => {
       hasToken: !!BROWSERLESS_TOKEN 
     });
 
-    const browserWSEndpoint = `${BROWSERLESS_URL}?token=${BROWSERLESS_TOKEN}`;
-    
-    // Test connection with shorter timeout
-    const browser = await chromium.connect({ 
-      wsEndpoint: browserWSEndpoint,
-      timeout: 10000 // 10 seconds timeout for testing
-    });
+    // Test different connection methods
+    const testResults = [];
 
-    await browser.close();
-    
-    logger.info('✅ BROWSERLESS.IO TEST SUCCESSFUL', { 
-      service: 'RAILWAY_API', 
-      stage: 'BROWSERLESS_TEST_SUCCESS', 
-      flow: 'CONNECTION_TEST'
-    });
+    // Method 1: Direct WebSocket connection
+    try {
+      logger.info('🔌 TESTING METHOD 1: Direct WebSocket', { 
+        service: 'RAILWAY_API', 
+        stage: 'METHOD_1_TEST', 
+        flow: 'CONNECTION_TEST'
+      });
 
-    res.json({ 
-      success: true, 
-      message: 'Browserless.io connection test successful',
-      endpoint: browserWSEndpoint 
-    });
+      const browserWSEndpoint = `${BROWSERLESS_URL}?token=${BROWSERLESS_TOKEN}`;
+             const browser = await chromium.connect({ 
+         wsEndpoint: browserWSEndpoint,
+         timeout: 30000
+       });
+      await browser.close();
+      
+      testResults.push({ method: 'Direct WebSocket', success: true });
+      logger.info('✅ METHOD 1 SUCCESSFUL', { 
+        service: 'RAILWAY_API', 
+        stage: 'METHOD_1_SUCCESS', 
+        flow: 'CONNECTION_TEST'
+      });
+    } catch (error) {
+      testResults.push({ 
+        method: 'Direct WebSocket', 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      });
+      logger.warn('⚠️ METHOD 1 FAILED', { 
+        service: 'RAILWAY_API', 
+        stage: 'METHOD_1_FAILED', 
+        flow: 'CONNECTION_TEST',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+
+    // Method 2: HTTP API test
+    try {
+      logger.info('🌐 TESTING METHOD 2: HTTP API', { 
+        service: 'RAILWAY_API', 
+        stage: 'METHOD_2_TEST', 
+        flow: 'CONNECTION_TEST'
+      });
+
+      const httpUrl = BROWSERLESS_URL.replace('wss://', 'https://').replace('ws://', 'http://');
+             const response = await fetch(`${httpUrl}/json/version?token=${BROWSERLESS_TOKEN}`, {
+         method: 'GET',
+         timeout: 20000
+       });
+
+      if (response.ok) {
+        const data = await response.json();
+        testResults.push({ method: 'HTTP API', success: true, data });
+        logger.info('✅ METHOD 2 SUCCESSFUL', { 
+          service: 'RAILWAY_API', 
+          stage: 'METHOD_2_SUCCESS', 
+          flow: 'CONNECTION_TEST',
+          data 
+        });
+      } else {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+    } catch (error) {
+      testResults.push({ 
+        method: 'HTTP API', 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      });
+      logger.warn('⚠️ METHOD 2 FAILED', { 
+        service: 'RAILWAY_API', 
+        stage: 'METHOD_2_FAILED', 
+        flow: 'CONNECTION_TEST',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+
+    // Method 3: Alternative WebSocket endpoint
+    try {
+      logger.info('🔌 TESTING METHOD 3: Alternative WebSocket', { 
+        service: 'RAILWAY_API', 
+        stage: 'METHOD_3_TEST', 
+        flow: 'CONNECTION_TEST'
+      });
+
+      const altEndpoint = `wss://chrome.browserless.io?token=${BROWSERLESS_TOKEN}`;
+             const browser = await chromium.connect({ 
+         wsEndpoint: altEndpoint,
+         timeout: 30000
+       });
+      await browser.close();
+      
+      testResults.push({ method: 'Alternative WebSocket', success: true });
+      logger.info('✅ METHOD 3 SUCCESSFUL', { 
+        service: 'RAILWAY_API', 
+        stage: 'METHOD_3_SUCCESS', 
+        flow: 'CONNECTION_TEST'
+      });
+    } catch (error) {
+      testResults.push({ 
+        method: 'Alternative WebSocket', 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      });
+      logger.warn('⚠️ METHOD 3 FAILED', { 
+        service: 'RAILWAY_API', 
+        stage: 'METHOD_3_FAILED', 
+        flow: 'CONNECTION_TEST',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+
+    // Check if any method worked
+    const successfulMethods = testResults.filter(r => r.success);
+    
+    if (successfulMethods.length > 0) {
+      logger.info('✅ BROWSERLESS.IO TEST SUCCESSFUL', { 
+        service: 'RAILWAY_API', 
+        stage: 'BROWSERLESS_TEST_SUCCESS', 
+        flow: 'CONNECTION_TEST',
+        successfulMethods: successfulMethods.length 
+      });
+
+      res.json({ 
+        success: true, 
+        message: 'Browserless.io connection test successful',
+        results: testResults,
+        workingMethod: successfulMethods[0].method
+      });
+    } else {
+      logger.error('💥 ALL BROWSERLESS.IO TESTS FAILED', { 
+        service: 'RAILWAY_API', 
+        stage: 'ALL_TESTS_FAILED', 
+        flow: 'CONNECTION_TEST',
+        results: testResults 
+      });
+
+      res.status(500).json({ 
+        success: false, 
+        error: 'All Browserless.io connection tests failed',
+        results: testResults
+      });
+    }
 
   } catch (error) {
-    logger.error('💥 BROWSERLESS.IO TEST FAILED', { 
+    logger.error('💥 BROWSERLESS.IO TEST ERROR', { 
       service: 'RAILWAY_API', 
-      stage: 'BROWSERLESS_TEST_FAILED', 
+      stage: 'BROWSERLESS_TEST_ERROR', 
       flow: 'CONNECTION_TEST',
       error: error instanceof Error ? error.message : 'Unknown error',
       stack: error instanceof Error ? error.stack : undefined 
@@ -256,7 +379,7 @@ router.get('/test-browserless', async (req, res) => {
 
     res.status(500).json({ 
       success: false, 
-      error: 'Browserless.io connection test failed',
+      error: 'Browserless.io connection test error',
       message: error instanceof Error ? error.message : 'Unknown error'
     });
   }

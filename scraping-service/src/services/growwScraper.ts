@@ -14,6 +14,7 @@ import {
 const USE_BROWSERLESS = process.env.USE_BROWSERLESS?.toLowerCase() === 'true';
 const BROWSERLESS_URL = process.env.BROWSERLESS_URL || 'wss://production-sfo.browserless.io';
 const BROWSERLESS_TOKEN = process.env.BROWSERLESS_TOKEN;
+const USE_MOCK_DATA = process.env.USE_MOCK_DATA?.toLowerCase() === 'true';
 
 // Debug environment variables
 console.log('🔧 ENVIRONMENT VARIABLES DEBUG:', {
@@ -21,6 +22,7 @@ console.log('🔧 ENVIRONMENT VARIABLES DEBUG:', {
   USE_BROWSERLESS_PARSED: USE_BROWSERLESS,
   BROWSERLESS_URL_RAW: process.env.BROWSERLESS_URL,
   BROWSERLESS_TOKEN_EXISTS: !!BROWSERLESS_TOKEN,
+  USE_MOCK_DATA,
   NODE_ENV: process.env.NODE_ENV
 });
 
@@ -85,8 +87,23 @@ export async function scrapeGrowwHoldings(
       sessionId,
       USE_BROWSERLESS,
       BROWSERLESS_URL,
-      hasToken: !!BROWSERLESS_TOKEN 
+      hasToken: !!BROWSERLESS_TOKEN,
+      USE_MOCK_DATA 
     });
+
+    // Check if we should use mock data
+    if (USE_MOCK_DATA) {
+      logger.info('🎭 USING MOCK DATA MODE', { 
+        service: 'BROWSER_SCRAPER', 
+        stage: 'MOCK_MODE', 
+        flow: 'SCRAPING_FLOW',
+        sessionId 
+      });
+      
+      // Simulate the scraping process with mock data
+      await simulateMockScraping(sessionId, accountName);
+      return;
+    }
 
     // Launch Playwright browser
     logger.info('🌐 BROWSER LAUNCH STARTED', { 
@@ -125,7 +142,10 @@ export async function scrapeGrowwHoldings(
 
             browser = await chromium.connect({ 
               wsEndpoint: browserWSEndpoint,
-              timeout: 15000 // Reduced timeout for faster retries
+              timeout: 60000, // Increased timeout to 60 seconds
+              headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+              }
             });
 
             logger.info('✅ BROWSERLESS.IO CONNECTION SUCCESSFUL', { 
@@ -388,10 +408,138 @@ export async function scrapeGrowwHoldings(
           logger.warn('Failed to close browser', { error });
         }
       }
-    }
+      }
+}
+
+async function simulateMockScraping(sessionId: string, accountName: string): Promise<void> {
+  try {
+    logger.info('🎭 STARTING MOCK SCRAPING SIMULATION', { 
+      service: 'BROWSER_SCRAPER', 
+      stage: 'MOCK_START', 
+      flow: 'MOCK_SCRAPING',
+      sessionId 
+    });
+
+    // Simulate browser launch
+    await updateScrapeSession(sessionId, {
+      progress: { percent: 20, stage: 'Launching browser...' }
+    });
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    // Simulate navigation
+    await updateScrapeSession(sessionId, {
+      progress: { percent: 30, stage: 'Navigating to Groww...' }
+    });
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    // Simulate login wait
+    await updateScrapeSession(sessionId, {
+      progress: { percent: 40, stage: 'Waiting for user login (5 minutes)...' }
+    });
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    // Simulate login success
+    await updateScrapeSession(sessionId, {
+      progress: { percent: 50, stage: 'Login successful, navigating to holdings...' }
+    });
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    // Simulate extracting holdings
+    await updateScrapeSession(sessionId, {
+      progress: { percent: 60, stage: 'Extracting holdings data...' }
+    });
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    // Simulate processing data
+    await updateScrapeSession(sessionId, {
+      progress: { percent: 80, stage: 'Processing holdings data...' }
+    });
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    // Simulate saving to database
+    await updateScrapeSession(sessionId, {
+      progress: { percent: 90, stage: 'Saving to database...' }
+    });
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    // Create mock holdings data
+    const mockHoldings = [
+      {
+        stock_name: 'RELIANCE',
+        quantity: 100,
+        avg_price: 2500.00,
+        market_price: 2600.00,
+        invested_value: 250000.00,
+        current_value: 260000.00,
+        pnl: 10000.00,
+        pnl_percent: 4.00,
+        sector: 'Oil & Gas',
+        subsector: 'Refineries',
+        market_cap: 'Large Cap'
+      },
+      {
+        stock_name: 'TCS',
+        quantity: 50,
+        avg_price: 3500.00,
+        market_price: 3600.00,
+        invested_value: 175000.00,
+        current_value: 180000.00,
+        pnl: 5000.00,
+        pnl_percent: 2.86,
+        sector: 'Technology',
+        subsector: 'IT Services',
+        market_cap: 'Large Cap'
+      },
+      {
+        stock_name: 'HDFC BANK',
+        quantity: 200,
+        avg_price: 1500.00,
+        market_price: 1520.00,
+        invested_value: 300000.00,
+        current_value: 304000.00,
+        pnl: 4000.00,
+        pnl_percent: 1.33,
+        sector: 'Banking',
+        subsector: 'Private Banks',
+        market_cap: 'Large Cap'
+      }
+    ];
+
+    // Save mock data to database
+    await saveHoldingsToDatabase(accountName, mockHoldings);
+
+    // Complete the scraping
+    await updateScrapeSession(sessionId, {
+      status: 'completed',
+      progress: { percent: 100, stage: 'Completed successfully' }
+    });
+
+    logger.info('✅ MOCK SCRAPING COMPLETED SUCCESSFULLY', { 
+      service: 'BROWSER_SCRAPER', 
+      stage: 'MOCK_COMPLETE', 
+      flow: 'MOCK_SCRAPING',
+      sessionId,
+      holdingsCount: mockHoldings.length 
+    });
+
+  } catch (error) {
+    logger.error('💥 MOCK SCRAPING FAILED', { 
+      service: 'BROWSER_SCRAPER', 
+      stage: 'MOCK_ERROR', 
+      flow: 'MOCK_SCRAPING',
+      sessionId,
+      error: error instanceof Error ? error.message : 'Unknown error' 
+    });
+    
+    await updateScrapeSession(sessionId, {
+      status: 'failed',
+      progress: { percent: 0, stage: 'Failed' },
+      error: 'Mock scraping failed: ' + (error instanceof Error ? error.message : 'Unknown error')
+    });
   }
-  
-  async function extractHoldings(page: Page): Promise<RawHolding[]> {
+}
+
+async function extractHoldings(page: Page): Promise<RawHolding[]> {
     try {
       // Wait for holdings table to load
       await page.waitForSelector('[data-testid="holdings-table"]', { timeout: 10000 });
