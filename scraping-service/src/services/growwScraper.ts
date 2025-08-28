@@ -10,6 +10,11 @@ import {
   updateAccountSummary 
 } from './database';
 
+// Browser configuration
+const USE_BROWSERLESS = process.env.USE_BROWSERLESS === 'true';
+const BROWSERLESS_URL = process.env.BROWSERLESS_URL || 'wss://chrome.browserless.io';
+const BROWSERLESS_TOKEN = process.env.BROWSERLESS_TOKEN;
+
 export interface RawHolding {
   stockName: string;
   quantity: string;
@@ -52,31 +57,52 @@ export async function scrapeGrowwHoldings(
 
     // Launch Playwright browser
     try {
-      logger.info('Attempting to launch Playwright browser');
-      browser = await chromium.launch({ 
-        headless: true,
-        args: [
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-          '--disable-dev-shm-usage',
-          '--disable-accelerated-2d-canvas',
-          '--no-first-run',
-          '--no-zygote',
-          '--disable-gpu',
-          '--disable-web-security',
-          '--disable-features=VizDisplayCompositor'
-        ]
-      });
+      if (USE_BROWSERLESS && BROWSERLESS_TOKEN) {
+        logger.info('Attempting to launch Playwright browser via Browserless.io');
+        
+        const browserWSEndpoint = `${BROWSERLESS_URL}?token=${BROWSERLESS_TOKEN}`;
+        
+        browser = await chromium.connect({ 
+          wsEndpoint: browserWSEndpoint,
+          timeout: 30000
+        });
 
-      const context = await browser.newContext({
-        userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-        viewport: { width: 1920, height: 1080 }
-      });
+        const context = await browser.newContext({
+          userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+          viewport: { width: 1920, height: 1080 }
+        });
 
-      page = await context.newPage();
-      logger.info('Playwright browser launched successfully');
+        page = await context.newPage();
+        logger.info('Playwright browser connected to Browserless.io successfully');
+      } else {
+        logger.info('Attempting to launch local browser');
+        browser = await chromium.launch({ 
+          headless: false, // Show browser UI
+          args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+            '--disable-accelerated-2d-canvas',
+            '--no-first-run',
+            '--no-zygote',
+            '--disable-gpu',
+            '--disable-web-security',
+            '--disable-features=VizDisplayCompositor',
+            '--remote-debugging-port=9222', // Enable remote debugging
+            '--remote-debugging-address=0.0.0.0' // Allow external connections
+          ]
+        });
+
+        const context = await browser.newContext({
+          userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+          viewport: { width: 1920, height: 1080 }
+        });
+
+        page = await context.newPage();
+        logger.info('Local browser launched successfully');
+      }
     } catch (error) {
-      logger.error('Failed to launch Playwright browser', { error });
+      logger.error('Failed to launch browser', { error });
       throw new Error('Failed to launch browser: ' + (error instanceof Error ? error.message : 'Unknown error'));
     }
 

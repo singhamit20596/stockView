@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { scrapeGrowwHoldings } from '../services/growwScraper';
-import { updateScrapeSession, createScrapeSession } from '../services/database';
+import { updateScrapeSession, createScrapeSession, getScrapeSession } from '../services/database';
 import { logger } from '../utils/logger';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -102,6 +102,25 @@ router.get('/results/:sessionId', async (req, res) => {
       error: 'Failed to get scraping results',
       message: error instanceof Error ? error.message : 'Unknown error'
     });
+  }
+});
+
+// Get browser debug URL for active sessions
+router.get('/browser/:sessionId', async (req, res) => {
+  try {
+    const { sessionId } = req.params;
+    const session = await getScrapeSession(sessionId);
+    
+    if (!session || session.status !== 'running') {
+      return res.status(404).json({ error: 'No active session found' });
+    }
+    
+    // Return the browser debug URL
+    const debugUrl = `http://localhost:9222`;
+    res.json({ debugUrl, sessionId });
+  } catch (error) {
+    logger.error('Failed to get browser URL', { error });
+    res.status(500).json({ error: 'Failed to get browser URL' });
   }
 });
 

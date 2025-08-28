@@ -138,6 +138,34 @@ export default function AddAccountPage() {
 						/>
 					</div>
 					<p className="text-sm text-[#64748B] dark:text-[#AFDDE5] font-medium">{progress.stage}</p>
+					
+					{/* Browser Login Instructions */}
+					{progress.stage?.includes('Waiting for user login') && jobId && (
+						<div className="mt-4 p-4 bg-[#F1F5F9] dark:bg-[#024950] border border-[#E2E8F0] dark:border-[#024950] rounded-lg">
+							<h3 className="text-sm font-semibold text-[#003135] dark:text-white mb-2">
+								🔐 Login Required
+							</h3>
+							<p className="text-xs text-[#64748B] dark:text-[#AFDDE5] mb-3">
+								A browser window has opened on the server. Please complete your Groww login there.
+							</p>
+							<div className="flex items-center gap-2">
+								<span className="text-xs text-[#64748B] dark:text-[#AFDDE5]">Browser URL:</span>
+								<code className="text-xs bg-[#E2E8F0] dark:bg-[#024950] px-2 py-1 rounded text-[#003135] dark:text-white">
+									https://stockview-production.up.railway.app:9222
+								</code>
+								<Button
+									size="sm"
+									variant="secondary"
+									onClick={() => window.open('https://stockview-production.up.railway.app:9222', '_blank')}
+								>
+									Open Browser
+								</Button>
+							</div>
+							<p className="text-xs text-[#964734] mt-2">
+								⚠️ Note: You have 5 minutes to complete the login
+							</p>
+						</div>
+					)}
 				</div>
 			)}
 			{preview && (
