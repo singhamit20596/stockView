@@ -11,9 +11,18 @@ import {
 } from './database';
 
 // Browser configuration
-const USE_BROWSERLESS = process.env.USE_BROWSERLESS === 'true';
+const USE_BROWSERLESS = process.env.USE_BROWSERLESS?.toLowerCase() === 'true';
 const BROWSERLESS_URL = process.env.BROWSERLESS_URL || 'wss://chrome.browserless.io';
 const BROWSERLESS_TOKEN = process.env.BROWSERLESS_TOKEN;
+
+// Debug environment variables
+console.log('🔧 ENVIRONMENT VARIABLES DEBUG:', {
+  USE_BROWSERLESS_RAW: process.env.USE_BROWSERLESS,
+  USE_BROWSERLESS_PARSED: USE_BROWSERLESS,
+  BROWSERLESS_URL_RAW: process.env.BROWSERLESS_URL,
+  BROWSERLESS_TOKEN_EXISTS: !!BROWSERLESS_TOKEN,
+  NODE_ENV: process.env.NODE_ENV
+});
 
 export interface RawHolding {
   stockName: string;
