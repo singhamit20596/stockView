@@ -44,6 +44,14 @@ export interface Stock {
 
 // Database operations
 export async function createScrapeSession(session: Omit<ScrapeSession, 'created_at' | 'updated_at'>): Promise<ScrapeSession> {
+  logger.info('💾 SUPABASE: Creating scrape session', { 
+    service: 'SUPABASE_DB', 
+    stage: 'CREATE_SESSION', 
+    flow: 'DATABASE_OPERATION',
+    sessionId: session.id,
+    accountName: session.account_name 
+  });
+
   const { data, error } = await supabase
     .from('scrape_sessions')
     .insert(session)
@@ -51,14 +59,35 @@ export async function createScrapeSession(session: Omit<ScrapeSession, 'created_
     .single();
 
   if (error) {
-    logger.error('Failed to create scrape session', error);
+    logger.error('💥 SUPABASE: Failed to create scrape session', { 
+      service: 'SUPABASE_DB', 
+      stage: 'CREATE_SESSION_ERROR', 
+      flow: 'DATABASE_OPERATION',
+      sessionId: session.id,
+      error 
+    });
     throw error;
   }
+
+  logger.info('✅ SUPABASE: Scrape session created successfully', { 
+    service: 'SUPABASE_DB', 
+    stage: 'CREATE_SESSION_SUCCESS', 
+    flow: 'DATABASE_OPERATION',
+    sessionId: session.id 
+  });
 
   return data;
 }
 
 export async function updateScrapeSession(id: string, updates: Partial<ScrapeSession>): Promise<ScrapeSession> {
+  logger.info('💾 SUPABASE: Updating scrape session', { 
+    service: 'SUPABASE_DB', 
+    stage: 'UPDATE_SESSION', 
+    flow: 'DATABASE_OPERATION',
+    sessionId: id,
+    updates 
+  });
+
   const { data, error } = await supabase
     .from('scrape_sessions')
     .update({ ...updates, updated_at: new Date().toISOString() })
@@ -67,9 +96,22 @@ export async function updateScrapeSession(id: string, updates: Partial<ScrapeSes
     .single();
 
   if (error) {
-    logger.error('Failed to update scrape session', error);
+    logger.error('💥 SUPABASE: Failed to update scrape session', { 
+      service: 'SUPABASE_DB', 
+      stage: 'UPDATE_SESSION_ERROR', 
+      flow: 'DATABASE_OPERATION',
+      sessionId: id,
+      error 
+    });
     throw error;
   }
+
+  logger.info('✅ SUPABASE: Scrape session updated successfully', { 
+    service: 'SUPABASE_DB', 
+    stage: 'UPDATE_SESSION_SUCCESS', 
+    flow: 'DATABASE_OPERATION',
+    sessionId: id 
+  });
 
   return data;
 }

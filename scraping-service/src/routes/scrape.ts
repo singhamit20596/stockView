@@ -9,17 +9,46 @@ const router = Router();
 // Start scraping
 router.post('/start', async (req, res) => {
   try {
+    logger.info('🚀 SCRAPE START REQUEST RECEIVED', { 
+      service: 'RAILWAY_API', 
+      stage: 'REQUEST_RECEIVED', 
+      flow: 'SCRAPE_START',
+      body: req.body 
+    });
+
     const { accountName, brokerId } = req.body;
 
     if (!accountName || !brokerId) {
+      logger.error('❌ MISSING REQUIRED FIELDS', { 
+        service: 'RAILWAY_API', 
+        stage: 'VALIDATION_FAILED', 
+        flow: 'SCRAPE_START',
+        accountName, 
+        brokerId 
+      });
       return res.status(400).json({
         error: 'Missing required fields',
         message: 'accountName and brokerId are required'
       });
     }
 
+    logger.info('✅ VALIDATION PASSED', { 
+      service: 'RAILWAY_API', 
+      stage: 'VALIDATION_PASSED', 
+      flow: 'SCRAPE_START',
+      accountName, 
+      brokerId 
+    });
+
     // Create scrape session
     const sessionId = uuidv4();
+    logger.info('🆔 SESSION ID GENERATED', { 
+      service: 'RAILWAY_API', 
+      stage: 'SESSION_CREATED', 
+      flow: 'SCRAPE_START',
+      sessionId 
+    });
+
     const session = await createScrapeSession({
       id: sessionId,
       account_name: accountName,
@@ -28,11 +57,40 @@ router.post('/start', async (req, res) => {
       progress: { percent: 0, stage: 'Initializing...' }
     });
 
-    logger.info('Scraping session created', { sessionId, accountName, brokerId });
+    logger.info('💾 SESSION SAVED TO SUPABASE', { 
+      service: 'RAILWAY_API', 
+      stage: 'SESSION_SAVED', 
+      flow: 'SCRAPE_START',
+      sessionId, 
+      accountName, 
+      brokerId,
+      session 
+    });
 
     // Start scraping in background
+    logger.info('🔄 STARTING BACKGROUND SCRAPING', { 
+      service: 'RAILWAY_API', 
+      stage: 'BACKGROUND_START', 
+      flow: 'SCRAPE_START',
+      sessionId 
+    });
+
     scrapeGrowwHoldings(sessionId, accountName, brokerId).catch(error => {
-      logger.error('Background scraping failed', { sessionId, error: error.message });
+      logger.error('💥 BACKGROUND SCRAPING FAILED', { 
+        service: 'RAILWAY_API', 
+        stage: 'BACKGROUND_ERROR', 
+        flow: 'SCRAPE_START',
+        sessionId, 
+        error: error.message,
+        stack: error.stack 
+      });
+    });
+
+    logger.info('✅ SCRAPE START RESPONSE SENT', { 
+      service: 'RAILWAY_API', 
+      stage: 'RESPONSE_SENT', 
+      flow: 'SCRAPE_START',
+      sessionId 
     });
 
     res.json({
@@ -42,7 +100,13 @@ router.post('/start', async (req, res) => {
     });
 
   } catch (error) {
-    logger.error('Failed to start scraping', error);
+    logger.error('💥 SCRAPE START ENDPOINT ERROR', { 
+      service: 'RAILWAY_API', 
+      stage: 'ENDPOINT_ERROR', 
+      flow: 'SCRAPE_START',
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined 
+    });
     res.status(500).json({
       error: 'Failed to start scraping',
       message: error instanceof Error ? error.message : 'Unknown error'
@@ -55,17 +119,54 @@ router.get('/status/:sessionId', async (req, res) => {
   try {
     const { sessionId } = req.params;
     
-    // This would typically fetch from database
-    // For now, return a mock response
+    logger.info('📊 STATUS REQUEST RECEIVED', { 
+      service: 'RAILWAY_API', 
+      stage: 'STATUS_REQUEST', 
+      flow: 'STATUS_CHECK',
+      sessionId 
+    });
+
+    // Fetch from database
+    const session = await getScrapeSession(sessionId);
+    
+    if (!session) {
+      logger.warn('⚠️ SESSION NOT FOUND', { 
+        service: 'RAILWAY_API', 
+        stage: 'SESSION_NOT_FOUND', 
+        flow: 'STATUS_CHECK',
+        sessionId 
+      });
+      return res.status(404).json({
+        error: 'Session not found',
+        sessionId
+      });
+    }
+
+    logger.info('✅ STATUS RESPONSE SENT', { 
+      service: 'RAILWAY_API', 
+      stage: 'STATUS_RESPONSE', 
+      flow: 'STATUS_CHECK',
+      sessionId,
+      status: session.status,
+      progress: session.progress 
+    });
+
     res.json({
       sessionId,
-      status: 'running',
-      progress: { percent: 50, stage: 'Extracting holdings...' },
+      status: session.status,
+      progress: session.progress,
       timestamp: new Date().toISOString()
     });
 
   } catch (error) {
-    logger.error('Failed to get scraping status', error);
+    logger.error('💥 STATUS ENDPOINT ERROR', { 
+      service: 'RAILWAY_API', 
+      stage: 'STATUS_ERROR', 
+      flow: 'STATUS_CHECK',
+      sessionId: req.params.sessionId,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined 
+    });
     res.status(500).json({
       error: 'Failed to get scraping status',
       message: error instanceof Error ? error.message : 'Unknown error'

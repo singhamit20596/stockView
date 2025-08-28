@@ -34,15 +34,27 @@ export default function AddAccountPage() {
 	);
 	const preview = previewQuery.data;
 
-	// simple frontend console logging for debug
+	// Enhanced frontend logging with sequence tracking
 	useEffect(() => {
-		console.log('[ui] jobId:', jobId);
+		console.log('[SEQ:001] [FRONTEND] [UI] JobId received:', { jobId, timestamp: new Date().toISOString() });
 	}, [jobId]);
+	
 	useEffect(() => {
-		console.log('[ui] progress', progress);
+		console.log('[SEQ:002] [FRONTEND] [UI] Progress update:', { 
+			progress, 
+			stage: progress?.stage,
+			percent: progress?.percent,
+			timestamp: new Date().toISOString() 
+		});
 	}, [progress]);
+	
 	useEffect(() => {
-		if (preview) console.log('[ui] preview', preview);
+		if (preview) {
+			console.log('[SEQ:003] [FRONTEND] [UI] Preview received:', { 
+				preview, 
+				timestamp: new Date().toISOString() 
+			});
+		}
 	}, [preview]);
 
 	return (
@@ -109,9 +121,9 @@ export default function AddAccountPage() {
 					variant="primary"
 					disabled={!name || start.isPending || isChecking || !isNameAvailable}
 					onClick={async () => {
-						console.log('[UI] Starting scrape for:', { name, brokerId });
+						console.log('[SEQ:004] [FRONTEND] [UI] Create & Scrape clicked:', { name, brokerId, timestamp: new Date().toISOString() });
 						const res = await start.mutateAsync({ name, brokerId });
-						console.log('[UI] Scrape started, jobId:', res.jobId);
+						console.log('[SEQ:005] [FRONTEND] [UI] Scrape response received:', { jobId: res.jobId, timestamp: new Date().toISOString() });
 						setJobId(res.jobId);
 					}}
 				>

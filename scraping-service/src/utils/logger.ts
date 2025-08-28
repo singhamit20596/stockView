@@ -2,18 +2,35 @@ import { createLogger, format, transports } from 'winston';
 
 const { combine, timestamp, printf, colorize } = format;
 
-// Custom format
+// Global sequence counter for tracking flow
+let sequenceCounter = 0;
+const getSequenceNumber = () => ++sequenceCounter;
+
+// Enhanced custom format with sequence numbers and service tracking
 const logFormat = printf(({ level, message, timestamp, ...metadata }: any) => {
-  let msg = `${timestamp} [${level}]: ${message}`;
-  if (Object.keys(metadata).length > 0) {
-    msg += ` ${JSON.stringify(metadata)}`;
+  const seq = getSequenceNumber();
+  const service = metadata.service || 'RAILWAY';
+  const sessionId = metadata.sessionId || 'NO_SESSION';
+  const stage = metadata.stage || 'NO_STAGE';
+  const flow = metadata.flow || 'NO_FLOW';
+  
+  let msg = `[SEQ:${seq.toString().padStart(3, '0')}] [${service}] [${sessionId}] [${stage}] [${flow}] ${timestamp} [${level.toUpperCase()}]: ${message}`;
+  if (Object.keys(metadata).length > 4) {
+    const cleanMetadata = { ...metadata };
+    delete cleanMetadata.service;
+    delete cleanMetadata.sessionId;
+    delete cleanMetadata.stage;
+    delete cleanMetadata.flow;
+    if (Object.keys(cleanMetadata).length > 0) {
+      msg += ` ${JSON.stringify(cleanMetadata)}`;
+    }
   }
   return msg;
 });
 
 // Create logger
 export const logger = createLogger({
-  level: process.env.LOG_LEVEL || 'info',
+  level: 'debug', // Set to debug for maximum visibility
   format: combine(
     timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
     logFormat
@@ -28,19 +45,17 @@ export const logger = createLogger({
       )
     }),
     // File transport for production
-    ...(process.env.NODE_ENV === 'production' ? [
-      new transports.File({
-        filename: 'logs/error.log',
-        level: 'error',
-        maxsize: 5242880, // 5MB
-        maxFiles: 5
-      }),
-      new transports.File({
-        filename: 'logs/combined.log',
-        maxsize: 5242880, // 5MB
-        maxFiles: 5
-      })
-    ] : [])
+    new transports.File({
+      filename: 'logs/error.log',
+      level: 'error',
+      maxsize: 5242880, // 5MB
+      maxFiles: 5
+    }),
+    new transports.File({
+      filename: 'logs/combined.log',
+      maxsize: 5242880, // 5MB
+      maxFiles: 5
+    })
   ]
 });
 

@@ -47,24 +47,76 @@ export async function scrapeGrowwHoldings(
   let page: Page | null = null;
 
   try {
+    logger.info('🚀 SCRAPING FUNCTION STARTED', { 
+      service: 'BROWSER_SCRAPER', 
+      stage: 'FUNCTION_START', 
+      flow: 'SCRAPING_FLOW',
+      sessionId, 
+      accountName, 
+      brokerId 
+    });
+
     // Update session status to running
     await updateScrapeSession(sessionId, {
       status: 'running',
       progress: { percent: 10, stage: 'Launching browser...' }
     });
 
-    logger.info('Starting Groww scraping', { sessionId, accountName });
+    logger.info('💾 SESSION STATUS UPDATED TO RUNNING', { 
+      service: 'BROWSER_SCRAPER', 
+      stage: 'SESSION_UPDATED', 
+      flow: 'SCRAPING_FLOW',
+      sessionId 
+    });
+
+    logger.info('🔧 ENVIRONMENT CHECK', { 
+      service: 'BROWSER_SCRAPER', 
+      stage: 'ENV_CHECK', 
+      flow: 'SCRAPING_FLOW',
+      sessionId,
+      USE_BROWSERLESS,
+      BROWSERLESS_URL,
+      hasToken: !!BROWSERLESS_TOKEN 
+    });
 
     // Launch Playwright browser
+    logger.info('🌐 BROWSER LAUNCH STARTED', { 
+      service: 'BROWSER_SCRAPER', 
+      stage: 'BROWSER_LAUNCH', 
+      flow: 'SCRAPING_FLOW',
+      sessionId 
+    });
+
     try {
       if (USE_BROWSERLESS && BROWSERLESS_TOKEN) {
-        logger.info('Attempting to launch Playwright browser via Browserless.io');
+        logger.info('🔗 ATTEMPTING BROWSERLESS.IO CONNECTION', { 
+          service: 'BROWSER_SCRAPER', 
+          stage: 'BROWSERLESS_ATTEMPT', 
+          flow: 'SCRAPING_FLOW',
+          sessionId,
+          BROWSERLESS_URL 
+        });
         
         const browserWSEndpoint = `${BROWSERLESS_URL}?token=${BROWSERLESS_TOKEN}`;
         
+        logger.info('🔌 CONNECTING TO BROWSERLESS.IO', { 
+          service: 'BROWSER_SCRAPER', 
+          stage: 'BROWSERLESS_CONNECT', 
+          flow: 'SCRAPING_FLOW',
+          sessionId,
+          endpoint: browserWSEndpoint 
+        });
+
         browser = await chromium.connect({ 
           wsEndpoint: browserWSEndpoint,
           timeout: 30000
+        });
+
+        logger.info('✅ BROWSERLESS.IO CONNECTION SUCCESSFUL', { 
+          service: 'BROWSER_SCRAPER', 
+          stage: 'BROWSERLESS_SUCCESS', 
+          flow: 'SCRAPING_FLOW',
+          sessionId 
         });
 
         const context = await browser.newContext({
@@ -73,9 +125,20 @@ export async function scrapeGrowwHoldings(
         });
 
         page = await context.newPage();
-        logger.info('Playwright browser connected to Browserless.io successfully');
+        logger.info('📄 BROWSERLESS.IO PAGE CREATED', { 
+          service: 'BROWSER_SCRAPER', 
+          stage: 'PAGE_CREATED', 
+          flow: 'SCRAPING_FLOW',
+          sessionId 
+        });
       } else {
-        logger.info('Attempting to launch local browser');
+        logger.info('🖥️ ATTEMPTING LOCAL BROWSER LAUNCH', { 
+          service: 'BROWSER_SCRAPER', 
+          stage: 'LOCAL_LAUNCH', 
+          flow: 'SCRAPING_FLOW',
+          sessionId 
+        });
+
         browser = await chromium.launch({ 
           headless: false, // Show browser UI
           args: [
@@ -93,18 +156,44 @@ export async function scrapeGrowwHoldings(
           ]
         });
 
+        logger.info('✅ LOCAL BROWSER LAUNCHED SUCCESSFULLY', { 
+          service: 'BROWSER_SCRAPER', 
+          stage: 'LOCAL_SUCCESS', 
+          flow: 'SCRAPING_FLOW',
+          sessionId 
+        });
+
         const context = await browser.newContext({
           userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
           viewport: { width: 1920, height: 1080 }
         });
 
         page = await context.newPage();
-        logger.info('Local browser launched successfully');
+        logger.info('📄 LOCAL PAGE CREATED', { 
+          service: 'BROWSER_SCRAPER', 
+          stage: 'PAGE_CREATED', 
+          flow: 'SCRAPING_FLOW',
+          sessionId 
+        });
       }
     } catch (error) {
-      logger.error('Failed to launch browser', { error });
+      logger.error('💥 BROWSER LAUNCH FAILED', { 
+        service: 'BROWSER_SCRAPER', 
+        stage: 'BROWSER_ERROR', 
+        flow: 'SCRAPING_FLOW',
+        sessionId,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined 
+      });
       throw new Error('Failed to launch browser: ' + (error instanceof Error ? error.message : 'Unknown error'));
     }
+
+    logger.info('🌐 NAVIGATION TO GROWW STARTED', { 
+      service: 'BROWSER_SCRAPER', 
+      stage: 'NAVIGATION_START', 
+      flow: 'SCRAPING_FLOW',
+      sessionId 
+    });
 
     await updateScrapeSession(sessionId, {
       progress: { percent: 20, stage: 'Navigating to Groww...' }
@@ -112,18 +201,64 @@ export async function scrapeGrowwHoldings(
 
     // Navigate to Groww login
     const loginUrl = 'https://groww.in/login';
+    logger.info('🔗 NAVIGATING TO GROWW LOGIN', { 
+      service: 'BROWSER_SCRAPER', 
+      stage: 'GROWW_NAVIGATION', 
+      flow: 'SCRAPING_FLOW',
+      sessionId,
+      loginUrl 
+    });
+
     await page.goto(loginUrl, { waitUntil: 'networkidle' });
+
+    logger.info('✅ GROWW LOGIN PAGE LOADED', { 
+      service: 'BROWSER_SCRAPER', 
+      stage: 'LOGIN_PAGE_LOADED', 
+      flow: 'SCRAPING_FLOW',
+      sessionId,
+      currentUrl: page.url() 
+    });
 
     await updateScrapeSession(sessionId, {
       progress: { percent: 30, stage: 'Waiting for user login (5 minutes)...' }
     });
 
+    logger.info('⏰ STARTING LOGIN WAIT TIMER', { 
+      service: 'BROWSER_SCRAPER', 
+      stage: 'LOGIN_WAIT_START', 
+      flow: 'SCRAPING_FLOW',
+      sessionId,
+      timeout: '5 minutes' 
+    });
+
     // Wait for user to login (5 minutes timeout)
     const deadline = Date.now() + 5 * 60 * 1000;
+    let loginCheckCount = 0;
     while (Date.now() < deadline) {
+      loginCheckCount++;
       const currentUrl = page.url();
+      
+      if (loginCheckCount % 30 === 0) { // Log every 30 seconds
+        logger.info('⏳ LOGIN WAIT CHECK', { 
+          service: 'BROWSER_SCRAPER', 
+          stage: 'LOGIN_WAIT_CHECK', 
+          flow: 'SCRAPING_FLOW',
+          sessionId,
+          checkCount: loginCheckCount,
+          currentUrl,
+          timeRemaining: Math.round((deadline - Date.now()) / 1000) + 's' 
+        });
+      }
+
       if (!currentUrl.includes('/login')) {
-        logger.info('User logged in successfully', { sessionId, currentUrl });
+        logger.info('✅ USER LOGIN DETECTED', { 
+          service: 'BROWSER_SCRAPER', 
+          stage: 'LOGIN_SUCCESS', 
+          flow: 'SCRAPING_FLOW',
+          sessionId,
+          currentUrl,
+          checkCount: loginCheckCount 
+        });
         break;
       }
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -131,6 +266,14 @@ export async function scrapeGrowwHoldings(
 
     const finalUrl = page.url();
     if (finalUrl.includes('/login')) {
+      logger.error('⏰ LOGIN TIMEOUT REACHED', { 
+        service: 'BROWSER_SCRAPER', 
+        stage: 'LOGIN_TIMEOUT', 
+        flow: 'SCRAPING_FLOW',
+        sessionId,
+        finalUrl,
+        totalChecks: loginCheckCount 
+      });
       throw new Error('Login timeout - user did not complete login within 5 minutes');
     }
 
