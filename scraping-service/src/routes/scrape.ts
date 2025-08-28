@@ -317,10 +317,10 @@ router.get('/test-browserless', async (req, res) => {
       });
 
       const altEndpoint = `wss://chrome.browserless.io?token=${BROWSERLESS_TOKEN}`;
-             const browser = await chromium.connect({ 
-         wsEndpoint: altEndpoint,
-         timeout: 30000
-       });
+      const browser = await chromium.connect({ 
+        wsEndpoint: altEndpoint,
+        timeout: 30000
+      });
       await browser.close();
       
       testResults.push({ method: 'Alternative WebSocket', success: true });
