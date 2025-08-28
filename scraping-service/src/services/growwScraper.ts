@@ -12,7 +12,7 @@ import {
 
 // Browser configuration
 const USE_BROWSERLESS = process.env.USE_BROWSERLESS?.toLowerCase() === 'true';
-const BROWSERLESS_URL = process.env.BROWSERLESS_URL || 'wss://chrome.browserless.io';
+const BROWSERLESS_URL = process.env.BROWSERLESS_URL || 'wss://production-sfo.browserless.io';
 const BROWSERLESS_TOKEN = process.env.BROWSERLESS_TOKEN;
 
 // Debug environment variables
