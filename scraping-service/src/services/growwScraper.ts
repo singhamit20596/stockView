@@ -14,7 +14,6 @@ import {
 const USE_BROWSERLESS = process.env.USE_BROWSERLESS?.toLowerCase() === 'true';
 const BROWSERLESS_URL = process.env.BROWSERLESS_URL || 'wss://production-sfo.browserless.io';
 const BROWSERLESS_TOKEN = process.env.BROWSERLESS_TOKEN;
-const USE_MOCK_DATA = process.env.USE_MOCK_DATA?.toLowerCase() === 'true';
 
 // Debug environment variables
 console.log('🔧 ENVIRONMENT VARIABLES DEBUG:', {
@@ -22,7 +21,6 @@ console.log('🔧 ENVIRONMENT VARIABLES DEBUG:', {
   USE_BROWSERLESS_PARSED: USE_BROWSERLESS,
   BROWSERLESS_URL_RAW: process.env.BROWSERLESS_URL,
   BROWSERLESS_TOKEN_EXISTS: !!BROWSERLESS_TOKEN,
-  USE_MOCK_DATA,
   NODE_ENV: process.env.NODE_ENV
 });
 
@@ -49,9 +47,9 @@ export interface ProcessedHolding {
   market_cap: string | null;
 }
 
-// HTTP API scraping function using Browserless.io
+// Real-time HTTP API scraping function using Browserless.io
 async function scrapeWithHTTPAPI(sessionId: string, accountName: string): Promise<RawHolding[]> {
-  logger.info('🌐 STARTING HTTP API SCRAPING', { 
+  logger.info('🌐 STARTING REAL-TIME HTTP API SCRAPING', { 
     service: 'BROWSER_SCRAPER', 
     stage: 'HTTP_SCRAPING_START', 
     flow: 'SCRAPING_FLOW',
@@ -61,81 +59,92 @@ async function scrapeWithHTTPAPI(sessionId: string, accountName: string): Promis
   const httpUrl = BROWSERLESS_URL.replace('wss://', 'https://').replace('ws://', 'http://');
   
   try {
-    // Step 1: Navigate to Groww login page
-    logger.info('🔗 NAVIGATING TO GROWW LOGIN', { 
+    // Step 1: Navigate to Groww and perform full scraping
+    logger.info('🔗 STARTING FULL GROWW SCRAPING', { 
       service: 'BROWSER_SCRAPER', 
-      stage: 'GROWW_NAVIGATION', 
+      stage: 'GROWW_SCRAPING_START', 
       flow: 'SCRAPING_FLOW',
       sessionId 
     });
 
-    const loginResponse = await fetch(`${httpUrl}/function?token=${BROWSERLESS_TOKEN}`, {
+    const scrapingResponse = await fetch(`${httpUrl}/function?token=${BROWSERLESS_TOKEN}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         code: `
           async () => {
             const page = await newPage();
+            
+            // Navigate to Groww login
             await page.goto('https://groww.in/login', { waitUntil: 'networkidle' });
-            return { status: 'login_page_loaded', title: await page.title() };
+            
+            // Wait for user to login (this will timeout in HTTP API, but we'll handle it)
+            await page.waitForFunction(() => {
+              return !window.location.href.includes('/login');
+            }, { timeout: 300000 }); // 5 minutes timeout
+            
+            // Navigate to holdings page
+            await page.goto('https://groww.in/portfolio/holdings', { waitUntil: 'networkidle' });
+            
+            // Wait for holdings to load
+            await page.waitForSelector('[data-testid="holdings-table"]', { timeout: 30000 });
+            
+            // Extract holdings data
+            const holdings = await page.evaluate(() => {
+              const rows = document.querySelectorAll('[data-testid="holdings-table"] tbody tr');
+              const holdingsData = [];
+              
+              rows.forEach((row) => {
+                const cells = row.querySelectorAll('td');
+                if (cells.length >= 4) {
+                  const stockName = cells[0]?.textContent?.trim() || '';
+                  const quantity = cells[1]?.textContent?.trim() || '0';
+                  const avgPrice = cells[2]?.textContent?.trim() || null;
+                  const marketPrice = cells[3]?.textContent?.trim() || null;
+                  
+                  holdingsData.push({
+                    stockName,
+                    quantity,
+                    avgPrice,
+                    marketPrice,
+                    sector: null,
+                    subsector: null
+                  });
+                }
+              });
+              
+              return holdingsData;
+            });
+            
+            return { status: 'success', holdings };
           }
         `,
         context: { url: 'https://groww.in/login' }
       })
     });
 
-    if (!loginResponse.ok) {
-      throw new Error(`Login navigation failed: ${loginResponse.status} ${loginResponse.statusText}`);
+    if (!scrapingResponse.ok) {
+      throw new Error(`Scraping failed: ${scrapingResponse.status} ${scrapingResponse.statusText}`);
     }
 
-    const loginResult = await loginResponse.json();
-    logger.info('✅ LOGIN PAGE LOADED', { 
+    const scrapingResult = await scrapingResponse.json();
+    
+    if (scrapingResult.status !== 'success') {
+      throw new Error(`Scraping returned error: ${scrapingResult.error || 'Unknown error'}`);
+    }
+
+    logger.info('✅ REAL-TIME SCRAPING COMPLETED', { 
       service: 'BROWSER_SCRAPER', 
-      stage: 'LOGIN_PAGE_SUCCESS', 
+      stage: 'SCRAPING_SUCCESS', 
       flow: 'SCRAPING_FLOW',
       sessionId,
-      result: loginResult 
+      holdingsCount: scrapingResult.holdings?.length || 0
     });
 
-    // Step 2: Wait for user login (simulate the wait)
-    logger.info('⏳ WAITING FOR USER LOGIN', { 
-      service: 'BROWSER_SCRAPER', 
-      stage: 'LOGIN_WAIT', 
-      flow: 'SCRAPING_FLOW',
-      sessionId 
-    });
-
-    // For now, return mock data since HTTP API doesn't support interactive login
-    // In a real implementation, you'd need to handle the login flow differently
-    logger.warn('⚠️ HTTP API DOES NOT SUPPORT INTERACTIVE LOGIN', { 
-      service: 'BROWSER_SCRAPER', 
-      stage: 'LOGIN_LIMITATION', 
-      flow: 'SCRAPING_FLOW',
-      sessionId 
-    });
-
-    // Return mock data for testing
-    return [
-      {
-        stockName: 'HDFC Bank',
-        quantity: '100',
-        avgPrice: '1500.50',
-        marketPrice: '1520.75',
-        sector: 'Banking',
-        subsector: 'Private Banks'
-      },
-      {
-        stockName: 'TCS',
-        quantity: '50',
-        avgPrice: '3200.00',
-        marketPrice: '3250.25',
-        sector: 'Technology',
-        subsector: 'IT Services'
-      }
-    ];
+    return scrapingResult.holdings || [];
 
   } catch (error) {
-    logger.error('💥 HTTP API SCRAPING FAILED', { 
+    logger.error('💥 REAL-TIME HTTP API SCRAPING FAILED', { 
       service: 'BROWSER_SCRAPER', 
       stage: 'HTTP_SCRAPING_ERROR', 
       flow: 'SCRAPING_FLOW',
@@ -156,7 +165,7 @@ export async function scrapeGrowwHoldings(
   let page: Page | null = null;
 
   try {
-    logger.info('🚀 SCRAPING FUNCTION STARTED', { 
+    logger.info('🚀 REAL-TIME SCRAPING FUNCTION STARTED', { 
       service: 'BROWSER_SCRAPER', 
       stage: 'FUNCTION_START', 
       flow: 'SCRAPING_FLOW',
@@ -168,7 +177,7 @@ export async function scrapeGrowwHoldings(
     // Update session status to running
     await updateScrapeSession(sessionId, {
       status: 'running',
-      progress: { percent: 10, stage: 'Starting scraping...' }
+      progress: { percent: 10, stage: 'Starting real-time scraping...' }
     });
 
     logger.info('💾 SESSION STATUS UPDATED TO RUNNING', { 
@@ -185,27 +194,12 @@ export async function scrapeGrowwHoldings(
       sessionId,
       USE_BROWSERLESS,
       BROWSERLESS_URL,
-      hasToken: !!BROWSERLESS_TOKEN,
-      USE_MOCK_DATA 
+      hasToken: !!BROWSERLESS_TOKEN
     });
 
-    // Check if we should use mock data
-    if (USE_MOCK_DATA) {
-      logger.info('🎭 USING MOCK DATA MODE', { 
-        service: 'BROWSER_SCRAPER', 
-        stage: 'MOCK_MODE', 
-        flow: 'SCRAPING_FLOW',
-        sessionId 
-      });
-      
-      // Simulate the scraping process with mock data
-      await simulateMockScraping(sessionId, accountName);
-      return;
-    }
-
-    // Use HTTP API approach instead of WebSocket
+    // Use HTTP API approach for real-time scraping
     if (USE_BROWSERLESS && BROWSERLESS_TOKEN) {
-      logger.info('🌐 USING HTTP API SCRAPING APPROACH', { 
+      logger.info('🌐 USING HTTP API FOR REAL-TIME SCRAPING', { 
         service: 'BROWSER_SCRAPER', 
         stage: 'HTTP_APPROACH', 
         flow: 'SCRAPING_FLOW',
@@ -214,22 +208,26 @@ export async function scrapeGrowwHoldings(
 
       // Update progress
       await updateScrapeSession(sessionId, {
-        progress: { percent: 20, stage: 'Using HTTP API for scraping...' }
+        progress: { percent: 20, stage: 'Using HTTP API for real-time scraping...' }
       });
 
       // Scrape using HTTP API
       const rawHoldings = await scrapeWithHTTPAPI(sessionId, accountName);
 
+      if (!rawHoldings || rawHoldings.length === 0) {
+        throw new Error('No holdings data extracted - scraping failed');
+      }
+
       // Process holdings
       await updateScrapeSession(sessionId, {
-        progress: { percent: 60, stage: 'Processing scraped data...' }
+        progress: { percent: 60, stage: 'Processing real-time data...' }
       });
 
       const processedHoldings = await processHoldings(rawHoldings);
 
       // Save to database
       await updateScrapeSession(sessionId, {
-        progress: { percent: 80, stage: 'Saving to database...' }
+        progress: { percent: 80, stage: 'Saving real-time data to database...' }
       });
 
       await saveHoldingsToDatabase(sessionId, accountName, brokerId, processedHoldings);
@@ -237,10 +235,10 @@ export async function scrapeGrowwHoldings(
       // Update final status
       await updateScrapeSession(sessionId, {
         status: 'completed',
-        progress: { percent: 100, stage: 'Scraping completed successfully' }
+        progress: { percent: 100, stage: 'Real-time scraping completed successfully' }
       });
 
-      logger.info('✅ HTTP API SCRAPING COMPLETED', { 
+      logger.info('✅ REAL-TIME SCRAPING COMPLETED SUCCESSFULLY', { 
         service: 'BROWSER_SCRAPER', 
         stage: 'HTTP_SCRAPING_SUCCESS', 
         flow: 'SCRAPING_FLOW',
@@ -251,8 +249,8 @@ export async function scrapeGrowwHoldings(
       return;
     }
 
-    // Fallback to local browser (existing code)
-    logger.info('🖥️ ATTEMPTING LOCAL BROWSER LAUNCH', { 
+    // Fallback to local browser for real-time scraping
+    logger.info('🖥️ ATTEMPTING LOCAL BROWSER FOR REAL-TIME SCRAPING', { 
       service: 'BROWSER_SCRAPER', 
       stage: 'LOCAL_LAUNCH', 
       flow: 'SCRAPING_FLOW',
@@ -260,7 +258,7 @@ export async function scrapeGrowwHoldings(
     });
 
     browser = await chromium.launch({ 
-      headless: false, // Show browser UI
+      headless: false, // Show browser UI for user interaction
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
@@ -296,11 +294,77 @@ export async function scrapeGrowwHoldings(
       sessionId 
     });
 
-    // Continue with existing local scraping logic...
-    // (Keep the rest of the existing scraping logic for local browser)
+    // Navigate to Groww login
+    await updateScrapeSession(sessionId, {
+      progress: { percent: 30, stage: 'Navigating to Groww login...' }
+    });
+
+    await page.goto('https://groww.in/login', { waitUntil: 'networkidle' });
+
+    // Wait for user login (5 minutes timeout)
+    await updateScrapeSession(sessionId, {
+      progress: { percent: 40, stage: 'Waiting for user login (5 minutes)...' }
+    });
+
+    const deadline = Date.now() + 5 * 60 * 1000;
+    while (Date.now() < deadline) {
+      const currentUrl = page.url();
+      if (!currentUrl.includes('/login')) {
+        break; // User has logged in
+      }
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+
+    if (page.url().includes('/login')) {
+      throw new Error('Login timeout - user did not complete login within 5 minutes');
+    }
+
+    // Navigate to holdings and extract data
+    await updateScrapeSession(sessionId, {
+      progress: { percent: 60, stage: 'Navigating to holdings...' }
+    });
+
+    await page.goto('https://groww.in/portfolio/holdings', { waitUntil: 'networkidle' });
+    await page.waitForSelector('[data-testid="holdings-table"]', { timeout: 30000 });
+
+    await updateScrapeSession(sessionId, {
+      progress: { percent: 70, stage: 'Extracting real-time holdings data...' }
+    });
+
+    const rawHoldings = await extractHoldings(page);
+
+    if (!rawHoldings || rawHoldings.length === 0) {
+      throw new Error('No holdings data extracted from local browser');
+    }
+
+    // Process and save holdings
+    await updateScrapeSession(sessionId, {
+      progress: { percent: 80, stage: 'Processing real-time data...' }
+    });
+
+    const processedHoldings = await processHoldings(rawHoldings);
+
+    await updateScrapeSession(sessionId, {
+      progress: { percent: 90, stage: 'Saving real-time data to database...' }
+    });
+
+    await saveHoldingsToDatabase(sessionId, accountName, brokerId, processedHoldings);
+
+    await updateScrapeSession(sessionId, {
+      status: 'completed',
+      progress: { percent: 100, stage: 'Real-time scraping completed successfully' }
+    });
+
+    logger.info('✅ LOCAL REAL-TIME SCRAPING COMPLETED', { 
+      service: 'BROWSER_SCRAPER', 
+      stage: 'LOCAL_SCRAPING_SUCCESS', 
+      flow: 'SCRAPING_FLOW',
+      sessionId,
+      holdingsCount: processedHoldings.length 
+    });
 
   } catch (error) {
-    logger.error('💥 SCRAPING FAILED', { 
+    logger.error('💥 REAL-TIME SCRAPING FAILED', { 
       service: 'BROWSER_SCRAPER', 
       stage: 'SCRAPING_ERROR', 
       flow: 'SCRAPING_FLOW',
@@ -312,7 +376,7 @@ export async function scrapeGrowwHoldings(
     // Update session status to failed
     await updateScrapeSession(sessionId, {
       status: 'failed',
-      progress: { percent: 0, stage: 'Failed' },
+      progress: { percent: 0, stage: 'Real-time scraping failed' },
       error: error instanceof Error ? error.message : 'Unknown error'
     });
 
@@ -349,138 +413,10 @@ export async function scrapeGrowwHoldings(
   }
 }
 
-async function simulateMockScraping(sessionId: string, accountName: string): Promise<void> {
-  try {
-    logger.info('🎭 STARTING MOCK SCRAPING SIMULATION', { 
-      service: 'BROWSER_SCRAPER', 
-      stage: 'MOCK_START', 
-      flow: 'MOCK_SCRAPING',
-      sessionId 
-    });
-
-    // Simulate browser launch
-    await updateScrapeSession(sessionId, {
-      progress: { percent: 20, stage: 'Launching browser...' }
-    });
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    // Simulate navigation
-    await updateScrapeSession(sessionId, {
-      progress: { percent: 30, stage: 'Navigating to Groww...' }
-    });
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    // Simulate login wait
-    await updateScrapeSession(sessionId, {
-      progress: { percent: 40, stage: 'Waiting for user login (5 minutes)...' }
-    });
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
-    // Simulate login success
-    await updateScrapeSession(sessionId, {
-      progress: { percent: 50, stage: 'Login successful, navigating to holdings...' }
-    });
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    // Simulate extracting holdings
-    await updateScrapeSession(sessionId, {
-      progress: { percent: 60, stage: 'Extracting holdings data...' }
-    });
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
-    // Simulate processing data
-    await updateScrapeSession(sessionId, {
-      progress: { percent: 80, stage: 'Processing holdings data...' }
-    });
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    // Simulate saving to database
-    await updateScrapeSession(sessionId, {
-      progress: { percent: 90, stage: 'Saving to database...' }
-    });
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    // Create mock holdings data
-    const mockHoldings = [
-      {
-        stock_name: 'RELIANCE',
-        quantity: 100,
-        avg_price: 2500.00,
-        market_price: 2600.00,
-        invested_value: 250000.00,
-        current_value: 260000.00,
-        pnl: 10000.00,
-        pnl_percent: 4.00,
-        sector: 'Oil & Gas',
-        subsector: 'Refineries',
-        market_cap: 'Large Cap'
-      },
-      {
-        stock_name: 'TCS',
-        quantity: 50,
-        avg_price: 3500.00,
-        market_price: 3600.00,
-        invested_value: 175000.00,
-        current_value: 180000.00,
-        pnl: 5000.00,
-        pnl_percent: 2.86,
-        sector: 'Technology',
-        subsector: 'IT Services',
-        market_cap: 'Large Cap'
-      },
-      {
-        stock_name: 'HDFC BANK',
-        quantity: 200,
-        avg_price: 1500.00,
-        market_price: 1520.00,
-        invested_value: 300000.00,
-        current_value: 304000.00,
-        pnl: 4000.00,
-        pnl_percent: 1.33,
-        sector: 'Banking',
-        subsector: 'Private Banks',
-        market_cap: 'Large Cap'
-      }
-    ];
-
-         // Save mock data to database
-     await saveHoldingsToDatabase(sessionId, accountName, 'groww', mockHoldings);
-
-    // Complete the scraping
-    await updateScrapeSession(sessionId, {
-      status: 'completed',
-      progress: { percent: 100, stage: 'Completed successfully' }
-    });
-
-    logger.info('✅ MOCK SCRAPING COMPLETED SUCCESSFULLY', { 
-      service: 'BROWSER_SCRAPER', 
-      stage: 'MOCK_COMPLETE', 
-      flow: 'MOCK_SCRAPING',
-      sessionId,
-      holdingsCount: mockHoldings.length 
-    });
-
-  } catch (error) {
-    logger.error('💥 MOCK SCRAPING FAILED', { 
-      service: 'BROWSER_SCRAPER', 
-      stage: 'MOCK_ERROR', 
-      flow: 'MOCK_SCRAPING',
-      sessionId,
-      error: error instanceof Error ? error.message : 'Unknown error' 
-    });
-    
-    await updateScrapeSession(sessionId, {
-      status: 'failed',
-      progress: { percent: 0, stage: 'Failed' },
-      error: 'Mock scraping failed: ' + (error instanceof Error ? error.message : 'Unknown error')
-    });
-  }
-}
-
 async function extractHoldings(page: Page): Promise<RawHolding[]> {
-    try {
-      // Wait for holdings table to load
-      await page.waitForSelector('[data-testid="holdings-table"]', { timeout: 10000 });
+  try {
+    // Wait for holdings table to load
+    await page.waitForSelector('[data-testid="holdings-table"]', { timeout: 10000 });
 
     // Extract holdings data
     const holdings = await page.evaluate(() => {
@@ -509,30 +445,12 @@ async function extractHoldings(page: Page): Promise<RawHolding[]> {
       return holdingsData;
     });
 
-    logger.info('Extracted holdings data', { count: holdings.length });
+    logger.info('Extracted real-time holdings data', { count: holdings.length });
     return holdings;
 
   } catch (error) {
-    logger.error('Failed to extract holdings', { error });
-    // Return mock data as fallback for now
-    return [
-      {
-        stockName: 'RELIANCE',
-        quantity: '100',
-        avgPrice: '2500.00',
-        marketPrice: '2600.00',
-        sector: 'Oil & Gas',
-        subsector: 'Refineries'
-      },
-      {
-        stockName: 'TCS',
-        quantity: '50',
-        avgPrice: '3500.00',
-        marketPrice: '3600.00',
-        sector: 'Technology',
-        subsector: 'IT Services'
-      }
-    ];
+    logger.error('Failed to extract real-time holdings', { error });
+    throw new Error('Failed to extract holdings data: ' + (error instanceof Error ? error.message : 'Unknown error'));
   }
 }
 
@@ -584,5 +502,5 @@ async function saveHoldingsToDatabase(sessionId: string, accountName: string, br
   // Update account summary
   await updateAccountSummary(account.id);
 
-  logger.info('Holdings saved to database', { accountName, holdingsCount: holdings.length });
+  logger.info('Real-time holdings saved to database', { accountName, holdingsCount: holdings.length });
 }
