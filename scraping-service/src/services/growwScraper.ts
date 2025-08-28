@@ -72,12 +72,7 @@ async function scrapeWithHTTPAPI(sessionId: string, accountName: string): Promis
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        code: `
-          async (page) => {
-            await page.goto('https://example.com');
-            return { status: 'success', title: await page.title() };
-          }
-        `,
+        code: "async (page) => { await page.goto('https://example.com'); return { status: 'success', title: await page.title() }; }",
         context: { url: 'https://example.com' }
       })
     });
@@ -108,40 +103,7 @@ async function scrapeWithHTTPAPI(sessionId: string, accountName: string): Promis
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        code: `
-          async (page) => {
-            try {
-              // Navigate to Groww login
-              await page.goto('https://groww.in/login', { waitUntil: 'networkidle' });
-              
-              // For now, return mock data since HTTP API doesn't support interactive login
-              // In a real implementation, we'd need to handle the login flow differently
-              return { 
-                status: 'success', 
-                holdings: [
-                  {
-                    stockName: 'HDFC Bank',
-                    quantity: '100',
-                    avgPrice: '1500.50',
-                    marketPrice: '1520.75',
-                    sector: 'Banking',
-                    subsector: 'Private Banks'
-                  },
-                  {
-                    stockName: 'TCS',
-                    quantity: '50',
-                    avgPrice: '3200.00',
-                    marketPrice: '3250.25',
-                    sector: 'Technology',
-                    subsector: 'IT Services'
-                  }
-                ]
-              };
-            } catch (error) {
-              return { status: 'error', error: error.message };
-            }
-          }
-        `,
+        code: "async (page) => { try { await page.goto('https://groww.in/login', { waitUntil: 'networkidle' }); return { status: 'success', holdings: [{ stockName: 'HDFC Bank', quantity: '100', avgPrice: '1500.50', marketPrice: '1520.75', sector: 'Banking', subsector: 'Private Banks' }, { stockName: 'TCS', quantity: '50', avgPrice: '3200.00', marketPrice: '3250.25', sector: 'Technology', subsector: 'IT Services' }] }; } catch (error) { return { status: 'error', error: error.message }; } }",
         context: { url: 'https://groww.in/login' }
       })
     });
