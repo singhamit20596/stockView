@@ -270,36 +270,43 @@ router.get('/test-browserless', async (req, res) => {
       });
 
       const httpUrl = BROWSERLESS_URL.replace('wss://', 'https://').replace('ws://', 'http://');
-             const response = await fetch(`${httpUrl}/json/version?token=${BROWSERLESS_TOKEN}`, {
-         method: 'GET',
-         timeout: 20000
-       });
+                    // Use AbortController for timeout
+       const controller = new AbortController();
+       const timeoutId = setTimeout(() => controller.abort(), 20000);
+       
+       try {
+         const response = await fetch(`${httpUrl}/json/version?token=${BROWSERLESS_TOKEN}`, {
+           method: 'GET',
+           signal: controller.signal
+         });
+         clearTimeout(timeoutId);
 
-      if (response.ok) {
-        const data = await response.json();
-        testResults.push({ method: 'HTTP API', success: true, data });
-        logger.info('✅ METHOD 2 SUCCESSFUL', { 
-          service: 'RAILWAY_API', 
-          stage: 'METHOD_2_SUCCESS', 
-          flow: 'CONNECTION_TEST',
-          data 
-        });
-      } else {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-    } catch (error) {
-      testResults.push({ 
-        method: 'HTTP API', 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Unknown error' 
-      });
-      logger.warn('⚠️ METHOD 2 FAILED', { 
-        service: 'RAILWAY_API', 
-        stage: 'METHOD_2_FAILED', 
-        flow: 'CONNECTION_TEST',
-        error: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
+         if (response.ok) {
+           const data = await response.json();
+           testResults.push({ method: 'HTTP API', success: true, data });
+           logger.info('✅ METHOD 2 SUCCESSFUL', { 
+             service: 'RAILWAY_API', 
+             stage: 'METHOD_2_SUCCESS', 
+             flow: 'CONNECTION_TEST',
+             data 
+           });
+         } else {
+           throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+         }
+       } catch (error) {
+         clearTimeout(timeoutId);
+         testResults.push({ 
+           method: 'HTTP API', 
+           success: false, 
+           error: error instanceof Error ? error.message : 'Unknown error' 
+         });
+         logger.warn('⚠️ METHOD 2 FAILED', { 
+           service: 'RAILWAY_API', 
+           stage: 'METHOD_2_FAILED', 
+           flow: 'CONNECTION_TEST',
+           error: error instanceof Error ? error.message : 'Unknown error'
+         });
+       }
 
     // Method 3: Alternative WebSocket endpoint
     try {
