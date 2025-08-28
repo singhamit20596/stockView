@@ -72,51 +72,53 @@ async function scrapeWithHTTPAPI(sessionId: string, accountName: string): Promis
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         code: `
-          async () => {
-            const page = await newPage();
-            
-            // Navigate to Groww login
-            await page.goto('https://groww.in/login', { waitUntil: 'networkidle' });
-            
-            // Wait for user to login (this will timeout in HTTP API, but we'll handle it)
-            await page.waitForFunction(() => {
-              return !window.location.href.includes('/login');
-            }, { timeout: 300000 }); // 5 minutes timeout
-            
-            // Navigate to holdings page
-            await page.goto('https://groww.in/portfolio/holdings', { waitUntil: 'networkidle' });
-            
-            // Wait for holdings to load
-            await page.waitForSelector('[data-testid="holdings-table"]', { timeout: 30000 });
-            
-            // Extract holdings data
-            const holdings = await page.evaluate(() => {
-              const rows = document.querySelectorAll('[data-testid="holdings-table"] tbody tr');
-              const holdingsData = [];
+          async (page) => {
+            try {
+              // Navigate to Groww login
+              await page.goto('https://groww.in/login', { waitUntil: 'networkidle' });
               
-              rows.forEach((row) => {
-                const cells = row.querySelectorAll('td');
-                if (cells.length >= 4) {
-                  const stockName = cells[0]?.textContent?.trim() || '';
-                  const quantity = cells[1]?.textContent?.trim() || '0';
-                  const avgPrice = cells[2]?.textContent?.trim() || null;
-                  const marketPrice = cells[3]?.textContent?.trim() || null;
-                  
-                  holdingsData.push({
-                    stockName,
-                    quantity,
-                    avgPrice,
-                    marketPrice,
-                    sector: null,
-                    subsector: null
-                  });
-                }
+              // Wait for user to login (this will timeout in HTTP API, but we'll handle it)
+              await page.waitForFunction(() => {
+                return !window.location.href.includes('/login');
+              }, { timeout: 300000 }); // 5 minutes timeout
+              
+              // Navigate to holdings page
+              await page.goto('https://groww.in/portfolio/holdings', { waitUntil: 'networkidle' });
+              
+              // Wait for holdings to load
+              await page.waitForSelector('[data-testid="holdings-table"]', { timeout: 30000 });
+              
+              // Extract holdings data
+              const holdings = await page.evaluate(() => {
+                const rows = document.querySelectorAll('[data-testid="holdings-table"] tbody tr');
+                const holdingsData = [];
+                
+                rows.forEach((row) => {
+                  const cells = row.querySelectorAll('td');
+                  if (cells.length >= 4) {
+                    const stockName = cells[0]?.textContent?.trim() || '';
+                    const quantity = cells[1]?.textContent?.trim() || '0';
+                    const avgPrice = cells[2]?.textContent?.trim() || null;
+                    const marketPrice = cells[3]?.textContent?.trim() || null;
+                    
+                    holdingsData.push({
+                      stockName,
+                      quantity,
+                      avgPrice,
+                      marketPrice,
+                      sector: null,
+                      subsector: null
+                    });
+                  }
+                });
+                
+                return holdingsData;
               });
               
-              return holdingsData;
-            });
-            
-            return { status: 'success', holdings };
+              return { status: 'success', holdings };
+            } catch (error) {
+              return { status: 'error', error: error.message };
+            }
           }
         `,
         context: { url: 'https://groww.in/login' }
@@ -197,169 +199,185 @@ export async function scrapeGrowwHoldings(
       hasToken: !!BROWSERLESS_TOKEN
     });
 
-    // Use HTTP API approach for real-time scraping
+    let rawHoldings: RawHolding[] = [];
+    let scrapingMethod = 'unknown';
+
+    // Try HTTP API approach first, with fallback to local browser
     if (USE_BROWSERLESS && BROWSERLESS_TOKEN) {
-      logger.info('🌐 USING HTTP API FOR REAL-TIME SCRAPING', { 
+      try {
+        logger.info('🌐 ATTEMPTING HTTP API FOR REAL-TIME SCRAPING', { 
+          service: 'BROWSER_SCRAPER', 
+          stage: 'HTTP_APPROACH', 
+          flow: 'SCRAPING_FLOW',
+          sessionId 
+        });
+
+        // Update progress
+        await updateScrapeSession(sessionId, {
+          progress: { percent: 20, stage: 'Using HTTP API for real-time scraping...' }
+        });
+
+        // Scrape using HTTP API
+        rawHoldings = await scrapeWithHTTPAPI(sessionId, accountName);
+        scrapingMethod = 'http_api';
+
+        if (!rawHoldings || rawHoldings.length === 0) {
+          throw new Error('No holdings data extracted from HTTP API - switching to local browser');
+        }
+
+        logger.info('✅ HTTP API SCRAPING SUCCESSFUL', { 
+          service: 'BROWSER_SCRAPER', 
+          stage: 'HTTP_SUCCESS', 
+          flow: 'SCRAPING_FLOW',
+          sessionId,
+          holdingsCount: rawHoldings.length 
+        });
+
+      } catch (httpError) {
+        logger.warn('⚠️ HTTP API SCRAPING FAILED, FALLING BACK TO LOCAL BROWSER', { 
+          service: 'BROWSER_SCRAPER', 
+          stage: 'HTTP_FALLBACK', 
+          flow: 'SCRAPING_FLOW',
+          sessionId,
+          error: httpError instanceof Error ? httpError.message : 'Unknown error'
+        });
+
+        // Continue to local browser fallback
+        scrapingMethod = 'local_browser';
+      }
+    } else {
+      scrapingMethod = 'local_browser';
+    }
+
+    // Local browser fallback (if HTTP API failed or not configured)
+    if (scrapingMethod === 'local_browser') {
+      logger.info('🖥️ USING LOCAL BROWSER FOR REAL-TIME SCRAPING', { 
         service: 'BROWSER_SCRAPER', 
-        stage: 'HTTP_APPROACH', 
+        stage: 'LOCAL_LAUNCH', 
         flow: 'SCRAPING_FLOW',
         sessionId 
       });
 
-      // Update progress
+      // Update progress for local browser
       await updateScrapeSession(sessionId, {
-        progress: { percent: 20, stage: 'Using HTTP API for real-time scraping...' }
+        progress: { percent: 20, stage: 'Launching local browser for real-time scraping...' }
       });
 
-      // Scrape using HTTP API
-      const rawHoldings = await scrapeWithHTTPAPI(sessionId, accountName);
+      browser = await chromium.launch({ 
+        headless: false, // Show browser UI for user interaction
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-accelerated-2d-canvas',
+          '--no-first-run',
+          '--no-zygote',
+          '--disable-gpu',
+          '--disable-web-security',
+          '--disable-features=VizDisplayCompositor',
+          '--remote-debugging-port=9222', // Enable remote debugging
+          '--remote-debugging-address=0.0.0.0' // Allow external connections
+        ]
+      });
+
+      logger.info('✅ LOCAL BROWSER LAUNCHED SUCCESSFULLY', { 
+        service: 'BROWSER_SCRAPER', 
+        stage: 'LOCAL_SUCCESS', 
+        flow: 'SCRAPING_FLOW',
+        sessionId 
+      });
+
+      const context = await browser.newContext({
+        userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+        viewport: { width: 1920, height: 1080 }
+      });
+
+      page = await context.newPage();
+      logger.info('📄 LOCAL PAGE CREATED', { 
+        service: 'BROWSER_SCRAPER', 
+        stage: 'PAGE_CREATED', 
+        flow: 'SCRAPING_FLOW',
+        sessionId 
+      });
+
+      // Navigate to Groww login
+      await updateScrapeSession(sessionId, {
+        progress: { percent: 30, stage: 'Navigating to Groww login...' }
+      });
+
+      await page.goto('https://groww.in/login', { waitUntil: 'networkidle' });
+
+      // Wait for user login (5 minutes timeout)
+      await updateScrapeSession(sessionId, {
+        progress: { percent: 40, stage: 'Waiting for user login (5 minutes)...' }
+      });
+
+      const deadline = Date.now() + 5 * 60 * 1000;
+      while (Date.now() < deadline) {
+        const currentUrl = page.url();
+        if (!currentUrl.includes('/login')) {
+          break; // User has logged in
+        }
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+
+      if (page.url().includes('/login')) {
+        throw new Error('Login timeout - user did not complete login within 5 minutes');
+      }
+
+      // Navigate to holdings and extract data
+      await updateScrapeSession(sessionId, {
+        progress: { percent: 60, stage: 'Navigating to holdings...' }
+      });
+
+      await page.goto('https://groww.in/portfolio/holdings', { waitUntil: 'networkidle' });
+      await page.waitForSelector('[data-testid="holdings-table"]', { timeout: 30000 });
+
+      await updateScrapeSession(sessionId, {
+        progress: { percent: 70, stage: 'Extracting real-time holdings data...' }
+      });
+
+      rawHoldings = await extractHoldings(page);
 
       if (!rawHoldings || rawHoldings.length === 0) {
-        throw new Error('No holdings data extracted - scraping failed');
+        throw new Error('No holdings data extracted from local browser');
       }
 
-      // Process holdings
-      await updateScrapeSession(sessionId, {
-        progress: { percent: 60, stage: 'Processing real-time data...' }
-      });
-
-      const processedHoldings = await processHoldings(rawHoldings);
-
-      // Save to database
-      await updateScrapeSession(sessionId, {
-        progress: { percent: 80, stage: 'Saving real-time data to database...' }
-      });
-
-      await saveHoldingsToDatabase(sessionId, accountName, brokerId, processedHoldings);
-
-      // Update final status
-      await updateScrapeSession(sessionId, {
-        status: 'completed',
-        progress: { percent: 100, stage: 'Real-time scraping completed successfully' }
-      });
-
-      logger.info('✅ REAL-TIME SCRAPING COMPLETED SUCCESSFULLY', { 
+      logger.info('✅ LOCAL BROWSER SCRAPING SUCCESSFUL', { 
         service: 'BROWSER_SCRAPER', 
-        stage: 'HTTP_SCRAPING_SUCCESS', 
+        stage: 'LOCAL_SUCCESS', 
         flow: 'SCRAPING_FLOW',
         sessionId,
-        holdingsCount: processedHoldings.length 
+        holdingsCount: rawHoldings.length 
       });
-
-      return;
     }
 
-    // Fallback to local browser for real-time scraping
-    logger.info('🖥️ ATTEMPTING LOCAL BROWSER FOR REAL-TIME SCRAPING', { 
-      service: 'BROWSER_SCRAPER', 
-      stage: 'LOCAL_LAUNCH', 
-      flow: 'SCRAPING_FLOW',
-      sessionId 
-    });
-
-    browser = await chromium.launch({ 
-      headless: false, // Show browser UI for user interaction
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-accelerated-2d-canvas',
-        '--no-first-run',
-        '--no-zygote',
-        '--disable-gpu',
-        '--disable-web-security',
-        '--disable-features=VizDisplayCompositor',
-        '--remote-debugging-port=9222', // Enable remote debugging
-        '--remote-debugging-address=0.0.0.0' // Allow external connections
-      ]
-    });
-
-    logger.info('✅ LOCAL BROWSER LAUNCHED SUCCESSFULLY', { 
-      service: 'BROWSER_SCRAPER', 
-      stage: 'LOCAL_SUCCESS', 
-      flow: 'SCRAPING_FLOW',
-      sessionId 
-    });
-
-    const context = await browser.newContext({
-      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-      viewport: { width: 1920, height: 1080 }
-    });
-
-    page = await context.newPage();
-    logger.info('📄 LOCAL PAGE CREATED', { 
-      service: 'BROWSER_SCRAPER', 
-      stage: 'PAGE_CREATED', 
-      flow: 'SCRAPING_FLOW',
-      sessionId 
-    });
-
-    // Navigate to Groww login
-    await updateScrapeSession(sessionId, {
-      progress: { percent: 30, stage: 'Navigating to Groww login...' }
-    });
-
-    await page.goto('https://groww.in/login', { waitUntil: 'networkidle' });
-
-    // Wait for user login (5 minutes timeout)
-    await updateScrapeSession(sessionId, {
-      progress: { percent: 40, stage: 'Waiting for user login (5 minutes)...' }
-    });
-
-    const deadline = Date.now() + 5 * 60 * 1000;
-    while (Date.now() < deadline) {
-      const currentUrl = page.url();
-      if (!currentUrl.includes('/login')) {
-        break; // User has logged in
-      }
-      await new Promise(resolve => setTimeout(resolve, 1000));
-    }
-
-    if (page.url().includes('/login')) {
-      throw new Error('Login timeout - user did not complete login within 5 minutes');
-    }
-
-    // Navigate to holdings and extract data
-    await updateScrapeSession(sessionId, {
-      progress: { percent: 60, stage: 'Navigating to holdings...' }
-    });
-
-    await page.goto('https://groww.in/portfolio/holdings', { waitUntil: 'networkidle' });
-    await page.waitForSelector('[data-testid="holdings-table"]', { timeout: 30000 });
-
-    await updateScrapeSession(sessionId, {
-      progress: { percent: 70, stage: 'Extracting real-time holdings data...' }
-    });
-
-    const rawHoldings = await extractHoldings(page);
-
-    if (!rawHoldings || rawHoldings.length === 0) {
-      throw new Error('No holdings data extracted from local browser');
-    }
-
-    // Process and save holdings
+    // Process holdings (common for both methods)
     await updateScrapeSession(sessionId, {
       progress: { percent: 80, stage: 'Processing real-time data...' }
     });
 
     const processedHoldings = await processHoldings(rawHoldings);
 
+    // Save to database
     await updateScrapeSession(sessionId, {
       progress: { percent: 90, stage: 'Saving real-time data to database...' }
     });
 
     await saveHoldingsToDatabase(sessionId, accountName, brokerId, processedHoldings);
 
+    // Update final status
     await updateScrapeSession(sessionId, {
       status: 'completed',
       progress: { percent: 100, stage: 'Real-time scraping completed successfully' }
     });
 
-    logger.info('✅ LOCAL REAL-TIME SCRAPING COMPLETED', { 
+    logger.info('✅ REAL-TIME SCRAPING COMPLETED SUCCESSFULLY', { 
       service: 'BROWSER_SCRAPER', 
-      stage: 'LOCAL_SCRAPING_SUCCESS', 
+      stage: 'SCRAPING_SUCCESS', 
       flow: 'SCRAPING_FLOW',
       sessionId,
+      scrapingMethod,
       holdingsCount: processedHoldings.length 
     });
 
