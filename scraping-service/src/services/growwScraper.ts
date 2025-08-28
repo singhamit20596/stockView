@@ -1,5 +1,4 @@
 import { chromium, Browser, Page } from 'playwright';
-import puppeteer from 'puppeteer';
 import { Decimal } from 'decimal.js';
 import { logger } from '../utils/logger';
 import { 
@@ -39,9 +38,8 @@ export async function scrapeGrowwHoldings(
   accountName: string, 
   brokerId: string
 ): Promise<void> {
-  let browser: any = null;
-  let page: any = null;
-  let usePlaywright = true;
+  let browser: Browser | null = null;
+  let page: Page | null = null;
 
   try {
     // Update session status to running
@@ -52,7 +50,7 @@ export async function scrapeGrowwHoldings(
 
     logger.info('Starting Groww scraping', { sessionId, accountName });
 
-    // Try Playwright first, fallback to Puppeteer
+    // Launch Playwright browser
     try {
       logger.info('Attempting to launch Playwright browser');
       browser = await chromium.launch({ 
@@ -77,33 +75,9 @@ export async function scrapeGrowwHoldings(
 
       page = await context.newPage();
       logger.info('Playwright browser launched successfully');
-    } catch (playwrightError) {
-      logger.warn('Playwright failed, trying Puppeteer', { error: playwrightError });
-      usePlaywright = false;
-      
-      try {
-        browser = await puppeteer.launch({
-          headless: true,
-          args: [
-            '--no-sandbox',
-            '--disable-setuid-sandbox',
-            '--disable-dev-shm-usage',
-            '--disable-accelerated-2d-canvas',
-            '--no-first-run',
-            '--no-zygote',
-            '--disable-gpu',
-            '--disable-web-security'
-          ]
-        });
-        
-        page = await browser.newPage();
-        await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
-        await page.setViewport({ width: 1920, height: 1080 });
-        logger.info('Puppeteer browser launched successfully');
-      } catch (puppeteerError) {
-        logger.error('Both Playwright and Puppeteer failed', { playwrightError, puppeteerError });
-        throw new Error('Failed to launch browser: ' + puppeteerError.message);
-      }
+    } catch (error) {
+      logger.error('Failed to launch Playwright browser', { error });
+      throw new Error('Failed to launch browser: ' + (error instanceof Error ? error.message : 'Unknown error'));
     }
 
     await updateScrapeSession(sessionId, {
@@ -112,12 +86,7 @@ export async function scrapeGrowwHoldings(
 
     // Navigate to Groww login
     const loginUrl = 'https://groww.in/login';
-    
-    if (usePlaywright) {
-      await page.goto(loginUrl, { waitUntil: 'networkidle' });
-    } else {
-      await page.goto(loginUrl, { waitUntil: 'networkidle0' });
-    }
+    await page.goto(loginUrl, { waitUntil: 'networkidle' });
 
     await updateScrapeSession(sessionId, {
       progress: { percent: 30, stage: 'Waiting for user login (5 minutes)...' }
@@ -126,7 +95,7 @@ export async function scrapeGrowwHoldings(
     // Wait for user to login (5 minutes timeout)
     const deadline = Date.now() + 5 * 60 * 1000;
     while (Date.now() < deadline) {
-      const currentUrl = usePlaywright ? page.url() : await page.url();
+      const currentUrl = page.url();
       if (!currentUrl.includes('/login')) {
         logger.info('User logged in successfully', { sessionId, currentUrl });
         break;
@@ -134,7 +103,7 @@ export async function scrapeGrowwHoldings(
       await new Promise(resolve => setTimeout(resolve, 1000));
     }
 
-    const finalUrl = usePlaywright ? page.url() : await page.url();
+    const finalUrl = page.url();
     if (finalUrl.includes('/login')) {
       throw new Error('Login timeout - user did not complete login within 5 minutes');
     }
@@ -145,12 +114,7 @@ export async function scrapeGrowwHoldings(
 
     // Navigate to holdings page
     const holdingsUrl = 'https://groww.in/portfolio/holdings';
-    
-    if (usePlaywright) {
-      await page.goto(holdingsUrl, { waitUntil: 'networkidle' });
-    } else {
-      await page.goto(holdingsUrl, { waitUntil: 'networkidle0' });
-    }
+    await page.goto(holdingsUrl, { waitUntil: 'networkidle' });
 
     await updateScrapeSession(sessionId, {
       progress: { percent: 50, stage: 'Waiting for holdings to load...' }
@@ -164,7 +128,7 @@ export async function scrapeGrowwHoldings(
     });
 
     // Extract holdings data
-    const rawHoldings = await extractHoldings(page, usePlaywright);
+    const rawHoldings = await extractHoldings(page);
 
     await updateScrapeSession(sessionId, {
       progress: { percent: 80, stage: 'Processing holdings data...' }
@@ -200,41 +164,29 @@ export async function scrapeGrowwHoldings(
       progress: { percent: 0, stage: 'Failed' },
       error: errorMessage
     });
-  } finally {
-    if (page) {
-      try {
-        if (usePlaywright) {
+      } finally {
+      if (page) {
+        try {
           await page.close();
-        } else {
-          await page.close();
+        } catch (error) {
+          logger.warn('Failed to close page', { error });
         }
-      } catch (error) {
-        logger.warn('Failed to close page', { error });
       }
-    }
-    
-    if (browser) {
-      try {
-        if (usePlaywright) {
+      
+      if (browser) {
+        try {
           await browser.close();
-        } else {
-          await browser.close();
+        } catch (error) {
+          logger.warn('Failed to close browser', { error });
         }
-      } catch (error) {
-        logger.warn('Failed to close browser', { error });
       }
     }
   }
-}
-
-async function extractHoldings(page: any, usePlaywright: boolean): Promise<RawHolding[]> {
-  try {
-    // Wait for holdings table to load
-    if (usePlaywright) {
+  
+  async function extractHoldings(page: Page): Promise<RawHolding[]> {
+    try {
+      // Wait for holdings table to load
       await page.waitForSelector('[data-testid="holdings-table"]', { timeout: 10000 });
-    } else {
-      await page.waitForSelector('[data-testid="holdings-table"]', { timeout: 10000 });
-    }
 
     // Extract holdings data
     const holdings = await page.evaluate(() => {
