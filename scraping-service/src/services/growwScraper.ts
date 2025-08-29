@@ -67,16 +67,12 @@ async function scrapeWithHTTPAPI(sessionId: string, accountName: string): Promis
       sessionId 
     });
 
-    // Test with /content endpoint (which is documented and works)
-    const testResponse = await fetch(`${httpUrl}/content?token=${BROWSERLESS_TOKEN}`, {
+    // Test with /content endpoint - use query parameters for launch options
+    const testResponse = await fetch(`${httpUrl}/content?token=${BROWSERLESS_TOKEN}&stealth=true&blockAds=true`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        url: 'https://example.com',
-        launch: {
-          stealth: true,
-          blockAds: true
-        }
+        url: 'https://example.com'
       })
     });
 
@@ -102,16 +98,11 @@ async function scrapeWithHTTPAPI(sessionId: string, accountName: string): Promis
       sessionId 
     });
 
-    const scrapingResponse = await fetch(`${httpUrl}/content?token=${BROWSERLESS_TOKEN}`, {
+    const scrapingResponse = await fetch(`${httpUrl}/content?token=${BROWSERLESS_TOKEN}&stealth=true&blockAds=true&headless=true`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        url: 'https://groww.in/login',
-        launch: {
-          stealth: true,
-          blockAds: true,
-          headless: true
-        }
+        url: 'https://groww.in/login'
       })
     });
 
