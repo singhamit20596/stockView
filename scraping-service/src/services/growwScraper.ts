@@ -58,9 +58,8 @@ export async function scrapeGrowwHoldings(sessionId: string, accountName: string
 
         const sessionTimeoutMs = 300000; // 5 minutes for complex automation
         const sessionTimeoutSeconds = Math.floor(sessionTimeoutMs / 1000); // Convert to seconds
-        const connectionTimeoutMs = 300000; // 300 seconds (5 minutes) for connection
 
-        let browser = null;
+        let browser: Browser | null = null;
         let lastError = null;
 
         try {
@@ -79,7 +78,6 @@ export async function scrapeGrowwHoldings(sessionId: string, accountName: string
               endpointName,
               attemptNumber: i + 1,
               totalEndpoints: endpoints.length,
-              connectionTimeoutMs,
               sessionTimeoutMs,
               sessionTimeoutSeconds
             });
@@ -99,33 +97,10 @@ export async function scrapeGrowwHoldings(sessionId: string, accountName: string
                 endpointName
               });
 
-              // Connection attempt with proper Playwright connection method
-              const connectionPromise = chromium.connect({
-                wsEndpoint: `${endpoint}/?token=${BROWSERLESS_TOKEN}`,
-                // Launch options should be in connection config, not URL
-                timeout: connectionTimeoutMs
+              // Remove client-side timeout - let Playwright handle connection naturally
+              browser = await chromium.connect({
+                wsEndpoint: `${endpoint}/?token=${BROWSERLESS_TOKEN}`
               });
-
-              // Set 120-second timeout for connection establishment
-              const timeoutPromise = new Promise<never>((_, reject) => {
-                setTimeout(() => {
-                  logger.error('⏰ BROWSERLESS.IO CONNECTION TIMEOUT', { 
-                    service: 'BROWSER_SCRAPER', 
-                    stage: 'CONNECTION_TIMEOUT', 
-                    flow: 'SCRAPING_FLOW',
-                    sessionId,
-                    endpoint,
-                    endpointName,
-                    connectionTimeoutMs,
-                    sessionTimeoutMs,
-                    sessionTimeoutSeconds,
-                    wsEndpoint: `${endpoint}/?token=${BROWSERLESS_TOKEN}`
-                  });
-                  reject(new Error(`Browserless.io connection timeout for ${endpointName}`));
-                }, connectionTimeoutMs);
-              });
-
-              browser = await Promise.race([connectionPromise, timeoutPromise]);
 
               logger.info('✅ BROWSERLESS.IO CONNECTED', { 
                 service: 'BROWSER_SCRAPER', 
