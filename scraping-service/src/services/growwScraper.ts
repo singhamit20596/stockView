@@ -45,16 +45,54 @@ export async function scrapeGrowwHoldings(sessionId: string, accountName: string
           sessionId 
         });
 
-        browser = await chromium.connect({
-          wsEndpoint: `${BROWSERLESS_URL}?token=${BROWSERLESS_TOKEN}&headless=false&stealth=true`
-        });
+        try {
+          // Add timeout for Browserless.io connection
+          const connectionPromise = chromium.connect({
+            wsEndpoint: `${BROWSERLESS_URL}?token=${BROWSERLESS_TOKEN}&headless=false&stealth=true`
+          });
 
-        logger.info('✅ BROWSERLESS.IO CONNECTED', { 
-          service: 'BROWSER_SCRAPER', 
-          stage: 'BROWSERLESS_CONNECTED', 
-          flow: 'SCRAPING_FLOW',
-          sessionId 
-        });
+          // Set 30-second timeout for connection
+          const timeoutPromise = new Promise<never>((_, reject) => {
+            setTimeout(() => reject(new Error('Browserless.io connection timeout')), 30000);
+          });
+
+          browser = await Promise.race([connectionPromise, timeoutPromise]);
+
+          logger.info('✅ BROWSERLESS.IO CONNECTED', { 
+            service: 'BROWSER_SCRAPER', 
+            stage: 'BROWSERLESS_CONNECTED', 
+            flow: 'SCRAPING_FLOW',
+            sessionId 
+          });
+        } catch (browserlessError) {
+          logger.error('💥 BROWSERLESS.IO CONNECTION FAILED', { 
+            service: 'BROWSER_SCRAPER', 
+            stage: 'BROWSERLESS_CONNECT_FAILED', 
+            flow: 'SCRAPING_FLOW',
+            sessionId,
+            error: browserlessError instanceof Error ? browserlessError.message : 'Unknown error'
+          });
+
+          // Fallback to local browser
+          logger.info('🔄 FALLING BACK TO LOCAL BROWSER', { 
+            service: 'BROWSER_SCRAPER', 
+            stage: 'LOCAL_FALLBACK', 
+            flow: 'SCRAPING_FLOW',
+            sessionId 
+          });
+
+          browser = await chromium.launch({
+            headless: false,
+            args: ['--no-sandbox', '--disable-setuid-sandbox']
+          });
+
+          logger.info('✅ LOCAL BROWSER LAUNCHED', { 
+            service: 'BROWSER_SCRAPER', 
+            stage: 'LOCAL_LAUNCHED', 
+            flow: 'SCRAPING_FLOW',
+            sessionId 
+          });
+        }
       } else {
         logger.info('🖥️ LAUNCHING LOCAL BROWSER', { 
           service: 'BROWSER_SCRAPER', 
@@ -66,6 +104,13 @@ export async function scrapeGrowwHoldings(sessionId: string, accountName: string
         browser = await chromium.launch({
           headless: false,
           args: ['--no-sandbox', '--disable-setuid-sandbox']
+        });
+
+        logger.info('✅ LOCAL BROWSER LAUNCHED', { 
+          service: 'BROWSER_SCRAPER', 
+          stage: 'LOCAL_LAUNCHED', 
+          flow: 'SCRAPING_FLOW',
+          sessionId 
         });
       }
 
