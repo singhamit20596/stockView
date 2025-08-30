@@ -92,8 +92,9 @@ export async function scrapeGrowwHoldings(sessionId: string, accountName: string
           }
 
           // Step 2: Construct WebSocket URL with timeout parameter
-          const sessionTimeout = 300000; // 5 minutes for complex automation
-          const wsEndpoint = `${BROWSERLESS_URL}?token=${BROWSERLESS_TOKEN}&headless=false&stealth=true&timeout=${sessionTimeout}`;
+          const sessionTimeoutMs = 300000; // 5 minutes for complex automation
+          const sessionTimeoutSeconds = Math.floor(sessionTimeoutMs / 1000); // Convert to seconds
+          const wsEndpoint = `${BROWSERLESS_URL}?token=${BROWSERLESS_TOKEN}&headless=false&stealth=true&timeout=${sessionTimeoutSeconds}`;
           
           logger.info('🔗 WEBSOCKET URL CONSTRUCTION', { 
             service: 'BROWSER_SCRAPER', 
@@ -106,7 +107,8 @@ export async function scrapeGrowwHoldings(sessionId: string, accountName: string
             containsStealth: wsEndpoint.includes('stealth'),
             containsToken: wsEndpoint.includes('token'),
             containsTimeout: wsEndpoint.includes('timeout'),
-            sessionTimeoutMs: sessionTimeout
+            sessionTimeoutMs: sessionTimeoutMs,
+            sessionTimeoutSeconds: sessionTimeoutSeconds
           });
 
           // Step 3: Log connection attempt details
@@ -116,14 +118,15 @@ export async function scrapeGrowwHoldings(sessionId: string, accountName: string
             flow: 'SCRAPING_FLOW',
             sessionId,
             connectionTimeoutMs: 30000,
-            sessionTimeoutMs: sessionTimeout,
+            sessionTimeoutMs: sessionTimeoutMs,
+            sessionTimeoutSeconds: sessionTimeoutSeconds,
             connectionMethod: 'chromium.connect',
             playwrightVersion: 'latest'
           });
 
           // Step 4: Add timeout for Browserless.io connection with proper error handling
           const connectionPromise = chromium.connect({
-            wsEndpoint: `${BROWSERLESS_URL}?token=${BROWSERLESS_TOKEN}&headless=false&stealth=true&timeout=${sessionTimeout}`
+            wsEndpoint: `${BROWSERLESS_URL}?token=${BROWSERLESS_TOKEN}&headless=false&stealth=true&timeout=${sessionTimeoutSeconds}`
           });
 
           // Set 30-second timeout for connection establishment
@@ -135,8 +138,9 @@ export async function scrapeGrowwHoldings(sessionId: string, accountName: string
                 flow: 'SCRAPING_FLOW',
                 sessionId,
                 connectionTimeoutMs: 30000,
-                sessionTimeoutMs: sessionTimeout,
-                wsEndpoint: `${BROWSERLESS_URL}?token=${BROWSERLESS_TOKEN}&headless=false&stealth=true&timeout=${sessionTimeout}`
+                sessionTimeoutMs: sessionTimeoutMs,
+                sessionTimeoutSeconds: sessionTimeoutSeconds,
+                wsEndpoint: `${BROWSERLESS_URL}?token=${BROWSERLESS_TOKEN}&headless=false&stealth=true&timeout=${sessionTimeoutSeconds}`
               });
               reject(new Error('Browserless.io connection timeout'));
             }, 30000);
@@ -151,7 +155,8 @@ export async function scrapeGrowwHoldings(sessionId: string, accountName: string
             sessionId,
             browserConnected: !!browser,
             browserType: browser?.constructor?.name || 'unknown',
-            sessionTimeoutMs: sessionTimeout
+            sessionTimeoutMs: sessionTimeoutMs,
+            sessionTimeoutSeconds: sessionTimeoutSeconds
           });
         } catch (browserlessError) {
           // Step 5: Enhanced error handling with specific HTTP code analysis
@@ -209,35 +214,15 @@ export async function scrapeGrowwHoldings(sessionId: string, accountName: string
             errorType,
             error: browserlessError instanceof Error ? browserlessError.message : 'Unknown error',
             errorStack: browserlessError instanceof Error ? browserlessError.stack : undefined,
-            wsEndpoint: `${BROWSERLESS_URL}?token=${BROWSERLESS_TOKEN}&headless=false&stealth=true&timeout=300000`,
+            wsEndpoint: `${BROWSERLESS_URL}?token=${BROWSERLESS_TOKEN}&headless=false&stealth=true&timeout=${Math.floor(300000 / 1000)}`,
             browserlessUrl: BROWSERLESS_URL,
             hasToken: !!BROWSERLESS_TOKEN,
             tokenLength: BROWSERLESS_TOKEN?.length || 0,
             errorDetails
           });
 
-          // Step 6: Fallback to local browser with detailed logging
-          logger.info('🔄 FALLING BACK TO LOCAL BROWSER', { 
-            service: 'BROWSER_SCRAPER', 
-            stage: 'LOCAL_FALLBACK', 
-            flow: 'SCRAPING_FLOW',
-            sessionId,
-            fallbackReason: 'Browserless.io connection failed',
-            originalErrorType: errorType,
-            originalError: browserlessError instanceof Error ? browserlessError.message : 'Unknown error'
-          });
-
-          browser = await chromium.launch({
-            headless: false,
-            args: ['--no-sandbox', '--disable-setuid-sandbox']
-          });
-
-          logger.info('✅ LOCAL BROWSER LAUNCHED', { 
-            service: 'BROWSER_SCRAPER', 
-            stage: 'LOCAL_LAUNCHED', 
-            flow: 'SCRAPING_FLOW',
-            sessionId 
-          });
+          // No fallback - throw the error
+          throw browserlessError;
         }
       } else {
         logger.info('🖥️ LAUNCHING LOCAL BROWSER', { 
