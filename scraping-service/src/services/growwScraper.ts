@@ -27,16 +27,7 @@ export async function scrapeGrowwHoldings(sessionId: string, accountName: string
   });
 
   try {
-    // Create scrape session
-    await createScrapeSession({
-      id: sessionId,
-      account_name: accountName,
-      broker_id: 'groww',
-      status: 'running',
-      progress: { percent: 10, stage: 'Initializing scraping service...' }
-    });
-
-    // Update progress
+    // Update progress (session already created in API route)
     await updateScrapeSession(sessionId, {
       progress: { percent: 20, stage: 'Connecting to browser service...' }
     });
