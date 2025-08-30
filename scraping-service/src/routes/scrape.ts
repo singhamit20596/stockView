@@ -81,7 +81,7 @@ router.post('/start', async (req, res) => {
       sessionId 
     });
 
-    scrapeGrowwHoldings(sessionId, accountName, brokerId).catch(error => {
+    scrapeGrowwHoldings(sessionId, accountName).catch(error => {
       logger.error('💥 BACKGROUND SCRAPING FAILED', { 
         service: 'RAILWAY_API', 
         stage: 'BACKGROUND_ERROR', 
