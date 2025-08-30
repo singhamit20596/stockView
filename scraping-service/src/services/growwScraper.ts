@@ -85,8 +85,8 @@ export async function scrapeGrowwHoldings(sessionId: string, accountName: string
             });
 
             try {
-              // Construct WebSocket URL with timeout parameter
-              const wsEndpoint = `${endpoint}?token=${BROWSERLESS_TOKEN}&headless=false&stealth=true&timeout=${sessionTimeoutSeconds}`;
+              // Construct WebSocket URL with ONLY connection parameters
+              const wsEndpoint = `${endpoint}/?token=${BROWSERLESS_TOKEN}`;
               
               logger.info('🔗 WEBSOCKET URL CONSTRUCTION', { 
                 service: 'BROWSER_SCRAPER', 
@@ -95,18 +95,15 @@ export async function scrapeGrowwHoldings(sessionId: string, accountName: string
                 sessionId,
                 wsEndpoint,
                 urlLength: wsEndpoint.length,
-                containsHeadless: wsEndpoint.includes('headless'),
-                containsStealth: wsEndpoint.includes('stealth'),
                 containsToken: wsEndpoint.includes('token'),
-                containsTimeout: wsEndpoint.includes('timeout'),
-                sessionTimeoutMs,
-                sessionTimeoutSeconds,
                 endpointName
               });
 
-              // Connection attempt with 120-second timeout
+              // Connection attempt with proper Playwright connection method
               const connectionPromise = chromium.connect({
-                wsEndpoint: `${endpoint}?token=${BROWSERLESS_TOKEN}&headless=false&stealth=true&timeout=${sessionTimeoutSeconds}`
+                wsEndpoint: `${endpoint}/?token=${BROWSERLESS_TOKEN}`,
+                // Launch options should be in connection config, not URL
+                timeout: connectionTimeoutMs
               });
 
               // Set 120-second timeout for connection establishment
@@ -122,7 +119,7 @@ export async function scrapeGrowwHoldings(sessionId: string, accountName: string
                     connectionTimeoutMs,
                     sessionTimeoutMs,
                     sessionTimeoutSeconds,
-                    wsEndpoint: `${endpoint}?token=${BROWSERLESS_TOKEN}&headless=false&stealth=true&timeout=${sessionTimeoutSeconds}`
+                    wsEndpoint: `${endpoint}/?token=${BROWSERLESS_TOKEN}`
                   });
                   reject(new Error(`Browserless.io connection timeout for ${endpointName}`));
                 }, connectionTimeoutMs);
@@ -209,7 +206,7 @@ export async function scrapeGrowwHoldings(sessionId: string, accountName: string
                 errorType,
                 error: endpointError instanceof Error ? endpointError.message : 'Unknown error',
                 errorStack: endpointError instanceof Error ? endpointError.stack : undefined,
-                wsEndpoint: `${endpoint}?token=${BROWSERLESS_TOKEN}&headless=false&stealth=true&timeout=${sessionTimeoutSeconds}`,
+                wsEndpoint: `${endpoint}/?token=${BROWSERLESS_TOKEN}`,
                 hasToken: !!BROWSERLESS_TOKEN,
                 tokenLength: BROWSERLESS_TOKEN?.length || 0,
                 errorDetails
