@@ -58,7 +58,7 @@ export async function scrapeGrowwHoldings(sessionId: string, accountName: string
 
         const sessionTimeoutMs = 300000; // 5 minutes for complex automation
         const sessionTimeoutSeconds = Math.floor(sessionTimeoutMs / 1000); // Convert to seconds
-        const connectionTimeoutMs = 120000; // 120 seconds for connection
+        const connectionTimeoutMs = 300000; // 300 seconds (5 minutes) for connection
 
         let browser = null;
         let lastError = null;
