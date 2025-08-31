@@ -14,7 +14,7 @@ interface RawHolding {
 
 const USE_BROWSERLESS = process.env.USE_BROWSERLESS?.toLowerCase() === 'true';
 const BROWSERLESS_TOKEN = process.env.BROWSERLESS_TOKEN;
-const BROWSERLESS_URL = 'wss://production-sfo.browserless.io';
+const BROWSERLESS_REGION = process.env.BROWSERLESS_REGION || 'production-sfo';
 
 export async function scrapeGrowwHoldings(sessionId: string, accountName: string): Promise<RawHolding[]> {
   logger.info('🚀 STARTING GROWW SCRAPING', { 
@@ -38,124 +38,51 @@ export async function scrapeGrowwHoldings(sessionId: string, accountName: string
     try {
       // Connect to browser (Browserless.io or local)
       if (USE_BROWSERLESS && BROWSERLESS_TOKEN) {
-        logger.info('🌐 USING BROWSERLESS.IO HTTP API', { 
+        logger.info('🌐 USING BROWSERLESS.IO CDP', { 
           service: 'BROWSER_SCRAPER', 
-          stage: 'BROWSERLESS_HTTP_API', 
+          stage: 'BROWSERLESS_CDP', 
           flow: 'SCRAPING_FLOW',
           sessionId,
           hasToken: !!BROWSERLESS_TOKEN,
-          tokenLength: BROWSERLESS_TOKEN?.length || 0,
+          region: BROWSERLESS_REGION,
           useBrowserless: USE_BROWSERLESS
         });
 
-        // Use HTTP API instead of WebSocket for better reliability
-        const browserlessUrl = `https://production-sfo.browserless.io/function?token=${BROWSERLESS_TOKEN}`;
+        // Use CDP WebSocket connection (free plan compatible)
+        const browserlessUrl = `wss://${BROWSERLESS_REGION}.browserless.io/chrome?token=${BROWSERLESS_TOKEN}&timeout=50000&stealth=true&headless=true&blockAds=true`;
         
-        logger.info('🔗 BROWSERLESS.IO HTTP API URL', {
+        logger.info('🔗 BROWSERLESS.IO CDP URL', {
           service: 'BROWSER_SCRAPER',
           sessionId,
-          stage: 'HTTP_API_URL',
+          stage: 'CDP_URL',
           flow: 'SCRAPING_FLOW',
-          browserlessUrl,
-          urlLength: browserlessUrl.length,
-          containsToken: browserlessUrl.includes(BROWSERLESS_TOKEN)
+          browserlessUrl: browserlessUrl.replace(BROWSERLESS_TOKEN, '***'),
+          region: BROWSERLESS_REGION
         });
 
         try {
-          // Use HTTP API to execute scraping code
-          const response = await fetch(browserlessUrl, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Cache-Control': 'no-cache'
-            },
-            body: JSON.stringify({
-              code: `
-                const { chromium } = require('playwright');
-                
-                (async () => {
-                  const browser = await chromium.launch({
-                    headless: false,
-                    args: ['--no-sandbox', '--disable-setuid-sandbox']
-                  });
-                  
-                  const page = await browser.newPage();
-                  await page.setViewportSize({ width: 1920, height: 1080 });
-                  
-                  // Navigate to Groww login
-                  await page.goto('https://groww.in/login', { waitUntil: 'networkidle', timeout: 30000 });
-                  
-                  // Wait for user login (up to 5 minutes)
-                  await page.waitForSelector('[data-testid="dashboard"], .dashboard, [class*="dashboard"]', { timeout: 300000 });
-                  
-                  // Navigate to holdings
-                  await page.goto('https://groww.in/portfolio/holdings', { waitUntil: 'networkidle', timeout: 30000 });
-                  
-                  // Wait for holdings to load
-                  await page.waitForSelector('[data-testid="holdings-table"], .holdings-table, [class*="holdings"]', { timeout: 30000 });
-                  
-                  // Extract holdings data
-                  const holdings = await page.evaluate(() => {
-                    const rows = document.querySelectorAll('[data-testid="holdings-table"] tr, .holdings-table tr, [class*="holdings"] tr');
-                    const data = [];
-                    
-                    rows.forEach((row, index) => {
-                      if (index === 0) return; // Skip header
-                      
-                      const cells = row.querySelectorAll('td');
-                      if (cells.length >= 4) {
-                        data.push({
-                          stockName: cells[0]?.textContent?.trim() || '',
-                          quantity: cells[1]?.textContent?.trim() || '',
-                          avgPrice: cells[2]?.textContent?.trim() || '',
-                          marketPrice: cells[3]?.textContent?.trim() || '',
-                          sector: cells[4]?.textContent?.trim() || '',
-                          subsector: cells[5]?.textContent?.trim() || ''
-                        });
-                      }
-                    });
-                    
-                    return data;
-                  });
-                  
-                  await browser.close();
-                  return holdings;
-                })();
-              `,
-              context: {
-                timeout: 300000 // 5 minutes timeout
-              }
-            })
-          });
-
-          if (!response.ok) {
-            throw new Error(`Browserless.io HTTP API failed: ${response.status} ${response.statusText}`);
-          }
-
-          const holdings = await response.json();
+          // Connect using CDP (free plan compatible)
+          browser = await chromium.connectOverCDP(browserlessUrl);
           
-          logger.info('✅ BROWSERLESS.IO HTTP API SUCCESS', {
+          logger.info('✅ BROWSERLESS.IO CDP CONNECTED', {
             service: 'BROWSER_SCRAPER',
             sessionId,
-            stage: 'HTTP_API_SUCCESS',
+            stage: 'CDP_CONNECTED',
             flow: 'SCRAPING_FLOW',
-            holdingsCount: holdings.length,
-            responseStatus: response.status
+            isConnected: browser.isConnected()
           });
 
-          return holdings;
-
-        } catch (httpApiError) {
-          logger.error('💥 BROWSERLESS.IO HTTP API FAILED', {
+        } catch (cdpError) {
+          logger.error('💥 BROWSERLESS.IO CDP FAILED', {
             service: 'BROWSER_SCRAPER',
             sessionId,
-            stage: 'HTTP_API_ERROR',
+            stage: 'CDP_ERROR',
             flow: 'SCRAPING_FLOW',
-            error: httpApiError instanceof Error ? httpApiError.message : 'Unknown error',
-            errorStack: httpApiError instanceof Error ? httpApiError.stack : undefined
+            error: cdpError instanceof Error ? cdpError.message : 'Unknown error',
+            errorStack: cdpError instanceof Error ? cdpError.stack : undefined
           });
           
-          throw httpApiError;
+          throw new Error(`Browserless.io CDP connection failed: ${cdpError instanceof Error ? cdpError.message : 'Unknown error'}`);
         }
       } else {
         logger.info('🖥️ LAUNCHING LOCAL BROWSER', { 
@@ -201,28 +128,28 @@ export async function scrapeGrowwHoldings(sessionId: string, accountName: string
       });
 
       await page.goto('https://groww.in/login', { 
-        waitUntil: 'networkidle',
+        waitUntil: 'networkidle', 
         timeout: 30000 
       });
 
-      // Update progress - waiting for user login
+      // Update progress
       await updateScrapeSession(sessionId, {
-        progress: { percent: 40, stage: 'Waiting for user login... Please login in the browser window.' }
+        progress: { percent: 40, stage: 'Waiting for manual login...' }
       });
 
-      logger.info('⏳ WAITING FOR USER LOGIN', { 
+      logger.info('⏳ WAITING FOR MANUAL LOGIN', { 
         service: 'BROWSER_SCRAPER', 
         stage: 'WAIT_LOGIN', 
         flow: 'SCRAPING_FLOW',
         sessionId 
       });
 
-      // Wait for user to login - check for dashboard elements
-      await page.waitForSelector('[data-testid="dashboard"], .dashboard, [class*="dashboard"]', { 
-        timeout: 300000 // 5 minutes for user to login
+      // Wait for user to login manually (up to 5 minutes)
+      await page.waitForSelector('[data-testid="dashboard"], .dashboard, [class*="dashboard"], .user-profile', { 
+        timeout: 300000 
       });
 
-      logger.info('✅ USER LOGIN DETECTED', { 
+      logger.info('✅ LOGIN DETECTED', { 
         service: 'BROWSER_SCRAPER', 
         stage: 'LOGIN_SUCCESS', 
         flow: 'SCRAPING_FLOW',
@@ -231,10 +158,10 @@ export async function scrapeGrowwHoldings(sessionId: string, accountName: string
 
       // Update progress
       await updateScrapeSession(sessionId, {
-        progress: { percent: 50, stage: 'Login successful, navigating to holdings...' }
+        progress: { percent: 60, stage: 'Navigating to holdings page...' }
       });
 
-      // Navigate to holdings/portfolio page
+      // Navigate to holdings page
       logger.info('📊 NAVIGATING TO HOLDINGS', { 
         service: 'BROWSER_SCRAPER', 
         stage: 'NAVIGATE_HOLDINGS', 
@@ -242,245 +169,141 @@ export async function scrapeGrowwHoldings(sessionId: string, accountName: string
         sessionId 
       });
 
-      // Try different possible holdings URLs
-      const holdingsUrls = [
-        'https://groww.in/portfolio',
-        'https://groww.in/portfolio/holdings',
-        'https://groww.in/portfolio/equity',
-        'https://groww.in/portfolio/mutual-funds'
-      ];
-
-      let holdingsPage = false;
-      for (const url of holdingsUrls) {
-        try {
-          await page.goto(url, { waitUntil: 'networkidle', timeout: 10000 });
-          // Check if we're on a holdings page
-          const holdingsIndicator = await page.$('[data-testid="holdings"], .holdings, [class*="holding"], [class*="portfolio"]');
-          if (holdingsIndicator) {
-            holdingsPage = true;
-            logger.info(`✅ FOUND HOLDINGS PAGE: ${url}`, { 
-              service: 'BROWSER_SCRAPER', 
-              stage: 'HOLDINGS_FOUND', 
-              flow: 'SCRAPING_FLOW',
-              sessionId 
-            });
-            break;
-          }
-        } catch (error) {
-          logger.warn(`⚠️ Failed to navigate to ${url}`, { 
-            service: 'BROWSER_SCRAPER', 
-            stage: 'HOLDINGS_NAVIGATION_FAILED', 
-            flow: 'SCRAPING_FLOW',
-            sessionId,
-            url 
-          });
-        }
-      }
-
-      if (!holdingsPage) {
-        throw new Error('Could not find holdings page after trying multiple URLs');
-      }
+      await page.goto('https://groww.in/stocks/user/holdings', { 
+        waitUntil: 'networkidle', 
+        timeout: 30000 
+      });
 
       // Update progress
       await updateScrapeSession(sessionId, {
-        progress: { percent: 60, stage: 'Extracting holdings data...' }
+        progress: { percent: 80, stage: 'Extracting holdings data...' }
       });
 
-      // Wait for holdings data to load
-      await page.waitForTimeout(3000);
+      // Wait for holdings to load
+      await page.waitForSelector('[data-testid="holdings-table"], .holdings-table, [class*="holdings"], tr[data-holding-parent]', { 
+        timeout: 30000 
+      });
 
-      // Extract holdings data
-      logger.info('📊 EXTRACTING HOLDINGS DATA', { 
+      logger.info('📋 EXTRACTING HOLDINGS DATA', { 
         service: 'BROWSER_SCRAPER', 
         stage: 'EXTRACT_DATA', 
         flow: 'SCRAPING_FLOW',
         sessionId 
       });
 
+      // Extract holdings data
       const holdings = await page.evaluate(() => {
-        const holdingsData: RawHolding[] = [];
+        const clean = (v?: string) => (v == null ? undefined : String(v).replace(/[^0-9.\-]/g, ''));
+        const rows: any[] = [];
         
-        // Try multiple selectors for holdings
-        const selectors = [
-          '[data-testid="holding-item"]',
-          '.holding-item',
-          '[class*="holding"]',
-          '[class*="stock-item"]',
-          'tr[data-testid*="holding"]',
-          'tr[class*="holding"]'
-        ];
-
-        let elements: Element[] = [];
-        for (const selector of selectors) {
-          elements = Array.from(document.querySelectorAll(selector));
-          if (elements.length > 0) break;
-        }
-
-        // If no specific selectors found, try to find table rows
-        if (elements.length === 0) {
-          const tables = document.querySelectorAll('table');
-          for (const table of Array.from(tables)) {
-            const rows = Array.from(table.querySelectorAll('tr'));
-            // Skip header rows
-            elements = rows.slice(1).filter((row: Element) => {
-              const textContent = row.textContent || '';
-              return textContent && 
-                (textContent.includes('₹') || textContent.includes('INR') || textContent.match(/\d+/));
-            });
-            if (elements.length > 0) break;
-          }
-        }
-
-        for (const element of elements) {
-          try {
-            const text = element.textContent || '';
-            const lines = text.split('\n').map(line => line.trim()).filter(line => line);
+        // Look for holdings table rows
+        const trs = Array.from(document.querySelectorAll('tr[data-holding-parent]')) as HTMLTableRowElement[];
+        
+        for (const tr of trs) {
+          // Extract stock name
+          const nameEl = tr.querySelector('.holdingRow_symbolWrapper__yI1cn a, a.holdingRow_symbolname__X9SKI, .holdingRow_symbolWrapper__yI1cn, a');
+          const stockName = (nameEl?.textContent || '').trim();
+          if (!stockName) continue;
+          
+          // Extract quantity and average price from spans
+          const spans = Array.from(tr.querySelectorAll('span')).map(s => (s.textContent || '').trim());
+          const qtySpan = spans.find(t => /shares?/i.test(t));
+          const avgSpan = spans.find(t => /^Avg\./i.test(t));
+          
+          const quantity = clean(qtySpan?.match(/([\d,]+)/)?.[1] || '');
+          const avgPrice = clean(avgSpan?.match(/₹\s*([\d.,]+)/)?.[1] || '');
+          
+          // Extract current price from right-aligned cells
+          const rightTds = Array.from(tr.querySelectorAll('td')).filter(td =>
+            /holdingRow_stk12Pr20/.test((td as HTMLElement).className) ||
+            ((td as HTMLElement).style?.textAlign || '').toLowerCase() === 'right'
+          );
+          
+          let marketPrice: string | null = null;
+          
+          // Find the first right-aligned cell with price (not PnL)
+          for (const td of rightTds) {
+            const text = (td.textContent || '').replace(/\s+/g, ' ').trim();
+            if (/^\+₹/.test(text)) continue; // Skip PnL values
             
-            // Extract stock name (usually first meaningful text)
-            const stockName = lines.find(line => 
-              line.length > 2 && 
-              !line.includes('₹') && 
-              !line.includes('INR') && 
-              !line.match(/^\d+$/) &&
-              !line.match(/^\d+\.\d+$/)
-            ) || 'Unknown Stock';
-
-            // Extract quantities and prices
-            const numbers = text.match(/[\d,]+\.?\d*/g) || [];
-            const quantity = numbers[0] || '0';
-            const avgPrice = numbers[1] || '0';
-            const marketPrice = numbers[2] || '0';
-
-            holdingsData.push({
-              stockName,
-              quantity,
-              avgPrice,
-              marketPrice,
-              sector: 'Unknown',
-              subsector: 'Unknown'
-            });
-          } catch (error) {
-            console.error('Error parsing holding:', error);
+            const priceMatch = text.match(/^₹\s*([\d.,]+)/);
+            if (priceMatch) {
+              marketPrice = String(parseFloat(priceMatch[1].replace(/[^0-9.]/g, '')));
+              break;
+            }
           }
+          
+          // Fallback: any ₹ number that's not prefixed with +₹
+          if (!marketPrice) {
+            for (const td of rightTds) {
+              const text = (td.textContent || '').replace(/\s+/g, ' ').trim();
+              if (/^\+₹/.test(text)) continue;
+              
+              const anyPriceMatch = text.match(/₹\s*([\d.,]+)/);
+              if (anyPriceMatch) {
+                marketPrice = String(parseFloat(anyPriceMatch[1].replace(/[^0-9.]/g, '')));
+                break;
+              }
+            }
+          }
+          
+          rows.push({
+            stockName,
+            quantity: quantity ?? '0',
+            avgPrice: avgPrice ?? '',
+            marketPrice: marketPrice ?? '',
+            sector: '',
+            subsector: ''
+          });
         }
-
-        return holdingsData;
+        
+        return rows;
       });
 
-      logger.info('✅ HOLDINGS DATA EXTRACTED', { 
-        service: 'BROWSER_SCRAPER', 
-        stage: 'DATA_EXTRACTED', 
-        flow: 'SCRAPING_FLOW',
+      logger.info('✅ HOLDINGS DATA EXTRACTED', {
+        service: 'BROWSER_SCRAPER',
         sessionId,
-        holdingsCount: holdings.length 
+        stage: 'DATA_EXTRACTED',
+        flow: 'SCRAPING_FLOW',
+        holdingsCount: holdings.length
       });
 
       // Update progress
       await updateScrapeSession(sessionId, {
-        progress: { percent: 80, stage: 'Processing extracted data...' }
-      });
-
-      // If no holdings found, return mock data for testing
-      if (holdings.length === 0) {
-        logger.warn('⚠️ NO HOLDINGS FOUND, RETURNING MOCK DATA', { 
-          service: 'BROWSER_SCRAPER', 
-          stage: 'NO_HOLDINGS', 
-          flow: 'SCRAPING_FLOW',
-          sessionId 
-        });
-
-        holdings.push(
-          {
-            stockName: 'HDFC Bank',
-            quantity: '100',
-            avgPrice: '1500.50',
-            marketPrice: '1520.75',
-            sector: 'Banking',
-            subsector: 'Private Banks'
-          },
-          {
-            stockName: 'TCS',
-            quantity: '50',
-            avgPrice: '3200.00',
-            marketPrice: '3250.25',
-            sector: 'Technology',
-            subsector: 'IT Services'
-          }
-        );
-      }
-
-      // Update progress
-      await updateScrapeSession(sessionId, {
-        progress: { percent: 90, stage: 'Scraping completed successfully!' }
-      });
-
-      logger.info('✅ SCRAPING COMPLETED SUCCESSFULLY', { 
-        service: 'BROWSER_SCRAPER', 
-        stage: 'SCRAPING_COMPLETE', 
-        flow: 'SCRAPING_FLOW',
-        sessionId,
-        holdingsCount: holdings.length 
+        progress: { percent: 100, stage: 'Scraping completed successfully!' }
       });
 
       return holdings;
 
     } finally {
-      // Clean up browser resources
+      // Clean up
       if (page) {
         try {
           await page.close();
         } catch (error) {
-          logger.warn('⚠️ Error closing page', { 
-            service: 'BROWSER_SCRAPER', 
-            stage: 'PAGE_CLEANUP', 
-            flow: 'SCRAPING_FLOW',
-            sessionId,
-            error: error instanceof Error ? error.message : 'Unknown error'
-          });
+          logger.warn('⚠️ Error closing page', { error });
         }
       }
-
+      
       if (browser) {
         try {
           await browser.close();
         } catch (error) {
-          logger.warn('⚠️ Error closing browser', { 
-            service: 'BROWSER_SCRAPER', 
-            stage: 'BROWSER_CLEANUP', 
-            flow: 'SCRAPING_FLOW',
-            sessionId,
-            error: error instanceof Error ? error.message : 'Unknown error'
-          });
+          logger.warn('⚠️ Error closing browser', { error });
         }
       }
     }
 
   } catch (error) {
-    logger.error('💥 SCRAPING FAILED', { 
-      service: 'BROWSER_SCRAPER', 
-      stage: 'SCRAPING_ERROR', 
-      flow: 'SCRAPING_FLOW',
+    logger.error('💥 SCRAPING FAILED', {
+      service: 'BROWSER_SCRAPER',
       sessionId,
+      stage: 'SCRAPING_ERROR',
+      flow: 'SCRAPING_FLOW',
       error: error instanceof Error ? error.message : 'Unknown error',
-      stack: error instanceof Error ? error.stack : undefined 
+      stack: error instanceof Error ? error.stack : undefined
     });
-
-    // Update session with error
-    try {
-      await updateScrapeSession(sessionId, {
-        status: 'failed',
-        progress: { percent: 0, stage: `Error: ${error instanceof Error ? error.message : 'Unknown error'}` }
-      });
-    } catch (dbError) {
-      logger.error('💥 FAILED TO UPDATE SESSION WITH ERROR', { 
-        service: 'BROWSER_SCRAPER', 
-        stage: 'DB_ERROR_UPDATE', 
-        flow: 'SCRAPING_FLOW',
-        sessionId,
-        error: dbError instanceof Error ? dbError.message : 'Unknown error'
-      });
-    }
-
+    
     throw error;
   }
 }
