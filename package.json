@@ -8,7 +8,12 @@
     "start": "next start",
     "lint": "next lint",
     "backfill:sectors": "node scripts/backfillSectors.mjs",
-    "backfill:view-sectors": "node scripts/backfillViewSectors.mjs"
+    "backfill:view-sectors": "node scripts/backfillViewSectors.mjs",
+    "scrape:realtime": "tsx src/scripts/realtime-scraping.ts",
+    "scrape:test": "tsx src/scripts/realtime-scraping.ts groww_main 1 1",
+    "scrape:once": "tsx -e \"import('./src/server/brokers/groww').then(m => m.scrapeGrowwHoldingsWithAccount('groww_main', console.log)).catch(console.error)\"",
+    "otp:provide": "tsx src/scripts/otp-helper.ts provide",
+    "otp:status": "tsx src/scripts/otp-helper.ts status"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",
@@ -42,6 +47,7 @@
     "eslint": "^9",
     "eslint-config-next": "15.4.6",
     "tailwindcss": "^4",
+    "tsx": "^4.20.5",
     "typescript": "^5"
   }
 }
