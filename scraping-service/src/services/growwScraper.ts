@@ -60,20 +60,19 @@ export async function scrapeGrowwHoldings(sessionId: string, accountName: string
         const sessionTimeoutSeconds = Math.floor(sessionTimeoutMs / 1000); // Convert to seconds
 
         let browser: Browser | null = null;
-        let lastError = null;
+        let lastError: Error | null = null;
 
         try {
-          // Try each endpoint
           for (let i = 0; i < endpoints.length; i++) {
             const endpoint = endpoints[i];
-            const endpointName = endpoint.includes('sfo') ? 'San Francisco' : 
+            const endpointName = endpoint.includes('sfo') ? 'San Francisco' :
                                 endpoint.includes('lon') ? 'London' : 'Amsterdam';
 
-            logger.info(`🌐 ATTEMPTING BROWSERLESS.IO CONNECTION (${i + 1}/${endpoints.length})`, { 
-              service: 'BROWSER_SCRAPER', 
-              stage: 'CONNECTION_ATTEMPT', 
-              flow: 'SCRAPING_FLOW',
+            logger.info(`🌐 ATTEMPTING BROWSERLESS.IO CONNECTION (${i + 1}/${endpoints.length})`, {
+              service: 'BROWSER_SCRAPER',
               sessionId,
+              stage: 'CONNECTION_ATTEMPT',
+              flow: 'SCRAPING_FLOW',
               endpoint,
               endpointName,
               attemptNumber: i + 1,
@@ -83,26 +82,51 @@ export async function scrapeGrowwHoldings(sessionId: string, accountName: string
             });
 
             try {
-              // Construct WebSocket URL with ONLY connection parameters
-              const wsEndpoint = `${endpoint}/?token=${BROWSERLESS_TOKEN}`;
-              
-              logger.info('🔗 WEBSOCKET URL CONSTRUCTION', { 
-                service: 'BROWSER_SCRAPER', 
-                stage: 'URL_CONSTRUCTION', 
-                flow: 'SCRAPING_FLOW',
+              const wsEndpoint = `${endpoint}/?token=${BROWSERLESS_TOKEN}`; // Corrected URL
+              logger.info('🔗 WEBSOCKET URL CONSTRUCTION', {
+                service: 'BROWSER_SCRAPER',
                 sessionId,
+                stage: 'URL_CONSTRUCTION',
+                flow: 'SCRAPING_FLOW',
                 wsEndpoint,
                 urlLength: wsEndpoint.length,
-                containsToken: wsEndpoint.includes('token'),
+                containsToken: wsEndpoint.includes(BROWSERLESS_TOKEN),
                 endpointName
               });
 
-              // Remove client-side timeout - let Playwright handle connection naturally
-              browser = await chromium.connect({
-                wsEndpoint: `${endpoint}/?token=${BROWSERLESS_TOKEN}`
+              // Enhanced connection with session management
+              logger.info('🔌 INITIATING BROWSERLESS.IO CONNECTION', {
+                service: 'BROWSER_SCRAPER',
+                sessionId,
+                stage: 'CONNECTION_INIT',
+                flow: 'SCRAPING_FLOW',
+                endpoint,
+                endpointName
               });
 
-              logger.info('✅ BROWSERLESS.IO CONNECTED', { 
+              // Connect with proper session management
+              browser = await chromium.connect({
+                wsEndpoint: `${endpoint}/?token=${BROWSERLESS_TOKEN}`,
+                timeout: 60000 // 60 seconds for initial connection
+              });
+
+              // Verify connection is actually usable
+              logger.info('🔍 VERIFYING BROWSERLESS.IO CONNECTION', {
+                service: 'BROWSER_SCRAPER',
+                sessionId,
+                stage: 'CONNECTION_VERIFY',
+                flow: 'SCRAPING_FLOW',
+                endpoint,
+                endpointName,
+                browserConnected: !!browser,
+                browserType: browser?.constructor?.name || 'unknown'
+              });
+
+              // Test if we can actually create a page (session persistence test)
+              const testPage = await browser.newPage();
+              await testPage.close(); // Close test page immediately
+
+              logger.info('✅ BROWSERLESS.IO CONNECTION VERIFIED AND PERSISTENT', { 
                 service: 'BROWSER_SCRAPER', 
                 stage: 'BROWSERLESS_CONNECTED', 
                 flow: 'SCRAPING_FLOW',
@@ -113,10 +137,11 @@ export async function scrapeGrowwHoldings(sessionId: string, accountName: string
                 browserType: browser?.constructor?.name || 'unknown',
                 sessionTimeoutMs,
                 sessionTimeoutSeconds,
-                attemptNumber: i + 1
+                attemptNumber: i + 1,
+                connectionVerified: true
               });
 
-              // Connection successful, break out of loop
+              // Connection successful and verified, break out of loop
               break;
 
             } catch (endpointError) {
