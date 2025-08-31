@@ -38,210 +38,124 @@ export async function scrapeGrowwHoldings(sessionId: string, accountName: string
     try {
       // Connect to browser (Browserless.io or local)
       if (USE_BROWSERLESS && BROWSERLESS_TOKEN) {
-        logger.info('🌐 CONNECTING TO BROWSERLESS.IO', { 
+        logger.info('🌐 USING BROWSERLESS.IO HTTP API', { 
           service: 'BROWSER_SCRAPER', 
-          stage: 'BROWSERLESS_CONNECT', 
+          stage: 'BROWSERLESS_HTTP_API', 
           flow: 'SCRAPING_FLOW',
           sessionId,
-          browserlessUrl: BROWSERLESS_URL,
           hasToken: !!BROWSERLESS_TOKEN,
           tokenLength: BROWSERLESS_TOKEN?.length || 0,
           useBrowserless: USE_BROWSERLESS
         });
 
-        // Define alternative endpoints
-        const endpoints = [
-          'wss://production-sfo.browserless.io',  // Primary: San Francisco
-          'wss://production-lon.browserless.io',  // Fallback 1: London
-          'wss://production-ams.browserless.io'   // Fallback 2: Amsterdam
-        ];
-
-        const sessionTimeoutMs = 300000; // 5 minutes for complex automation
-        const sessionTimeoutSeconds = Math.floor(sessionTimeoutMs / 1000); // Convert to seconds
-
-        let browser: Browser | null = null;
-        let lastError: Error | null = null;
+        // Use HTTP API instead of WebSocket for better reliability
+        const browserlessUrl = `https://production-sfo.browserless.io/function?token=${BROWSERLESS_TOKEN}`;
+        
+        logger.info('🔗 BROWSERLESS.IO HTTP API URL', {
+          service: 'BROWSER_SCRAPER',
+          sessionId,
+          stage: 'HTTP_API_URL',
+          flow: 'SCRAPING_FLOW',
+          browserlessUrl,
+          urlLength: browserlessUrl.length,
+          containsToken: browserlessUrl.includes(BROWSERLESS_TOKEN)
+        });
 
         try {
-          for (let i = 0; i < endpoints.length; i++) {
-            const endpoint = endpoints[i];
-            const endpointName = endpoint.includes('sfo') ? 'San Francisco' :
-                                endpoint.includes('lon') ? 'London' : 'Amsterdam';
-
-            logger.info(`🌐 ATTEMPTING BROWSERLESS.IO CONNECTION (${i + 1}/${endpoints.length})`, {
-              service: 'BROWSER_SCRAPER',
-              sessionId,
-              stage: 'CONNECTION_ATTEMPT',
-              flow: 'SCRAPING_FLOW',
-              endpoint,
-              endpointName,
-              attemptNumber: i + 1,
-              totalEndpoints: endpoints.length,
-              sessionTimeoutMs,
-              sessionTimeoutSeconds
-            });
-
-            try {
-              const wsEndpoint = `${endpoint}/?token=${BROWSERLESS_TOKEN}`; // Corrected URL
-              logger.info('🔗 WEBSOCKET URL CONSTRUCTION', {
-                service: 'BROWSER_SCRAPER',
-                sessionId,
-                stage: 'URL_CONSTRUCTION',
-                flow: 'SCRAPING_FLOW',
-                wsEndpoint,
-                urlLength: wsEndpoint.length,
-                containsToken: wsEndpoint.includes(BROWSERLESS_TOKEN),
-                endpointName
-              });
-
-              // Enhanced connection with session management
-              logger.info('🔌 INITIATING BROWSERLESS.IO CONNECTION', {
-                service: 'BROWSER_SCRAPER',
-                sessionId,
-                stage: 'CONNECTION_INIT',
-                flow: 'SCRAPING_FLOW',
-                endpoint,
-                endpointName
-              });
-
-              // Connect with proper session management
-              browser = await chromium.connect({
-                wsEndpoint: `${endpoint}/?token=${BROWSERLESS_TOKEN}`,
-                timeout: 60000 // 60 seconds for initial connection
-              });
-
-              // Verify connection is actually usable
-              logger.info('🔍 VERIFYING BROWSERLESS.IO CONNECTION', {
-                service: 'BROWSER_SCRAPER',
-                sessionId,
-                stage: 'CONNECTION_VERIFY',
-                flow: 'SCRAPING_FLOW',
-                endpoint,
-                endpointName,
-                browserConnected: !!browser,
-                browserType: browser?.constructor?.name || 'unknown'
-              });
-
-              // Test if we can actually create a page (session persistence test)
-              const testPage = await browser.newPage();
-              await testPage.close(); // Close test page immediately
-
-              logger.info('✅ BROWSERLESS.IO CONNECTION VERIFIED AND PERSISTENT', { 
-                service: 'BROWSER_SCRAPER', 
-                stage: 'BROWSERLESS_CONNECTED', 
-                flow: 'SCRAPING_FLOW',
-                sessionId,
-                endpoint,
-                endpointName,
-                browserConnected: !!browser,
-                browserType: browser?.constructor?.name || 'unknown',
-                sessionTimeoutMs,
-                sessionTimeoutSeconds,
-                attemptNumber: i + 1,
-                connectionVerified: true
-              });
-
-              // Connection successful and verified, break out of loop
-              break;
-
-            } catch (endpointError) {
-              lastError = endpointError;
-              
-              // Enhanced error handling with specific HTTP code analysis
-              let errorType = 'UNKNOWN';
-              let errorDetails = {};
-              
-              if (endpointError instanceof Error) {
-                const errorMessage = endpointError.message;
+          // Use HTTP API to execute scraping code
+          const response = await fetch(browserlessUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Cache-Control': 'no-cache'
+            },
+            body: JSON.stringify({
+              code: `
+                const { chromium } = require('playwright');
                 
-                // Analyze error message for specific HTTP codes
-                if (errorMessage.includes('400')) {
-                  errorType = 'HTTP_400_BAD_REQUEST';
-                  errorDetails = { 
-                    issue: 'Malformed request or invalid parameters',
-                    possibleCauses: ['Invalid timeout value', 'Argument collisions', 'Malformed JSON']
-                  };
-                } else if (errorMessage.includes('401')) {
-                  errorType = 'HTTP_401_UNAUTHORIZED';
-                  errorDetails = { 
-                    issue: 'Invalid authentication credentials',
-                    possibleCauses: ['Invalid API token', 'Token not sent properly', 'Expired token']
-                  };
-                } else if (errorMessage.includes('403')) {
-                  errorType = 'HTTP_403_FORBIDDEN';
-                  errorDetails = { 
-                    issue: 'Server refuses to authorize request',
-                    possibleCauses: ['Deprecated endpoint', 'Incorrect regional endpoint', 'Insufficient permissions']
-                  };
-                } else if (errorMessage.includes('408')) {
-                  errorType = 'HTTP_408_REQUEST_TIMEOUT';
-                  errorDetails = { 
-                    issue: 'Request took too long to process',
-                    possibleCauses: ['Timeout too low', 'Unhealthy workers', 'Exceeded plan limits']
-                  };
-                } else if (errorMessage.includes('429')) {
-                  errorType = 'HTTP_429_TOO_MANY_REQUESTS';
-                  errorDetails = { 
-                    issue: 'Rate limit exceeded',
-                    possibleCauses: ['Concurrent session limit', 'Zombie sessions', 'Plan limits exceeded']
-                  };
-                } else if (errorMessage.includes('timeout')) {
-                  errorType = 'CONNECTION_TIMEOUT';
-                  errorDetails = { 
-                    issue: 'Connection establishment timeout',
-                    possibleCauses: ['Network issues', 'Service unavailable', 'Firewall blocking']
-                  };
-                }
+                (async () => {
+                  const browser = await chromium.launch({
+                    headless: false,
+                    args: ['--no-sandbox', '--disable-setuid-sandbox']
+                  });
+                  
+                  const page = await browser.newPage();
+                  await page.setViewportSize({ width: 1920, height: 1080 });
+                  
+                  // Navigate to Groww login
+                  await page.goto('https://groww.in/login', { waitUntil: 'networkidle', timeout: 30000 });
+                  
+                  // Wait for user login (up to 5 minutes)
+                  await page.waitForSelector('[data-testid="dashboard"], .dashboard, [class*="dashboard"]', { timeout: 300000 });
+                  
+                  // Navigate to holdings
+                  await page.goto('https://groww.in/portfolio/holdings', { waitUntil: 'networkidle', timeout: 30000 });
+                  
+                  // Wait for holdings to load
+                  await page.waitForSelector('[data-testid="holdings-table"], .holdings-table, [class*="holdings"]', { timeout: 30000 });
+                  
+                  // Extract holdings data
+                  const holdings = await page.evaluate(() => {
+                    const rows = document.querySelectorAll('[data-testid="holdings-table"] tr, .holdings-table tr, [class*="holdings"] tr');
+                    const data = [];
+                    
+                    rows.forEach((row, index) => {
+                      if (index === 0) return; // Skip header
+                      
+                      const cells = row.querySelectorAll('td');
+                      if (cells.length >= 4) {
+                        data.push({
+                          stockName: cells[0]?.textContent?.trim() || '',
+                          quantity: cells[1]?.textContent?.trim() || '',
+                          avgPrice: cells[2]?.textContent?.trim() || '',
+                          marketPrice: cells[3]?.textContent?.trim() || '',
+                          sector: cells[4]?.textContent?.trim() || '',
+                          subsector: cells[5]?.textContent?.trim() || ''
+                        });
+                      }
+                    });
+                    
+                    return data;
+                  });
+                  
+                  await browser.close();
+                  return holdings;
+                })();
+              `,
+              context: {
+                timeout: 300000 // 5 minutes timeout
               }
-
-              logger.error('💥 BROWSERLESS.IO ENDPOINT FAILED', { 
-                service: 'BROWSER_SCRAPER', 
-                stage: 'ENDPOINT_FAILED', 
-                flow: 'SCRAPING_FLOW',
-                sessionId,
-                endpoint,
-                endpointName,
-                attemptNumber: i + 1,
-                totalEndpoints: endpoints.length,
-                errorType,
-                error: endpointError instanceof Error ? endpointError.message : 'Unknown error',
-                errorStack: endpointError instanceof Error ? endpointError.stack : undefined,
-                wsEndpoint: `${endpoint}/?token=${BROWSERLESS_TOKEN}`,
-                hasToken: !!BROWSERLESS_TOKEN,
-                tokenLength: BROWSERLESS_TOKEN?.length || 0,
-                errorDetails
-              });
-
-              // If this was the last endpoint, throw the error
-              if (i === endpoints.length - 1) {
-                throw new Error(`All Browserless.io endpoints failed. Last error: ${endpointError instanceof Error ? endpointError.message : 'Unknown error'}`);
-              } else {
-                logger.info('🔄 TRYING NEXT ENDPOINT', { 
-                  service: 'BROWSER_SCRAPER', 
-                  stage: 'NEXT_ENDPOINT', 
-                  flow: 'SCRAPING_FLOW',
-                  sessionId,
-                  currentEndpoint: endpointName,
-                  nextEndpointIndex: i + 1,
-                  remainingEndpoints: endpoints.length - i - 1
-                });
-              }
-            }
-          }
-        } catch (browserlessError) {
-          logger.error('💥 ALL BROWSERLESS.IO ENDPOINTS FAILED', { 
-            service: 'BROWSER_SCRAPER', 
-            stage: 'ALL_ENDPOINTS_FAILED', 
-            flow: 'SCRAPING_FLOW',
-            sessionId,
-            error: browserlessError instanceof Error ? browserlessError.message : 'Unknown error',
-            errorStack: browserlessError instanceof Error ? browserlessError.stack : undefined,
-            totalEndpointsTried: endpoints.length,
-            endpoints: endpoints
+            })
           });
 
-          // No fallback - throw the error
-          throw browserlessError;
+          if (!response.ok) {
+            throw new Error(`Browserless.io HTTP API failed: ${response.status} ${response.statusText}`);
+          }
+
+          const holdings = await response.json();
+          
+          logger.info('✅ BROWSERLESS.IO HTTP API SUCCESS', {
+            service: 'BROWSER_SCRAPER',
+            sessionId,
+            stage: 'HTTP_API_SUCCESS',
+            flow: 'SCRAPING_FLOW',
+            holdingsCount: holdings.length,
+            responseStatus: response.status
+          });
+
+          return holdings;
+
+        } catch (httpApiError) {
+          logger.error('💥 BROWSERLESS.IO HTTP API FAILED', {
+            service: 'BROWSER_SCRAPER',
+            sessionId,
+            stage: 'HTTP_API_ERROR',
+            flow: 'SCRAPING_FLOW',
+            error: httpApiError instanceof Error ? httpApiError.message : 'Unknown error',
+            errorStack: httpApiError instanceof Error ? httpApiError.stack : undefined
+          });
+          
+          throw httpApiError;
         }
       } else {
         logger.info('🖥️ LAUNCHING LOCAL BROWSER', { 

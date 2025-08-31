@@ -32,6 +32,7 @@ export default function AppContent({ children }: { children: React.ReactNode }) 
           <Link href="/accounts" className="block px-3 py-2 rounded-lg hover:bg-white/10 transition-colors">Accounts</Link>
           <Link href="/views" className="block px-3 py-2 rounded-lg hover:bg-white/10 transition-colors">Views</Link>
           <Link href="/stock-view" className="block px-3 py-2 rounded-lg hover:bg-white/10 transition-colors">Dashboard</Link>
+          <Link href="/credentials" className="block px-3 py-2 rounded-lg hover:bg-white/10 transition-colors">Credentials</Link>
           <Link href="/settings" className="block px-3 py-2 rounded-lg hover:bg-white/10 transition-colors">Settings</Link>
         </nav>
       </aside>

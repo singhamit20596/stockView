@@ -111,4 +111,32 @@ export interface TableFile<T> {
 	rows: T[];
 }
 
+// Database credentials interface
+export interface DBCredentials {
+  account_name: string;
+  email: string;
+  password: string;
+  pin: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+// Credentials form interface for UI
+export interface CredentialsFormData {
+  account_name: string;
+  email: string;
+  password: string;
+  pin: string;
+}
+
+// Groww credentials interface for multi-step login
+export interface GrowwCredentials {
+  username: string;
+  password: string;
+  pin: string;
+}
+
+// OTP input callback for manual OTP entry
+export type OTPInputCallback = (otp: string) => Promise<void>;
+
 
