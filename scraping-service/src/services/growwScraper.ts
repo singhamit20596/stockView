@@ -1,6 +1,7 @@
 import { chromium, Browser, Page } from 'playwright';
 import { logger } from '../utils/logger';
 import { createScrapeSession, updateScrapeSession } from './database';
+import { logEnvironmentStatus } from '../utils/envCheck';
 
 // Define RawHolding type locally since it's not available in types
 interface RawHolding {
@@ -17,13 +18,18 @@ const BROWSERLESS_TOKEN = process.env.BROWSERLESS_TOKEN;
 const BROWSERLESS_REGION = process.env.BROWSERLESS_REGION || 'production-sfo';
 
 export async function scrapeGrowwHoldings(sessionId: string, accountName: string): Promise<RawHolding[]> {
+  // Log environment status at the start
+  logEnvironmentStatus();
+
   logger.info('🚀 STARTING GROWW SCRAPING', { 
     service: 'BROWSER_SCRAPER', 
     stage: 'SCRAPING_START', 
     flow: 'SCRAPING_FLOW',
     sessionId,
     accountName,
-    useBrowserless: USE_BROWSERLESS 
+    useBrowserless: USE_BROWSERLESS,
+    hasToken: !!BROWSERLESS_TOKEN,
+    region: BROWSERLESS_REGION
   });
 
   try {
@@ -85,6 +91,26 @@ export async function scrapeGrowwHoldings(sessionId: string, accountName: string
           throw new Error(`Browserless.io CDP connection failed: ${cdpError instanceof Error ? cdpError.message : 'Unknown error'}`);
         }
       } else {
+        // Log why Browserless.io is not being used
+        const reasons = [];
+        if (!USE_BROWSERLESS) reasons.push('USE_BROWSERLESS=false');
+        if (!BROWSERLESS_TOKEN) reasons.push('BROWSERLESS_TOKEN not set');
+        
+        logger.warn('⚠️ BROWSERLESS.IO NOT AVAILABLE', { 
+          service: 'BROWSER_SCRAPER', 
+          stage: 'BROWSERLESS_UNAVAILABLE', 
+          flow: 'SCRAPING_FLOW',
+          sessionId,
+          useBrowserless: USE_BROWSERLESS,
+          hasToken: !!BROWSERLESS_TOKEN,
+          reasons: reasons.join(', '),
+          environment: {
+            USE_BROWSERLESS: process.env.USE_BROWSERLESS,
+            BROWSERLESS_TOKEN: BROWSERLESS_TOKEN ? 'SET' : 'NOT_SET',
+            BROWSERLESS_REGION: BROWSERLESS_REGION
+          }
+        });
+
         logger.info('🖥️ LAUNCHING LOCAL BROWSER', { 
           service: 'BROWSER_SCRAPER', 
           stage: 'LOCAL_LAUNCH', 
@@ -92,20 +118,33 @@ export async function scrapeGrowwHoldings(sessionId: string, accountName: string
           sessionId,
           useBrowserless: USE_BROWSERLESS,
           hasToken: !!BROWSERLESS_TOKEN,
-          reason: !USE_BROWSERLESS ? 'USE_BROWSERLESS=false' : 'No BROWSERLESS_TOKEN'
+          reason: reasons.join(', ')
         });
 
-        browser = await chromium.launch({
-          headless: false,
-          args: ['--no-sandbox', '--disable-setuid-sandbox']
-        });
+        try {
+          browser = await chromium.launch({
+            headless: true, // Changed to true for Railway environment
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+          });
 
-        logger.info('✅ LOCAL BROWSER LAUNCHED', { 
-          service: 'BROWSER_SCRAPER', 
-          stage: 'LOCAL_LAUNCHED', 
-          flow: 'SCRAPING_FLOW',
-          sessionId 
-        });
+          logger.info('✅ LOCAL BROWSER LAUNCHED', { 
+            service: 'BROWSER_SCRAPER', 
+            stage: 'LOCAL_LAUNCHED', 
+            flow: 'SCRAPING_FLOW',
+            sessionId 
+          });
+        } catch (localBrowserError) {
+          logger.error('💥 LOCAL BROWSER LAUNCH FAILED', {
+            service: 'BROWSER_SCRAPER',
+            sessionId,
+            stage: 'LOCAL_BROWSER_ERROR',
+            flow: 'SCRAPING_FLOW',
+            error: localBrowserError instanceof Error ? localBrowserError.message : 'Unknown error',
+            errorStack: localBrowserError instanceof Error ? localBrowserError.stack : undefined
+          });
+          
+          throw new Error(`Local browser launch failed: ${localBrowserError instanceof Error ? localBrowserError.message : 'Unknown error'}`);
+        }
       }
 
       // Create new page
